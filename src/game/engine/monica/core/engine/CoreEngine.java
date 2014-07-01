@@ -1,7 +1,7 @@
 package game.engine.monica.core.engine;
 
-import game.engine.monica.core.time.CDateTime;
-import game.engine.monica.core.time.CWorldDate;
+import game.engine.monica.core.datetime.DateTime;
+import game.engine.monica.core.datetime.WorldDate;
 import java.math.BigInteger;
 import java.util.LinkedList;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -39,10 +39,10 @@ public final class CoreEngine {
     }
     private static volatile boolean isContinuing = false;
 
-    public static void setWorldDate(CDateTime dateTime) {
+    public static void setWorldDate(DateTime dateTime) {
         if (isStart())
             throw new EngineException("The game has already started.");
-        date = new CWorldDate(dateTime);
+        date = new WorldDate(dateTime);
     }
 
     public static int getCurrentYear() {
@@ -87,7 +87,7 @@ public final class CoreEngine {
         return date.getMilliSecond();
     }
 
-    public static CDateTime getCurrentDateTime() {
+    public static DateTime getCurrentDateTime() {
         if (!isStart())
             throw new EngineException("The game has not started yet.");
         return date.getCurrentDateTime();
@@ -134,7 +134,7 @@ public final class CoreEngine {
             throw new EngineException("The game has not started yet.");
         return date.getCurrentDateTime().toInteger(date);
     }
-    private static volatile CWorldDate date;
+    private static volatile WorldDate date;
 
     public static void set1msStopTime(int ms) {
         if (ms < 1)
