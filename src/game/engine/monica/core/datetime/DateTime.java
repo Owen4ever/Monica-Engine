@@ -1,11 +1,11 @@
-package game.engine.monica.core.time;
+package game.engine.monica.core.datetime;
 
 import static game.engine.monica.util.Math.minTimes;
 import java.math.BigInteger;
 
-public class CDateTime {
+public class DateTime {
 
-    public CDateTime(int year, int mon, int day,
+    public DateTime(int year, int mon, int day,
             int hour, int min, int sec, int msec) {
         this.year = year;
         this.month = mon;
@@ -17,7 +17,7 @@ public class CDateTime {
         hash = calcHash(this);
     }
 
-    public BigInteger toInteger(CWorldDate d) {
+    public BigInteger toInteger(WorldDate d) {
         int pmon = minTimes(d.loopMon);
         int pday = minTimes(d.loopDay);
         int phour = minTimes(d.loopHour);
@@ -35,9 +35,9 @@ public class CDateTime {
 
     @Override
     public boolean equals(Object obj) {
-        if (obj == null || !(obj instanceof CDateTime))
+        if (obj == null || !(obj instanceof DateTime))
             return false;
-        CDateTime t = (CDateTime) obj;
+        DateTime t = (DateTime) obj;
         return year == t.year && month == t.month && day == t.day
                 && hour == t.hour && minute == t.minute
                 && second == t.second && millisecond == t.millisecond;
@@ -57,7 +57,7 @@ public class CDateTime {
     public final int year, month, day, hour, minute, second, millisecond;
     private final int hash;
 
-    private static int calcHash(CDateTime t) {
+    private static int calcHash(DateTime t) {
         int hash = t.year << 4 + t.month;
         hash <<= 4;
         hash += t.day;
@@ -71,7 +71,7 @@ public class CDateTime {
         return hash + t.millisecond;
     }
 
-    public static CDateTime getDateTime(CWorldDate d, BigInteger i) {
+    public static DateTime getDateTime(WorldDate d, BigInteger i) {
         int pmon = minTimes(d.loopMon);
         int pday = minTimes(d.loopDay);
         int phour = minTimes(d.loopHour);
@@ -102,7 +102,7 @@ public class CDateTime {
         int mon = getNum(pyear,
                 s2.substring(pyear, pyear + pmon), pppppp - pmon, i);
         int year = getNum(0, s2.substring(0, pyear), pppppp, i) - 1;
-        return new CDateTime(year, mon, day, hour, min, sec, msec);
+        return new DateTime(year, mon, day, hour, min, sec, msec);
     }
 
     private static int getNum(int f, String m, int r, BigInteger i) {

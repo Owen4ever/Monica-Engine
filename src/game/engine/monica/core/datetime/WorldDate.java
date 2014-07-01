@@ -1,24 +1,24 @@
-package game.engine.monica.core.time;
+package game.engine.monica.core.datetime;
 
 import game.engine.monica.core.engine.CoreEngine;
 import game.engine.monica.core.engine.EngineRunnable;
 import game.engine.monica.core.engine.EngineThread;
 import game.engine.monica.core.engine.EngineThreadGroup;
 
-public final class CWorldDate {
+public final class WorldDate {
 
-    public CWorldDate() {
-        this(new CDateTime(1, 1, 1, 0, 0, 0, 0));
+    public WorldDate() {
+        this(new DateTime(1, 1, 1, 0, 0, 0, 0));
     }
 
-    public CWorldDate(CDateTime dt) {
+    public WorldDate(DateTime dt) {
         setCurrentDate(dt);
     }
 
-    public void setCurrentDate(CDateTime dt) {
+    public void setCurrentDate(DateTime dt) {
         if (dt == null || dt.year < 0 || dt.month < 0 || dt.day < 0
                 || dt.hour < 0 || dt.minute < 0 || dt.second < 0 || dt.millisecond < 0)
-            throw new CWorldDateInitilizeException();
+            throw new WorldDateInitilizeException();
         this.year = dt.year;
         this.mon = dt.month;
         this.day = dt.day;
@@ -56,44 +56,44 @@ public final class CWorldDate {
         return msec;
     }
 
-    public CDateTime getCurrentDateTime() {
-        return new CDateTime(year, mon, day, hour, min, sec, msec);
+    public DateTime getCurrentDateTime() {
+        return new DateTime(year, mon, day, hour, min, sec, msec);
     }
     private volatile int year, mon, day, hour, min, sec, msec;
 
     public void setLoopMonth(int mon) {
         if (mon < 1)
-            throw new CWorldDateInitilizeException();
+            throw new WorldDateInitilizeException();
         loopMon = mon;
     }
 
     public void setLoopDay(int day) {
         if (day < 1)
-            throw new CWorldDateInitilizeException();
+            throw new WorldDateInitilizeException();
         loopDay = day;
     }
 
     public void setLoopHour(int hour) {
         if (hour < 1)
-            throw new CWorldDateInitilizeException();
+            throw new WorldDateInitilizeException();
         loopHour = hour;
     }
 
     public void setLoopMinute(int min) {
         if (min < 1)
-            throw new CWorldDateInitilizeException();
+            throw new WorldDateInitilizeException();
         loopMin = min;
     }
 
     public void setLoopSecond(int sec) {
         if (sec < 1)
-            throw new CWorldDateInitilizeException();
+            throw new WorldDateInitilizeException();
         loopSec = sec;
     }
 
     public void setLoopMilliSecond(int msec) {
         if (msec < 1)
-            throw new CWorldDateInitilizeException();
+            throw new WorldDateInitilizeException();
         loopMSec = msec;
     }
     int loopMon = 12, loopDay = 30,
