@@ -22,35 +22,46 @@
  * THE SOFTWARE.
  */
 
-package game.engine.monica.util;
+package game.engine.monica.core.element;
 
-public final class FinalPair<F, L> {
+public final class Energy {
 
-    public FinalPair(F f, L l) {
-        this.first = f;
-        this.last = l;
-        hashCode = 31 + first.hashCode() + last.hashCode();
+    private static final long serialVersionUID = 46274354375486750L;
+
+    public Energy(String name) {
+        if (name == null || name.isEmpty())
+            throw new NullPointerException("Energy name cannot be null.");
+        this.name = name;
+    }
+
+    public final String getName() {
+        return name;
     }
 
     @Override
     public boolean equals(Object obj) {
-        if (obj == null || obj.getClass() != getClass())
+        if (obj == null)
             return false;
-        return equals((FinalPair) obj);
+        if (obj instanceof Energy)
+            return equals((Energy) obj);
+        else
+            return false;
     }
 
-    public boolean equals(FinalPair p) {
-        if (p == null)
+    public boolean equals(Energy e) {
+        if (e == null)
             return false;
-        return (first == null ? p.first == null : first.equals(p.first))
-                && (last == null ? p.last == null : last.equals(p.last));
+        return name.equals(e.name);
     }
 
     @Override
     public int hashCode() {
-        return hashCode;
+        return name.hashCode();
     }
-    public final F first;
-    public final L last;
-    private final int hashCode;
+
+    @Override
+    public String toString() {
+        return getClass().getName() + " [ Name = " + name + " ]";
+    }
+    private final String name;
 }

@@ -22,35 +22,28 @@
  * THE SOFTWARE.
  */
 
-package game.engine.monica.util;
+package game.engine.monica.core.element;
 
-public final class FinalPair<F, L> {
+public abstract class AbstractElement {
 
-    public FinalPair(F f, L l) {
-        this.first = f;
-        this.last = l;
-        hashCode = 31 + first.hashCode() + last.hashCode();
+    protected AbstractElement(String name, int turnToEnergy) {
+        if (name == null || name.isEmpty())
+            throw new NullPointerException("The name of Element is null.");
+        if (turnToEnergy < 1)
+            throw new ElementInitializationException("The number which turns to energy smaller than 1.");
+        this.name = name;
+        this.turnToEnergy = turnToEnergy;
     }
 
-    @Override
-    public boolean equals(Object obj) {
-        if (obj == null || obj.getClass() != getClass())
-            return false;
-        return equals((FinalPair) obj);
+    public final String getName() {
+        return name;
     }
 
-    public boolean equals(FinalPair p) {
-        if (p == null)
-            return false;
-        return (first == null ? p.first == null : first.equals(p.first))
-                && (last == null ? p.last == null : last.equals(p.last));
-    }
+    public abstract boolean canInteract(AbstractElement e);
 
-    @Override
-    public int hashCode() {
-        return hashCode;
+    public final int turnToEnergy() {
+        return turnToEnergy;
     }
-    public final F first;
-    public final L last;
-    private final int hashCode;
+    private final String name;
+    private final int turnToEnergy;
 }

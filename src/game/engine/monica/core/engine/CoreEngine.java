@@ -1,9 +1,34 @@
+/*
+ * The MIT License
+ *
+ * Copyright 2014 Owen.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
+
 package game.engine.monica.core.engine;
 
 import game.engine.monica.core.datetime.DateTime;
 import game.engine.monica.core.datetime.WorldDate;
+import game.engine.monica.util.OMath;
+import game.engine.monica.util.ThreadRouser;
 import java.math.BigInteger;
-import java.util.LinkedList;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public final class CoreEngine {
@@ -136,18 +161,26 @@ public final class CoreEngine {
     }
     private static volatile WorldDate date;
 
-    public static void set1msStopTime(int ms) {
+    public static void set1msSuspendTime(int ms) {
         if (ms < 1)
             throw new EngineException("set1msStopTime( " + Integer.toString(ms) + " )");
         boolean is = isStart;
         if (is)
             pause();
-        ohmsStopTimeLocker.lock();
+        omsSuspendTimeLocker.lock();
         try {
-            omsStopTime = ms;
-            omsStopTimeChangeCount++;
+            if (ms != suspendTimeCalc.omsSuspendTime) {
+                int i = OMath.isPowerOfTwo(ms);
+                if (i == 1)
+                    suspendTimeCalc = new SuspendTimeCalculator.SuspendTimeCalculator_1();
+                else if (i != -1)
+                    suspendTimeCalc = new SuspendTimeCalculator.SuspendTimeCalculator_P2(i);
+                else
+                    suspendTimeCalc = new SuspendTimeCalculator.SuspendTimeCalculator_Other(ms);
+                omsSuspendTimeChangeCount++;
+            }
         } finally {
-            ohmsStopTimeLocker.unlock();
+            omsSuspendTimeLocker.unlock();
         }
         try {
             Thread.sleep(100);
@@ -157,38 +190,88 @@ public final class CoreEngine {
             setContinue();
     }
 
-    public static int get1msStopTime() {
-        return omsStopTime;
-    }
-    private static volatile int omsStopTime = 1;
-
-    public static boolean is1msStopTimeChanged(int count) {
-        return omsStopTimeChangeCount == count;
+    public static int calcSuspendTime(int time) {
+        return suspendTimeCalc.calc(time);
     }
 
-    public static int get1msStopTimeChangeCount() {
-        return omsStopTimeChangeCount;
+    public static int get1msSuspendTime() {
+        return suspendTimeCalc.omsSuspendTime;
     }
-    private static volatile int omsStopTimeChangeCount = 0;
-    private static final transient ReentrantReadWriteLock.WriteLock ohmsStopTimeLocker = new ReentrantReadWriteLock().writeLock();
+    private static SuspendTimeCalculator suspendTimeCalc
+            = new SuspendTimeCalculator.SuspendTimeCalculator_1();
 
-    public static void addNeedWakeUpThread(Thread t) {
-        if (t == null)
-            throw new NullPointerException("The thread which needs to wake up is null.");
-        needWakeUpThreads.add(t);
-    }
+    private static abstract class SuspendTimeCalculator {
 
-    public static boolean removeWakeUpThread(Thread t) {
-        if (t == null)
-            throw new NullPointerException("THe thread which wants to remove from the list is null.");
-        return needWakeUpThreads.remove(t);
-    }
+        private SuspendTimeCalculator(int omsSuspendTime) {
+            this.omsSuspendTime = omsSuspendTime;
+        }
 
-    public static void wakeUpAllThreads() {
-        for (int i = 0; i < needWakeUpThreads.size(); ++i) {
-            Thread c = needWakeUpThreads.remove(i);
-            c.interrupt();
+        abstract int calc(int t);
+        protected volatile int omsSuspendTime;
+
+        private static final class SuspendTimeCalculator_1
+                extends SuspendTimeCalculator {
+
+            private SuspendTimeCalculator_1() {
+                super(1);
+            }
+
+            @Override
+            int calc(int t) {
+                return t;
+            }
+        }
+
+        private static final class SuspendTimeCalculator_P2
+                extends SuspendTimeCalculator {
+
+            private SuspendTimeCalculator_P2(int omsSuspendTime) {
+                super(omsSuspendTime);
+            }
+
+            @Override
+            int calc(int t) {
+                return t << omsSuspendTime;
+            }
+        }
+
+        private static final class SuspendTimeCalculator_Other
+                extends SuspendTimeCalculator {
+
+            public SuspendTimeCalculator_Other(int omsSuspendTime) {
+                super(omsSuspendTime);
+            }
+
+            @Override
+            int calc(int t) {
+                return t * omsSuspendTime;
+            }
         }
     }
-    private static final LinkedList<Thread> needWakeUpThreads = new LinkedList<>();
+
+    public static boolean is1msSuspendTimeChanged(int count) {
+        return omsSuspendTimeChangeCount == count;
+    }
+
+    public static int get1msSuspendTimeChangeCount() {
+        return omsSuspendTimeChangeCount;
+    }
+    private static transient volatile int omsSuspendTimeChangeCount = 0;
+    private static final transient ReentrantReadWriteLock.WriteLock omsSuspendTimeLocker
+            = new ReentrantReadWriteLock().writeLock();
+
+    public static final ThreadRouser engineThreadRouser = new ThreadRouser();
+
+    public static int getDefaultQuantily() {
+        return defaultQuantily;
+    }
+
+    public static void setDefaultQuantily(int n) {
+        if (n < 1)
+            throw new EngineException("The number which is used to"
+                    + "set up the default quantily of lists, sets and maps"
+                    + "is less than 1.");
+        defaultQuantily = n;
+    }
+    private static int defaultQuantily = 16;
 }

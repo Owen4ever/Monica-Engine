@@ -22,35 +22,24 @@
  * THE SOFTWARE.
  */
 
-package game.engine.monica.util;
+package game.engine.monica.core.condition;
 
-public final class FinalPair<F, L> {
+public abstract class AbstractCondition {
 
-    public FinalPair(F f, L l) {
-        this.first = f;
-        this.last = l;
-        hashCode = 31 + first.hashCode() + last.hashCode();
+    public AbstractCondition(ConditionType type) {
+        if (type == null)
+            throw new NullPointerException("The condition type is null.");
+        this.type = type;
     }
 
-    @Override
-    public boolean equals(Object obj) {
-        if (obj == null || obj.getClass() != getClass())
-            return false;
-        return equals((FinalPair) obj);
+    public ConditionType getType() {
+        return type;
     }
 
-    public boolean equals(FinalPair p) {
-        if (p == null)
-            return false;
-        return (first == null ? p.first == null : first.equals(p.first))
-                && (last == null ? p.last == null : last.equals(p.last));
-    }
+    public abstract String getIntroduction();
 
-    @Override
-    public int hashCode() {
-        return hashCode;
-    }
-    public final F first;
-    public final L last;
-    private final int hashCode;
+    public abstract boolean alreadyMeet();
+
+    public abstract boolean meet(Object... obj);
+    private final ConditionType type;
 }

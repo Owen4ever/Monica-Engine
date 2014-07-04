@@ -1,3 +1,27 @@
+/*
+ * The MIT License
+ *
+ * Copyright 2014 Owen.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
+
 package game.engine.monica.core.datetime;
 
 import game.engine.monica.core.engine.CoreEngine;
@@ -18,7 +42,7 @@ public final class WorldDate {
     public void setCurrentDate(DateTime dt) {
         if (dt == null || dt.year < 0 || dt.month < 0 || dt.day < 0
                 || dt.hour < 0 || dt.minute < 0 || dt.second < 0 || dt.millisecond < 0)
-            throw new WorldDateInitilizeException();
+            throw new WorldDateInitializeException();
         this.year = dt.year;
         this.mon = dt.month;
         this.day = dt.day;
@@ -63,37 +87,37 @@ public final class WorldDate {
 
     public void setLoopMonth(int mon) {
         if (mon < 1)
-            throw new WorldDateInitilizeException();
+            throw new WorldDateInitializeException();
         loopMon = mon;
     }
 
     public void setLoopDay(int day) {
         if (day < 1)
-            throw new WorldDateInitilizeException();
+            throw new WorldDateInitializeException();
         loopDay = day;
     }
 
     public void setLoopHour(int hour) {
         if (hour < 1)
-            throw new WorldDateInitilizeException();
+            throw new WorldDateInitializeException();
         loopHour = hour;
     }
 
     public void setLoopMinute(int min) {
         if (min < 1)
-            throw new WorldDateInitilizeException();
+            throw new WorldDateInitializeException();
         loopMin = min;
     }
 
     public void setLoopSecond(int sec) {
         if (sec < 1)
-            throw new WorldDateInitilizeException();
+            throw new WorldDateInitializeException();
         loopSec = sec;
     }
 
     public void setLoopMilliSecond(int msec) {
         if (msec < 1)
-            throw new WorldDateInitilizeException();
+            throw new WorldDateInitializeException();
         loopMSec = msec;
     }
     int loopMon = 12, loopDay = 30,
@@ -101,7 +125,7 @@ public final class WorldDate {
 
     public void start() {
         isStart = true;
-        final long omsst = CoreEngine.get1msStopTime();
+        final long omsst = CoreEngine.get1msSuspendTime();
         final long wait_msec = omsst;
         final long wait_sec = wait_msec * loopMSec;
         final long wait_min = wait_sec * loopSec;

@@ -22,35 +22,17 @@
  * THE SOFTWARE.
  */
 
-package game.engine.monica.util;
+package game.engine.monica.core.element;
 
-public final class FinalPair<F, L> {
+public class ElementInitializationException extends RuntimeException {
 
-    public FinalPair(F f, L l) {
-        this.first = f;
-        this.last = l;
-        hashCode = 31 + first.hashCode() + last.hashCode();
+    private static final long serialVersionUID = -7034657190745766939L;
+
+    public ElementInitializationException() {
+        super();
     }
 
-    @Override
-    public boolean equals(Object obj) {
-        if (obj == null || obj.getClass() != getClass())
-            return false;
-        return equals((FinalPair) obj);
+    public ElementInitializationException(String msg) {
+        super(msg);
     }
-
-    public boolean equals(FinalPair p) {
-        if (p == null)
-            return false;
-        return (first == null ? p.first == null : first.equals(p.first))
-                && (last == null ? p.last == null : last.equals(p.last));
-    }
-
-    @Override
-    public int hashCode() {
-        return hashCode;
-    }
-    public final F first;
-    public final L last;
-    private final int hashCode;
 }
