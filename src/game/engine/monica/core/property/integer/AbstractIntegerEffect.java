@@ -44,6 +44,13 @@ public abstract class AbstractIntegerEffect implements AbstractEffect {
     }
 
     public abstract int affect(int val);
+
+    @Override
+    public String toString() {
+        return getClass().getName() + "[ EffectType = " + effectType + ", "
+                + affectTo.getType()
+                + ", Affect to = " + affectTo.getName() + " ]";
+    }
     protected final EffectType effectType;
     protected final PropertyID affectTo;
 }

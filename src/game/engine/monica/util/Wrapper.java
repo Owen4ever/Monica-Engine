@@ -22,14 +22,13 @@
  * THE SOFTWARE.
  */
 
-package game.engine.monica.core.engine;
+package game.engine.monica.util;
 
-public abstract class EngineRunnable implements Runnable {
+public final class Wrapper<T> {
 
-    @Override
-    public final void run() {
-        loop();
+    public Wrapper(T t) {
+        this.pack = t;
     }
 
-    protected abstract void loop();
+    public T pack;
 }

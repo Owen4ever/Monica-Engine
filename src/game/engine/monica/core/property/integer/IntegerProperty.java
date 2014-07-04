@@ -25,12 +25,12 @@
 package game.engine.monica.core.property.integer;
 
 import game.engine.monica.core.engine.CoreEngine;
-import game.engine.monica.core.engine.EngineRunnable;
 import game.engine.monica.core.engine.EngineThread;
 import game.engine.monica.core.property.EffectPointer;
 import game.engine.monica.core.property.ErrorTypeException;
 import game.engine.monica.core.property.PropertyID;
 import game.engine.monica.util.FinalPair;
+import game.engine.monica.util.Wrapper;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.PriorityBlockingQueue;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -74,7 +74,7 @@ public class IntegerProperty implements Comparable<IntegerProperty> {
     public final EffectPointer addAdditionValue(AbstractIntegerEffect e) {
         if (e == null)
             throw new NullPointerException("The addition effect is null.");
-        additionEffectPointerLocker.lock();
+        calcLocker.lock();
         try {
             if (currentAdditionEffectPointer == null)
                 currentAdditionEffectPointer = EffectPointer.newFirstPointer();
@@ -83,58 +83,57 @@ public class IntegerProperty implements Comparable<IntegerProperty> {
             addVal.put(currentAdditionEffectPointer, e);
             isCalc = false;
         } finally {
-            additionEffectPointerLocker.unlock();
+            calcLocker.unlock();
         }
         return currentAdditionEffectPointer;
     }
-    private final transient ReentrantReadWriteLock.WriteLock additionEffectPointerLocker
-            = new ReentrantReadWriteLock().writeLock();
 
     public final void removeAdditionValue(EffectPointer pointer) {
-        additionEffectPointerLocker.lock();
+        calcLocker.lock();
         try {
             pointer.delete();
             addVal.remove(pointer);
             isCalc = false;
         } finally {
-            additionEffectPointerLocker.unlock();
+            calcLocker.unlock();
         }
     }
 
     public final EffectPointer addBuffEffect(IntegerBuffEffect e) {
         if (e == null)
             throw new NullPointerException("The buff effect is null.");
-        buffEffectPointerLocker.lock();
+        calcLocker.lock();
         try {
             if (currentBuffEffectPointer == null)
                 currentBuffEffectPointer = EffectPointer.newFirstPointer();
             else
                 currentBuffEffectPointer = currentBuffEffectPointer.linkNewOne();
-            buffVal.put(currentBuffEffectPointer, new FinalPair<>(e, new MapValue(0)));
+            buffVal.put(currentBuffEffectPointer, new FinalPair<>(e, new Wrapper<Integer>(0)));
+            BuffRunnable r = new BuffRunnable(currentBuffEffectPointer);
+            buffThreadSet.add(r);
+            new EngineThread(r).start();
             isCalc = false;
         } finally {
-            buffEffectPointerLocker.unlock();
+            calcLocker.unlock();
         }
         return currentBuffEffectPointer;
     }
-    private final transient ReentrantReadWriteLock.WriteLock buffEffectPointerLocker
-            = new ReentrantReadWriteLock().writeLock();
 
     public final void removeBuffEffect(EffectPointer pointer) {
-        buffEffectPointerLocker.lock();
+        calcLocker.lock();
         try {
             pointer.delete();
             buffVal.remove(pointer);
             isCalc = false;
         } finally {
-            buffEffectPointerLocker.unlock();
+            calcLocker.unlock();
         }
     }
 
     public final EffectPointer addLongTimeEffect(IntegerLongTimeEffect e) {
         if (e == null)
             throw new NullPointerException("The buff effect is null.");
-        longTimeEffectPointerLocker.lock();
+        calcLocker.lock();
         try {
             if (currentLongTimeEffectPointer == null)
                 currentLongTimeEffectPointer = EffectPointer.newFirstPointer();
@@ -143,52 +142,48 @@ public class IntegerProperty implements Comparable<IntegerProperty> {
             longTimeVal.put(currentLongTimeEffectPointer, e);
             isCalc = false;
         } finally {
-            longTimeEffectPointerLocker.unlock();
+            calcLocker.unlock();
         }
         return currentLongTimeEffectPointer;
     }
-    private final transient ReentrantReadWriteLock.WriteLock longTimeEffectPointerLocker
-            = new ReentrantReadWriteLock().writeLock();
 
     public final void removeLongTimeEffect(EffectPointer pointer) {
-        longTimeEffectPointerLocker.lock();
+        calcLocker.lock();
         try {
             pointer.delete();
             longTimeVal.remove(pointer);
             isCalc = false;
         } finally {
-            longTimeEffectPointerLocker.unlock();
+            calcLocker.unlock();
         }
     }
 
     public final void setFixedEffect(IntegerFixedEffect e) {
         if (e == null)
             throw new NullPointerException("The IntegerFixedEffect is null.");
-        fixedEffectPointerLocker.lock();
+        calcLocker.lock();
         try {
             fixedVal = e.affect(0);
             isFixed = true;
             isCalc = false;
         } finally {
-            fixedEffectPointerLocker.unlock();
+            calcLocker.unlock();
         }
     }
 
     public final void cancelFixedEffect() {
-        fixedEffectPointerLocker.lock();
+        calcLocker.lock();
         try {
             isFixed = false;
             isCalc = false;
         } finally {
-            fixedEffectPointerLocker.unlock();
+            calcLocker.unlock();
         }
     }
 
     public final boolean isFixed() {
         return isFixed;
     }
-    private final transient ReentrantReadWriteLock.WriteLock fixedEffectPointerLocker
-            = new ReentrantReadWriteLock().writeLock();
 
     public final EffectPointer addEffect(AbstractIntegerEffect e) {
         if (e == null)
@@ -215,8 +210,23 @@ public class IntegerProperty implements Comparable<IntegerProperty> {
     public final void setAdjustment(IntegerPropertyAdjustment a) {
         if (a == null)
             throw new NullPointerException("The adjustment is null.");
-        this.adjustment = a;
-        isCalc = false;
+        calcLocker.lock();
+        try {
+            this.adjustment = a;
+            isCalc = false;
+        } finally {
+            calcLocker.unlock();
+        }
+    }
+
+    public final void removeAdjustment() {
+        calcLocker.lock();
+        try {
+            this.hasAdjustment = true;
+            isCalc = false;
+        } finally {
+            calcLocker.unlock();
+        }
     }
 
     public final int getTotalValue() {
@@ -233,22 +243,15 @@ public class IntegerProperty implements Comparable<IntegerProperty> {
         try {
             if (isFixed)
                 totalVal = fixedVal;
-            additionEffectPointerLocker.lock();
-            try {
-                addVal.forEach((EffectPointer p, AbstractIntegerEffect e) -> {
-                    totalVal = e.affect(totalVal);
-                });
-            } finally {
-                additionEffectPointerLocker.unlock();
-            }
-            buffEffectPointerLocker.lock();
-            try {
-                buffVal.forEach((EffectPointer p,
-                        FinalPair<IntegerBuffEffect, MapValue> e) -> {
-                        });
-            } finally {
-                buffEffectPointerLocker.unlock();
-            }
+            Wrapper<Integer> tval = new Wrapper<>(defaultVal + offsetVal);
+            addVal.forEach((EffectPointer p, AbstractIntegerEffect e) -> {
+                tval.pack = e.affect(tval.pack);
+            });
+            buffVal.forEach((EffectPointer p,
+                    FinalPair<IntegerBuffEffect, Wrapper<Integer>> e) -> {
+                        tval.pack = e.first.affect(tval.pack);
+                    });
+            totalVal = adjustment.adjust(tval.pack);
             isCalc = true;
         } finally {
             calcLocker.unlock();
@@ -261,12 +264,35 @@ public class IntegerProperty implements Comparable<IntegerProperty> {
     public int compareTo(IntegerProperty t) {
         return type.compareTo(t.type);
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null || obj.getClass() != IntegerProperty.class)
+            return false;
+        IntegerProperty p = (IntegerProperty) obj;
+        return type.equals(p.type);
+    }
+
+    @Override
+    public int hashCode() {
+        return type.hashCode();
+    }
+
+    @Override
+    public String toString() {
+        return getClass().getName() + "[ ID = " + type.getName()
+                + ", Type = " + type.getType()
+                + ", Default value = " + defaultVal
+                + ", Offset value = " + offsetVal
+                + ", Total value = " + getTotalValue()
+                + ",  Has adjustment" + " ]";
+    }
     private final PropertyID type;
     protected int defaultVal, offsetVal;
     protected final ConcurrentHashMap<EffectPointer, AbstractIntegerEffect> addVal
             = new ConcurrentHashMap<>(CoreEngine.getDefaultQuantily(), 0.5f);
     protected EffectPointer currentAdditionEffectPointer = null;
-    protected final ConcurrentHashMap<EffectPointer, FinalPair<IntegerBuffEffect, MapValue>> buffVal
+    protected final ConcurrentHashMap<EffectPointer, FinalPair<IntegerBuffEffect, Wrapper<Integer>>> buffVal
             = new ConcurrentHashMap<>(CoreEngine.getDefaultQuantily(), 0.5f);
     private final PriorityBlockingQueue<BuffRunnable> buffThreadSet
             = new PriorityBlockingQueue<>(CoreEngine.getDefaultQuantily());
@@ -274,6 +300,7 @@ public class IntegerProperty implements Comparable<IntegerProperty> {
     protected final ConcurrentHashMap<EffectPointer, IntegerLongTimeEffect> longTimeVal
             = new ConcurrentHashMap<>(CoreEngine.getDefaultQuantily(), 0.5f);
     protected EffectPointer currentLongTimeEffectPointer = null;
+    protected boolean hasAdjustment = false;
     protected IntegerPropertyAdjustment adjustment = null;
     private boolean isFixed = false;
     protected int fixedVal;
@@ -281,24 +308,16 @@ public class IntegerProperty implements Comparable<IntegerProperty> {
     protected transient volatile boolean isCalc = false;
     protected transient int totalVal;
 
-    protected static final class MapValue {
-
-        public MapValue(int val) {
-            this.val = val;
-        }
-        public int val;
-    }
-
-    private final class BuffRunnable extends EngineRunnable
-            implements Comparable<BuffRunnable> {
+    private final class BuffRunnable
+            implements Comparable<BuffRunnable>, Runnable {
 
         public BuffRunnable(EffectPointer pointer) {
             this.pointer = pointer;
         }
 
         @Override
-        protected void loop() {
-            FinalPair<IntegerBuffEffect, MapValue> v = buffVal.get(pointer);
+        public void run() {
+            FinalPair<IntegerBuffEffect, Wrapper<Integer>> v = buffVal.get(pointer);
             IntegerBuffEffect effect = v.first;
             int ce1mscc = CoreEngine.get1msSuspendTimeChangeCount();
             int time = CoreEngine.get1msSuspendTime() * effect.getMaxDuration();
@@ -325,7 +344,7 @@ public class IntegerProperty implements Comparable<IntegerProperty> {
                             return;
                         }
                         if (currentCount % it == 0)
-                            v.last.val = effect.getValue() * currentCount;
+                            v.last.pack = effect.getValue() * currentCount;
                     }
                 }
             } else {

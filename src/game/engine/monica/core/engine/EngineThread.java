@@ -26,19 +26,19 @@ package game.engine.monica.core.engine;
 
 public class EngineThread extends Thread {
 
-    public EngineThread(EngineRunnable r) {
+    public EngineThread(Runnable r) {
         this(TG_UNGROUPED, r);
     }
 
-    public EngineThread(EngineRunnable r, String name) {
+    public EngineThread(Runnable r, String name) {
         this(TG_UNGROUPED, r, name);
     }
 
-    public EngineThread(EngineThreadGroup g, EngineRunnable r) {
+    public EngineThread(EngineThreadGroup g, Runnable r) {
         this(g, r, "Eternal World - Unname Thread " + getCurrentThreadCount());
     }
 
-    public EngineThread(EngineThreadGroup g, EngineRunnable r, String name) {
+    public EngineThread(EngineThreadGroup g, Runnable r, String name) {
         super(g, r, name);
     }
 

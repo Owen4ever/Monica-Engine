@@ -76,6 +76,12 @@ public abstract class IntegerBuffEffect extends AbstractIntegerEffect {
 
     public static IntegerBuffEffect newBuffEffect(PropertyID affectTo,
             IntegerEffectCalcType calcType, int val, int startingTime,
+            int duration) {
+        return newBuffEffect(affectTo, calcType, val, startingTime, 0, duration, false);
+    }
+
+    public static IntegerBuffEffect newBuffEffect(PropertyID affectTo,
+            IntegerEffectCalcType calcType, int val, int startingTime,
             int intervalDuration, int duration, boolean isInterval) {
         if (calcType == null)
             throw new ErrorTypeException("Error calculation type.");

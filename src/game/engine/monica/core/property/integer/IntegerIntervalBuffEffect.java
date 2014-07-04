@@ -22,23 +22,19 @@
  * THE SOFTWARE.
  */
 
-package game.engine.monica.core.property;
+package game.engine.monica.core.property.integer;
 
-/**
- *
- * @author Owen
- */
-public enum EffectType {
+import game.engine.monica.core.property.PropertyID;
 
-    TYPE_INTEGER_FIXED,
-    TYPE_INTEGER_NUM,
-    TYPE_INTEGER_BUFF,
-    TYPE_INTEGER_BUFF_INTERVAL,
-    TYPE_INTEGER_DEBUFF,
-    TYPE_INTEGER_DEBUFF_INTERVAL,
-    TYPE_INTEGER_LONGTIME,
-    TYPE_BOOL_FIXED,
-    TYPE_BOOL_BOOLEAN,
-    TYPE_BOOL_BUFF,
-    TYPE_BOOL_LONGTIME
+public class IntegerIntervalBuffEffect extends IntegerBuffEffect {
+
+    public IntegerIntervalBuffEffect(PropertyID affectTo, int val,
+            int startingTime, int intervalDuration, int duration) {
+        super(affectTo, val, startingTime, intervalDuration, duration, true);
+    }
+
+    @Override
+    public int affect(int val) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
 }
