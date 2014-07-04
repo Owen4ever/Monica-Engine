@@ -24,13 +24,12 @@
 
 package game.engine.monica.core.property;
 
-import game.engine.monica.core.engine.EngineRunnable;
 import game.engine.monica.core.engine.EngineThread;
 import game.engine.monica.core.engine.EngineThreadGroup;
 
 public final class PropertyThread extends EngineThread {
 
-    public PropertyThread(EngineRunnable r) {
+    public PropertyThread(Runnable r) {
         super(TG_PROPERTY, r);
     }
 
