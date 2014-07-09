@@ -22,26 +22,22 @@
  * THE SOFTWARE.
  */
 
-package game.engine.monica.core.element;
+package game.engine.monica.core.property.number;
 
-public abstract class AbstractElement {
+import game.engine.monica.core.property.EffectType;
+import game.engine.monica.core.property.EffectorInterface;
+import game.engine.monica.core.property.PropertyID;
+import game.engine.monica.util.StringID;
 
-    protected AbstractElement(String name, int turnToEnergy) {
-        if (name == null || name.isEmpty())
-            throw new NullPointerException("The name of Element is null.");
-        if (turnToEnergy < 1)
-            throw new ElementInitializationException("The number which turns to energy smaller than 1.");
-        this.name = name;
-        this.turnToEnergy = turnToEnergy;
+public class NumberEffect extends AbstractNumberEffect {
+
+    protected NumberEffect(StringID id, PropertyID affectTo,
+            EffectorInterface<Double> effector, double val) {
+        super(id, EffectType.TYPE_NUM_NUMBER, affectTo, effector, val);
     }
 
-    public final String getName() {
-        return name;
+    public static NumberEffect newNumberEffect(StringID id, PropertyID affectTo,
+            NumberEffectCalcType calcType, double val) {
+        return new NumberEffect(id, affectTo, getNumberEffector(calcType, val), val);
     }
-
-    public final int turnToEnergy() {
-        return turnToEnergy;
-    }
-    private final String name;
-    private final int turnToEnergy;
 }

@@ -22,9 +22,12 @@
  * THE SOFTWARE.
  */
 
-package game.engine.monica.core.property.integer;
+package game.engine.monica.core.engine;
 
-public interface IntegerPropertyAdjustment {
+import game.engine.monica.util.StringID;
 
-    int adjust(int val);
+@FunctionalInterface
+public interface ConstructorInterface<T> {
+
+    T newInstance(StringID id, Object... objs);
 }

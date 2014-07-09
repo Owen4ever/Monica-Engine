@@ -22,26 +22,35 @@
  * THE SOFTWARE.
  */
 
-package game.engine.monica.core.element;
+package game.engine.monica.core.property.number;
 
-public abstract class AbstractElement {
+import game.engine.monica.core.property.EffectorInterface;
+import game.engine.monica.core.property.PropertyID;
+import game.engine.monica.util.StringID;
 
-    protected AbstractElement(String name, int turnToEnergy) {
-        if (name == null || name.isEmpty())
-            throw new NullPointerException("The name of Element is null.");
-        if (turnToEnergy < 1)
-            throw new ElementInitializationException("The number which turns to energy smaller than 1.");
-        this.name = name;
-        this.turnToEnergy = turnToEnergy;
+public class NumberIntervalBuffEffect extends NumberBuffEffect {
+
+    public NumberIntervalBuffEffect(StringID id, PropertyID affectTo,
+            EffectorInterface effector, int val,
+            int startingTime, int intervalDuration, int duration) {
+        super(id, affectTo, effector, val,
+                startingTime, intervalDuration, duration, true);
+        if (startingTime == 0)
+            currentVal = val;
+        else
+            currentVal = 0;
     }
 
-    public final String getName() {
-        return name;
+    public void intervalBuffIncrease() {
+        currentVal += val;
     }
 
-    public final int turnToEnergy() {
-        return turnToEnergy;
+    public int getCurrentValue() {
+        return currentVal;
     }
-    private final String name;
-    private final int turnToEnergy;
+
+    public void setCurrentValue(int currentVal) {
+        this.currentVal = currentVal;
+    }
+    private int currentVal;
 }

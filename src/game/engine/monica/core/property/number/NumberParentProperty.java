@@ -22,21 +22,19 @@
  * THE SOFTWARE.
  */
 
-package game.engine.monica.core.property.integer;
+package game.engine.monica.core.property.number;
 
-import game.engine.monica.core.property.EffectType;
 import game.engine.monica.core.property.PropertyID;
 
-public class IntegerFixedEffect extends AbstractIntegerEffect {
+public abstract class NumberParentProperty extends NumberProperty
+        implements NumberPropertyAdjustment {
 
-    public IntegerFixedEffect(PropertyID affectTo, int val) {
-        super(EffectType.TYPE_INTEGER_FIXED, affectTo);
-        this.val = val;
+    public NumberParentProperty(PropertyID id, boolean isPercentVal) {
+        super(id, isPercentVal);
     }
 
-    @Override
-    public int affect(int value) {
-        return val;
+    public NumberParentProperty(PropertyID id, boolean isPercentVal,
+            int defaultVal, int offsetVal) {
+        super(id, isPercentVal, defaultVal, offsetVal);
     }
-    private final int val;
 }

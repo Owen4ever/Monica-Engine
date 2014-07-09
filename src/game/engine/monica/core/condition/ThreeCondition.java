@@ -22,20 +22,15 @@
  * THE SOFTWARE.
  */
 
-package game.engine.monica.core.property.integer;
+package game.engine.monica.core.condition;
 
-import game.engine.monica.core.property.PropertyID;
+@FunctionalInterface
+public interface ThreeCondition extends ConditionInterface {
 
-public abstract class IntegerParentProperty extends IntegerProperty
-        implements IntegerPropertyAdjustment {
-
-    public IntegerParentProperty(PropertyID id, boolean isPercentVal) {
-        super(id, isPercentVal);
+    @Override
+    default int count() {
+        return 3;
     }
 
-    public IntegerParentProperty(PropertyID id, boolean isPercentVal,
-            int defaultVal, int offsetVal) {
-        super(id, isPercentVal, defaultVal, offsetVal);
-    }
-
+    boolean match(Object o1, Object o2, Object o3);
 }

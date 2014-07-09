@@ -25,9 +25,9 @@
 package game.engine.monica.core.datetime;
 
 import game.engine.monica.core.engine.CoreEngine;
-import game.engine.monica.core.engine.EngineRunnable;
 import game.engine.monica.core.engine.EngineThread;
 import game.engine.monica.core.engine.EngineThreadGroup;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public final class WorldDate {
 
@@ -138,116 +138,95 @@ public final class WorldDate {
         final long wt_hour = wait_day * 950 / 1000 + wt_min;
         final long wt_day = wait_mon * 950 / 1000 + wt_hour;
         final long wt_mon = wait_mon * loopMon * 950 / 1000 + wt_day;
-        new EngineThread(TG_TIME, new EngineRunnable() {
-            @Override
-            public final void loop() {
-                int firstWaitTime = loopMSec - msec;
-                if (firstWaitTime > 1)
-                    EngineThread.sleepWithoutException(firstWaitTime * wait_msec);
-                while (isStart) {
-                    if (msec >= loopMSec) {
-                        msec = 0;
-                        sec++;
-                        EngineThread.sleepWithoutException(wt_msec);
-                        continue;
-                    }
-                    EngineThread.sleepWithoutException(0);
+        new EngineThread(TG_TIME, () -> {
+            int firstWaitTime = loopMSec - msec;
+            if (firstWaitTime > 1)
+                EngineThread.sleepWithoutException(firstWaitTime * wait_msec);
+            while (isStart) {
+                if (msec >= loopMSec) {
+                    msec = 0;
+                    sec++;
+                    EngineThread.sleepWithoutException(wt_msec);
+                    continue;
                 }
+                EngineThread.sleepWithoutException(0);
             }
         }, "MilliSecond Checker").start();
-        new EngineThread(TG_TIME, new EngineRunnable() {
-            @Override
-            public final void loop() {
-                int firstWaitTime = loopSec - sec;
-                if (firstWaitTime > 1)
-                    EngineThread.sleepWithoutException(firstWaitTime * wait_sec);
-                while (isStart) {
-                    if (sec >= loopSec) {
-                        sec = 0;
-                        min++;
-                        EngineThread.sleepWithoutException(wt_sec);
-                        continue;
-                    }
-                    EngineThread.sleepWithoutException(0);
+        new EngineThread(TG_TIME, () -> {
+            int firstWaitTime = loopSec - sec;
+            if (firstWaitTime > 1)
+                EngineThread.sleepWithoutException(firstWaitTime * wait_sec);
+            while (isStart) {
+                if (sec >= loopSec) {
+                    sec = 0;
+                    min++;
+                    EngineThread.sleepWithoutException(wt_sec);
+                    continue;
                 }
+                EngineThread.sleepWithoutException(0);
             }
         }, "Second Checker").start();
-        new EngineThread(TG_TIME, new EngineRunnable() {
-            @Override
-            public final void loop() {
-                int firstWaitTime = loopMin - min;
-                if (firstWaitTime > 1)
-                    EngineThread.sleepWithoutException(firstWaitTime * wait_min);
-                while (isStart) {
-                    if (min >= loopMin) {
-                        min = 0;
-                        hour++;
-                        EngineThread.sleepWithoutException(wt_min);
-                        continue;
-                    }
-                    EngineThread.sleepWithoutException(0);
+        new EngineThread(TG_TIME, () -> {
+            int firstWaitTime = loopMin - min;
+            if (firstWaitTime > 1)
+                EngineThread.sleepWithoutException(firstWaitTime * wait_min);
+            while (isStart) {
+                if (min >= loopMin) {
+                    min = 0;
+                    hour++;
+                    EngineThread.sleepWithoutException(wt_min);
+                    continue;
                 }
+                EngineThread.sleepWithoutException(0);
             }
         }, "Minute Checker").start();
-        new EngineThread(TG_TIME, new EngineRunnable() {
-            @Override
-            public final void loop() {
-                int firstWaitTime = loopHour - hour;
-                if (firstWaitTime > 0)
-                    EngineThread.sleepWithoutException(firstWaitTime * wait_hour);
-                while (isStart) {
-                    if (hour >= loopHour) {
-                        hour = 0;
-                        day++;
-                        EngineThread.sleepWithoutException(wt_hour);
-                        continue;
-                    }
-                    EngineThread.sleepWithoutException(0);
+        new EngineThread(TG_TIME, () -> {
+            int firstWaitTime = loopHour - hour;
+            if (firstWaitTime > 0)
+                EngineThread.sleepWithoutException(firstWaitTime * wait_hour);
+            while (isStart) {
+                if (hour >= loopHour) {
+                    hour = 0;
+                    day++;
+                    EngineThread.sleepWithoutException(wt_hour);
+                    continue;
                 }
+                EngineThread.sleepWithoutException(0);
             }
         }, "Hour Checker").start();
-        new EngineThread(TG_TIME, new EngineRunnable() {
-            @Override
-            public final void loop() {
-                int firstWaitTime = loopDay - day;
-                if (firstWaitTime > 0)
-                    EngineThread.sleepWithoutException(firstWaitTime * wait_day);
-                while (isStart) {
-                    if (day >= loopDay) {
-                        day = 0;
-                        mon++;
-                        EngineThread.sleepWithoutException(wt_day);
-                        continue;
-                    }
-                    EngineThread.sleepWithoutException(0);
+        new EngineThread(TG_TIME, () -> {
+            int firstWaitTime = loopDay - day;
+            if (firstWaitTime > 0)
+                EngineThread.sleepWithoutException(firstWaitTime * wait_day);
+            while (isStart) {
+                if (day >= loopDay) {
+                    day = 0;
+                    mon++;
+                    EngineThread.sleepWithoutException(wt_day);
+                    continue;
                 }
+                EngineThread.sleepWithoutException(0);
             }
         }, "Day Checker").start();
-        new EngineThread(TG_TIME, new EngineRunnable() {
-            @Override
-            public final void loop() {
-                int firstWaitTime = loopMon - mon;
-                if (firstWaitTime > 0)
-                    EngineThread.sleepWithoutException(firstWaitTime * wait_mon);
-                while (isStart) {
-                    if (mon >= loopMon) {
-                        mon = 0;
-                        year++;
-                        EngineThread.sleepWithoutException(wt_mon);
-                        continue;
-                    }
-                    EngineThread.sleepWithoutException(0);
+        new EngineThread(TG_TIME, () -> {
+            int firstWaitTime = loopMon - mon;
+            if (firstWaitTime > 0)
+                EngineThread.sleepWithoutException(firstWaitTime * wait_mon);
+            while (isStart) {
+                if (mon >= loopMon) {
+                    mon = 0;
+                    year++;
+                    EngineThread.sleepWithoutException(wt_mon);
+                    continue;
                 }
+                EngineThread.sleepWithoutException(0);
             }
         }, "Month Checker").start();
         EngineThread timeMainThread
-                = new EngineThread(TG_TIME, new EngineRunnable() {
-                    @Override
-                    public final void loop() {
-                        while (isStart) {
-                            msec++;
-                            EngineThread.sleepWithoutException(omsst);
-                        }
+                = new EngineThread(TG_TIME, () -> {
+                    while (isStart) {
+                        msec++;
+                        EngineThread.sleepWithoutException(omsst);
                     }
                 }, "Time Counter");
         timeMainThread.setPriority(Thread.MAX_PRIORITY);
@@ -255,13 +234,20 @@ public final class WorldDate {
     }
 
     public void stop() {
-        isStart = false;
+        timeLocker.lock();
+        try {
+            isStart = false;
+        } finally {
+            timeLocker.unlock();
+        }
     }
 
     public boolean isStart() {
         return isStart;
     }
     private volatile boolean isStart = false;
+    private final transient ReentrantReadWriteLock.WriteLock timeLocker
+            = new ReentrantReadWriteLock().writeLock();
 
     @Override
     public String toString() {

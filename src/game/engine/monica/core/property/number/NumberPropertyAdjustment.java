@@ -22,19 +22,9 @@
  * THE SOFTWARE.
  */
 
-package game.engine.monica.core.property.integer;
+package game.engine.monica.core.property.number;
 
-import game.engine.monica.core.property.PropertyID;
+public interface NumberPropertyAdjustment {
 
-public class IntegerIntervalBuffEffect extends IntegerBuffEffect {
-
-    public IntegerIntervalBuffEffect(PropertyID affectTo, int val,
-            int startingTime, int intervalDuration, int duration) {
-        super(affectTo, val, startingTime, intervalDuration, duration, true);
-    }
-
-    @Override
-    public int affect(int val) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
+    double adjust(double val);
 }

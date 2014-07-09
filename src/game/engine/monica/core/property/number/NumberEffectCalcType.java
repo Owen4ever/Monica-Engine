@@ -22,35 +22,19 @@
  * THE SOFTWARE.
  */
 
-package game.engine.monica.core.property.integer;
+package game.engine.monica.core.property.number;
 
-import game.engine.monica.core.property.AbstractEffect;
-import game.engine.monica.core.property.EffectType;
-import game.engine.monica.core.property.PropertyID;
+public enum NumberEffectCalcType {
 
-public abstract class AbstractIntegerEffect implements AbstractEffect {
-
-    protected AbstractIntegerEffect(EffectType type, PropertyID affectTo) {
-        if (type == null)
-            throw new NullPointerException("The effect type is null.");
-        if (affectTo == null)
-            throw new NullPointerException("The PropertyID which affects to is null.");
-        effectType = type;
-        this.affectTo = affectTo;
-    }
-
-    public final PropertyID affectTo() {
-        return affectTo;
-    }
-
-    public abstract int affect(int val);
-
-    @Override
-    public String toString() {
-        return getClass().getName() + "[ EffectType = " + effectType + ", "
-                + affectTo.getType()
-                + ", Affect to = " + affectTo.getName() + " ]";
-    }
-    protected final EffectType effectType;
-    protected final PropertyID affectTo;
+    // a: Default Value.
+    // b: The specified number of the effect.
+    // c: The value will return.
+    ADD_NUM, // c = a + b
+    ADD_PER, // c = a * (1 + b)
+    MUL_NUM, // c = a * b
+    MUL_PER, // c = a * b
+    SUB_NUM, // c = a - b
+    SUB_PER, // c = a * (1 - b)
+    DIV_NUM, // c = a / b
+    DIV_PER, // c = a / b
 }

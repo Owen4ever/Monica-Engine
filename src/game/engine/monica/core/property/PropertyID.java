@@ -24,26 +24,31 @@
 
 package game.engine.monica.core.property;
 
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.stream.Stream;
+import game.engine.monica.util.StringID;
 
 public final class PropertyID implements Comparable<PropertyID> {
 
-    private PropertyID(int id, PropertyType type, String name, String intro) {
+    public PropertyID(StringID id, PropertyType type, String name, String intro) {
         if (type == null)
-            throw new NullPointerException("The property ID type is null.");
+            throw new NullPointerException("The PropertyID type is null.");
+        setID(id);
         setName(name);
         setIntroduction(intro);
-        this.id = id;
         this.type = type;
-    }
-
-    public int getId() {
-        return id;
     }
 
     public PropertyType getType() {
         return type;
+    }
+
+    public StringID getID() {
+        return id;
+    }
+
+    public void setID(StringID name) {
+        if (name == null)
+            throw new NullPointerException("The property ID name cannot be null.");
+        this.id = name;
     }
 
     public String getName() {
@@ -52,8 +57,7 @@ public final class PropertyID implements Comparable<PropertyID> {
 
     public void setName(String name) {
         if (name == null || name.isEmpty())
-            throw new NullPointerException("The property ID name cannot be null.");
-        this.name = name;
+            throw new NullPointerException("The name of PropertyID is null.");
     }
 
     public String getIntroduction() {
@@ -68,7 +72,7 @@ public final class PropertyID implements Comparable<PropertyID> {
 
     @Override
     public int compareTo(PropertyID type) {
-        return id == type.id ? 0 : (id < type.id ? -1 : 1);
+        return Integer.compare(id.hashCode(), type.id.hashCode());
     }
 
     @Override
@@ -78,19 +82,22 @@ public final class PropertyID implements Comparable<PropertyID> {
         if (obj == null || obj.getClass() != getClass())
             return false;
         PropertyID pt = (PropertyID) obj;
-        return pt.id == id;
+        return pt.id.equals(id);
     }
 
     @Override
     public int hashCode() {
-        return id;
+        return id.hashCode();
     }
 
     @Override
     public String toString() {
-        return getClass().getName() + " [ ID = " + id + ", Type = " + type.name() + ", Name = " + name + ", Introduction = " + intro + " ]";
+        return getClass().getName()
+                + " [ ID = " + id
+                + ", Name = " + name + ", Type = " + type.name()
+                + ", Introduction = " + intro + " ]";
     }
-    private final int id;
+    private StringID id;
     private String name, intro;
     private final PropertyType type;
 
@@ -98,22 +105,4 @@ public final class PropertyID implements Comparable<PropertyID> {
 
         INTEGER, BOOLEAN
     }
-
-    public static PropertyID newPropertyID(PropertyType type, String name, String intro) {
-        PropertyID id = new PropertyID(propertyId, type, name, name);
-        propertyIDs.add(id);
-        propertyId++;
-        return id;
-    }
-    private static transient volatile int propertyId = 0;
-
-    public static PropertyID getPropertyID(int index) {
-        return propertyIDs.get(index);
-    }
-
-    public static Stream<PropertyID> getPropertyIDs() {
-        return propertyIDs.parallelStream();
-    }
-    private static final CopyOnWriteArrayList<PropertyID> propertyIDs
-            = new CopyOnWriteArrayList<>();
 }

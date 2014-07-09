@@ -42,6 +42,20 @@ public class EngineThread extends Thread {
         super(g, r, name);
     }
 
+    @Override
+    public void interrupt() {
+        isInterrupted = true;
+        super.interrupt();
+    }
+
+    @Override
+    public boolean isInterrupted() {
+        boolean f = isInterrupted;
+        isInterrupted = false;
+        return f;
+    }
+    private transient volatile boolean isInterrupted = false;
+
     public static void sleepWithoutException(long delay) {
         try {
             sleep(delay);

@@ -57,7 +57,7 @@ public final class EffectPointer {
             next.decrease();
     }
 
-    public EffectPointer linkNewOne() {
+    public EffectPointer linkNew() {
         EffectPointer newOne = new EffectPointer(pointer + 1);
         this.next = newOne;
         return newOne;
@@ -80,6 +80,6 @@ public final class EffectPointer {
     EffectPointer next = null;
 
     public static EffectPointer newFirstPointer() {
-        return new EffectPointer(0);
+        return new EffectPointer(-1);
     }
 }

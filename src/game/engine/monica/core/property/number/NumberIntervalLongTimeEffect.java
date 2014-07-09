@@ -22,18 +22,35 @@
  * THE SOFTWARE.
  */
 
-package game.engine.monica.core.condition;
+package game.engine.monica.core.property.number;
 
-public class ConditionType {
+import game.engine.monica.core.property.EffectorInterface;
+import game.engine.monica.core.property.PropertyID;
+import game.engine.monica.util.StringID;
 
-    public ConditionType(String type) {
-        if (type == null || type.isEmpty())
-            throw new NullPointerException("The type name is null.");
-        this.type = type;
+public class NumberIntervalLongTimeEffect extends NumberLongTimeEffect {
+
+    public NumberIntervalLongTimeEffect(StringID id, PropertyID affectTo,
+            EffectorInterface effector, int val,
+            int startingTime, int intervalDuration) {
+        super(id, affectTo, effector, val,
+                startingTime, intervalDuration, true);
+        if (startingTime == 0)
+            currentVal = val;
+        else
+            currentVal = 0;
     }
 
-    public String name() {
-        return type;
+    public void intervalBuffIncrease() {
+        currentVal += val;
     }
-    private final String type;
+
+    public int getCurrentValue() {
+        return currentVal;
+    }
+
+    public void setCurrentValue(int currentVal) {
+        this.currentVal = currentVal;
+    }
+    private int currentVal;
 }

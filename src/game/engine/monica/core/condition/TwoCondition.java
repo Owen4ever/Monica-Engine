@@ -22,26 +22,15 @@
  * THE SOFTWARE.
  */
 
-package game.engine.monica.core.element;
+package game.engine.monica.core.condition;
 
-public abstract class AbstractElement {
+@FunctionalInterface
+public interface TwoCondition extends ConditionInterface {
 
-    protected AbstractElement(String name, int turnToEnergy) {
-        if (name == null || name.isEmpty())
-            throw new NullPointerException("The name of Element is null.");
-        if (turnToEnergy < 1)
-            throw new ElementInitializationException("The number which turns to energy smaller than 1.");
-        this.name = name;
-        this.turnToEnergy = turnToEnergy;
+    @Override
+    default int count() {
+        return 2;
     }
 
-    public final String getName() {
-        return name;
-    }
-
-    public final int turnToEnergy() {
-        return turnToEnergy;
-    }
-    private final String name;
-    private final int turnToEnergy;
+    boolean match(Object c1, Object c2);
 }

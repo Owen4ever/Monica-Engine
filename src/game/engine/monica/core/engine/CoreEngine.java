@@ -26,9 +26,16 @@ package game.engine.monica.core.engine;
 
 import game.engine.monica.core.datetime.DateTime;
 import game.engine.monica.core.datetime.WorldDate;
+import game.engine.monica.core.property.AbstractEffect;
+import game.engine.monica.core.property.PropertyID;
+import game.engine.monica.core.property.PropertyID.PropertyType;
 import game.engine.monica.util.OMath;
+import game.engine.monica.util.StringID;
 import game.engine.monica.util.ThreadRouser;
 import java.math.BigInteger;
+import java.util.HashSet;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public final class CoreEngine {
@@ -40,29 +47,84 @@ public final class CoreEngine {
     public static void start() {
         if (date == null)
             throw new EngineException("Cannot start the game until WorldDate sets up.");
-        isStart = true;
-        date.start();
+        if (engineSCLock.tryLock())
+            try {
+                isStart = true;
+                isContinuing = true;
+                date.start();
+                runAll();
+            } finally {
+                engineSCLock.unlock();
+            }
+    }
+
+    public static void stop() {
+        if (!isStart)
+            throw new EngineException("The game engine has not started yet.");
+        if (engineSCLock.tryLock())
+            try {
+                isStart = false;
+                isContinuing = false;
+                date.stop();
+            } finally {
+                engineSCLock.unlock();
+            }
     }
     private static volatile boolean isStart = false;
 
     public static boolean isContinuing() {
-        return isStart & isContinuing;
+        return isContinuing;
     }
 
     public static void setContinue() {
         if (!isStart())
             throw new EngineException("The game engine has not started yet.");
-        date.start();
-        isContinuing = true;
+        if (isContinuing)
+            throw new EngineException("The game engine has already started.");
+        if (engineSCLock.tryLock())
+            try {
+                isContinuing = true;
+                date.start();
+                runAll();
+            } finally {
+                engineSCLock.unlock();
+            }
     }
 
     public static void pause() {
         if (!isStart())
             throw new EngineException("The game engine has not started yet.");
-        date.stop();
-        isContinuing = false;
+        if (!isContinuing)
+            throw new EngineException("The game engine has already"
+                    + " set to continue.");
+        if (engineSCLock.tryLock())
+            try {
+                date.stop();
+                isContinuing = false;
+            } finally {
+                engineSCLock.unlock();
+            }
     }
     private static volatile boolean isContinuing = false;
+    private static transient ReentrantReadWriteLock.WriteLock engineSCLock
+            = new ReentrantReadWriteLock().writeLock();
+
+    public static final ThreadRouser engineThreadRouser = new ThreadRouser();
+
+    public static void runThreadIfStart(Thread t) {
+        if (t == null)
+            throw new NullPointerException("The thread which will run"
+                    + " if the game engine starts is null.");
+        engineThreadRunner.add(t);
+    }
+
+    private static void runAll() {
+        engineThreadRunner.parallelStream().forEach((Thread t) -> {
+            t.start();
+        });
+        engineThreadRunner.clear();
+    }
+    private static final HashSet<Thread> engineThreadRunner = new HashSet<>();
 
     public static void setWorldDate(DateTime dateTime) {
         if (isStart())
@@ -163,7 +225,9 @@ public final class CoreEngine {
 
     public static void set1msSuspendTime(int ms) {
         if (ms < 1)
-            throw new EngineException("set1msStopTime( " + Integer.toString(ms) + " )");
+            throw new EngineException("set1msStopTime( "
+                    + Integer.toString(ms) + " ) < 1ms"
+            );
         boolean is = isStart;
         if (is)
             pause();
@@ -260,8 +324,6 @@ public final class CoreEngine {
     private static final transient ReentrantReadWriteLock.WriteLock omsSuspendTimeLocker
             = new ReentrantReadWriteLock().writeLock();
 
-    public static final ThreadRouser engineThreadRouser = new ThreadRouser();
-
     public static int getDefaultQuantily() {
         return defaultQuantily;
     }
@@ -274,4 +336,51 @@ public final class CoreEngine {
         defaultQuantily = n;
     }
     private static int defaultQuantily = 16;
+
+    public StringID newStringID(String id) {
+        if (id == null || id.isEmpty())
+            throw new NullPointerException("The string id is null.");
+        int index = strIds.indexOf(id);
+        if (index >= 0)
+            return ids.get(index);
+        else {
+            StringID sid = new StringID(id);
+            ids.add(sid);
+            strIds.add(id);
+            return sid;
+        }
+    }
+
+    public static StringID getStringID(String id) {
+        int index = strIds.indexOf(id);
+        if (index >= 0)
+            return ids.get(index);
+        else
+            return null;
+    }
+    private static final CopyOnWriteArrayList<StringID> ids
+            = new CopyOnWriteArrayList<>();
+    private static final CopyOnWriteArrayList<String> strIds
+            = new CopyOnWriteArrayList<>();
+
+    public static ConstructorGroup getConstrucorGroup() {
+        return constructorGroup;
+    }
+    private static final ConstructorGroup constructorGroup
+            = new ConstructorGroup();
+
+    private static final ConcurrentHashMap<StringID, PropertyID> pids
+            = new ConcurrentHashMap<>(108, 0.6f);
+    private static final ConcurrentHashMap<StringID, AbstractEffect> effects
+            = new ConcurrentHashMap<>(108, 0.6f);
+
+    static {
+        constructorGroup.addConstructor(PropertyID.class,
+                (StringID id, Object... objs) -> {
+                    PropertyID pid = new PropertyID(id, (PropertyType) objs[0],
+                            (String) objs[1], (String) objs[2]);
+                    pids.put(id, pid);
+                    return pid;
+                });
+    }
 }

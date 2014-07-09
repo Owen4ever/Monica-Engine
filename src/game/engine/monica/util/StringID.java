@@ -22,24 +22,41 @@
  * THE SOFTWARE.
  */
 
-package game.engine.monica.core.condition;
+package game.engine.monica.util;
 
-public abstract class AbstractCondition {
+public final class StringID {
 
-    public AbstractCondition(ConditionType type) {
-        if (type == null)
-            throw new NullPointerException("The condition type is null.");
-        this.type = type;
+    public StringID(String id) {
+        if (id == null || id.isEmpty())
+            throw new NullPointerException("The string id is null.");
+        this.id = id;
+        this.hashCode = (id.hashCode() << 4) + 2730;
+        this.toString = "(" + id + ")";
     }
 
-    public ConditionType getType() {
-        return type;
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null || StringID.class != obj.getClass())
+            return false;
+        return equals((StringID) obj);
     }
 
-    public abstract String getIntroduction();
+    public boolean equals(StringID sid) {
+        if (sid == null)
+            return false;
+        return id.equals(sid.id);
+    }
 
-    public abstract boolean alreadyMeet();
+    @Override
+    public int hashCode() {
+        return hashCode;
+    }
 
-    public abstract boolean meet(Object... obj);
-    private final ConditionType type;
+    @Override
+    public String toString() {
+        return toString;
+    }
+    private final String id;
+    private final int hashCode;
+    private final String toString;
 }

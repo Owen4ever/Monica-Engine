@@ -22,19 +22,15 @@
  * THE SOFTWARE.
  */
 
-package game.engine.monica.core.property.integer;
+package game.engine.monica.core.condition;
 
-public enum IntegerEffectCalcType {
+@FunctionalInterface
+public interface OneCondition extends ConditionInterface {
 
-    // a: Default Value.
-    // b: The specified number of the effect.
-    // c: The value will return.
-    ADD_NUM, // c = a + b
-    ADD_PER, // c = a * (100 + b) / 100
-    MUL_NUM, // c = a * b
-    MUL_PER, // c = a * b / 100
-    SUB_NUM, // c = a - b
-    SUB_PER, // c = a * (100 - b)
-    DIV_NUM, // c = a / b
-    DIV_PER, // c = a / b / 100
+    @Override
+    default int count() {
+        return 1;
+    }
+
+    boolean match(Object obj);
 }
