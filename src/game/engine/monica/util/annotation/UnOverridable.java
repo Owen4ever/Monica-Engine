@@ -22,25 +22,18 @@
  * THE SOFTWARE.
  */
 
-package game.engine.monica.core.property.number;
+package game.engine.monica.util.annotation;
 
-import game.engine.monica.core.property.EffectType;
-import game.engine.monica.core.property.PropertyID;
-import game.engine.monica.util.StringID;
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-public class NumberFixedEffect extends AbstractNumberEffect {
+@Documented
+@Retention(RetentionPolicy.SOURCE)
+@Target({ElementType.FIELD, ElementType.METHOD})
+public @interface UnOverridable {
 
-    protected NumberFixedEffect(StringID id, PropertyID affectTo, double val) {
-        super(id, EffectType.TYPE_NUM_FIXED, affectTo, v -> val, val);
-    }
-
-    @Override
-    public NumberFixedEffect clone() {
-        return new NumberFixedEffect(id, affectTo, val);
-    }
-
-    public static NumberFixedEffect newFixedEffect(StringID id,
-            PropertyID affectTo, double val) {
-        return new NumberFixedEffect(id, affectTo, val);
-    }
+    String describe() default "";
 }

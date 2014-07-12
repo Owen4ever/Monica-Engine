@@ -22,25 +22,20 @@
  * THE SOFTWARE.
  */
 
-package game.engine.monica.core.property.number;
+package game.engine.monica.core.property.bool;
 
 import game.engine.monica.core.property.EffectType;
 import game.engine.monica.core.property.PropertyID;
 import game.engine.monica.util.StringID;
 
-public class NumberFixedEffect extends AbstractNumberEffect {
+public class BoolFixedEffect extends AbstractBoolEffect {
 
-    protected NumberFixedEffect(StringID id, PropertyID affectTo, double val) {
-        super(id, EffectType.TYPE_NUM_FIXED, affectTo, v -> val, val);
+    protected BoolFixedEffect(StringID id, PropertyID affectTo, boolean val) {
+        super(id, EffectType.TYPE_BOOL_FIXED, affectTo, v -> val, val);
     }
 
-    @Override
-    public NumberFixedEffect clone() {
-        return new NumberFixedEffect(id, affectTo, val);
-    }
-
-    public static NumberFixedEffect newFixedEffect(StringID id,
-            PropertyID affectTo, double val) {
-        return new NumberFixedEffect(id, affectTo, val);
+    public static BoolFixedEffect newFixedEffect(StringID id,
+            PropertyID affectTo, boolean val) {
+        return new BoolFixedEffect(id, affectTo, val);
     }
 }

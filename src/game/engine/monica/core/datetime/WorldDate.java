@@ -81,7 +81,14 @@ public final class WorldDate {
     }
 
     public DateTime getCurrentDateTime() {
-        return new DateTime(year, mon, day, hour, min, sec, msec);
+        final int year = this.year,
+                month = this.mon,
+                day = this.day,
+                hour = this.hour,
+                minute = this.min,
+                second = this.sec,
+                milliSecond = this.msec;
+        return new DateTime(year, month, day, hour, minute, second, milliSecond);
     }
     private volatile int year, mon, day, hour, min, sec, msec;
 
@@ -123,8 +130,7 @@ public final class WorldDate {
     int loopMon = 12, loopDay = 30,
             loopHour = 24, loopMin = 60, loopSec = 60, loopMSec = 1000;
 
-    public void start() {
-        isStart = true;
+    public void ready() {
         final long omsst = CoreEngine.get1msSuspendTime();
         final long wait_msec = omsst;
         final long wait_sec = wait_msec * loopMSec;
@@ -138,7 +144,7 @@ public final class WorldDate {
         final long wt_hour = wait_day * 950 / 1000 + wt_min;
         final long wt_day = wait_mon * 950 / 1000 + wt_hour;
         final long wt_mon = wait_mon * loopMon * 950 / 1000 + wt_day;
-        new EngineThread(TG_TIME, () -> {
+        t_c_msec = new EngineThread(TG_TIME, () -> {
             int firstWaitTime = loopMSec - msec;
             if (firstWaitTime > 1)
                 EngineThread.sleepWithoutException(firstWaitTime * wait_msec);
@@ -151,8 +157,8 @@ public final class WorldDate {
                 }
                 EngineThread.sleepWithoutException(0);
             }
-        }, "MilliSecond Checker").start();
-        new EngineThread(TG_TIME, () -> {
+        }, "MilliSecond Checker");
+        t_c_sec = new EngineThread(TG_TIME, () -> {
             int firstWaitTime = loopSec - sec;
             if (firstWaitTime > 1)
                 EngineThread.sleepWithoutException(firstWaitTime * wait_sec);
@@ -165,8 +171,8 @@ public final class WorldDate {
                 }
                 EngineThread.sleepWithoutException(0);
             }
-        }, "Second Checker").start();
-        new EngineThread(TG_TIME, () -> {
+        }, "Second Checker");
+        t_c_min = new EngineThread(TG_TIME, () -> {
             int firstWaitTime = loopMin - min;
             if (firstWaitTime > 1)
                 EngineThread.sleepWithoutException(firstWaitTime * wait_min);
@@ -179,8 +185,8 @@ public final class WorldDate {
                 }
                 EngineThread.sleepWithoutException(0);
             }
-        }, "Minute Checker").start();
-        new EngineThread(TG_TIME, () -> {
+        }, "Minute Checker");
+        t_c_hour = new EngineThread(TG_TIME, () -> {
             int firstWaitTime = loopHour - hour;
             if (firstWaitTime > 0)
                 EngineThread.sleepWithoutException(firstWaitTime * wait_hour);
@@ -193,8 +199,8 @@ public final class WorldDate {
                 }
                 EngineThread.sleepWithoutException(0);
             }
-        }, "Hour Checker").start();
-        new EngineThread(TG_TIME, () -> {
+        }, "Hour Checker");
+        t_c_day = new EngineThread(TG_TIME, () -> {
             int firstWaitTime = loopDay - day;
             if (firstWaitTime > 0)
                 EngineThread.sleepWithoutException(firstWaitTime * wait_day);
@@ -207,8 +213,8 @@ public final class WorldDate {
                 }
                 EngineThread.sleepWithoutException(0);
             }
-        }, "Day Checker").start();
-        new EngineThread(TG_TIME, () -> {
+        }, "Day Checker");
+        t_c_mon = new EngineThread(TG_TIME, () -> {
             int firstWaitTime = loopMon - mon;
             if (firstWaitTime > 0)
                 EngineThread.sleepWithoutException(firstWaitTime * wait_mon);
@@ -221,16 +227,32 @@ public final class WorldDate {
                 }
                 EngineThread.sleepWithoutException(0);
             }
-        }, "Month Checker").start();
-        EngineThread timeMainThread
+        }, "Month Checker");
+        timeMainThread
                 = new EngineThread(TG_TIME, () -> {
                     while (isStart) {
-                        msec++;
                         EngineThread.sleepWithoutException(omsst);
+                        msec++;
                     }
                 }, "Time Counter");
         timeMainThread.setPriority(Thread.MAX_PRIORITY);
-        timeMainThread.start();
+        isReady = true;
+    }
+    private transient EngineThread t_c_msec, t_c_sec, t_c_min, t_c_hour,
+            t_c_day, t_c_mon;
+    private transient EngineThread timeMainThread;
+
+    public void start() {
+        if (isReady) {
+            isStart = true;
+            timeMainThread.start();
+            t_c_msec.start();
+            t_c_sec.start();
+            t_c_min.start();
+            t_c_hour.start();
+            t_c_day.start();
+            t_c_mon.start();
+        }
     }
 
     public void stop() {
@@ -245,7 +267,8 @@ public final class WorldDate {
     public boolean isStart() {
         return isStart;
     }
-    private volatile boolean isStart = false;
+    private transient volatile boolean isReady = false;
+    private transient volatile boolean isStart = false;
     private final transient ReentrantReadWriteLock.WriteLock timeLocker
             = new ReentrantReadWriteLock().writeLock();
 

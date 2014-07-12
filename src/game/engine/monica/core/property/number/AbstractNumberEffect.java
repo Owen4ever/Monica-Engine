@@ -31,7 +31,8 @@ import game.engine.monica.core.property.ErrorTypeException;
 import game.engine.monica.core.property.PropertyID;
 import game.engine.monica.util.StringID;
 
-public abstract class AbstractNumberEffect extends AbstractEffect<Double> {
+public abstract class AbstractNumberEffect extends AbstractEffect<Double>
+        implements Cloneable {
 
     protected AbstractNumberEffect(StringID id, EffectType type,
             PropertyID affectTo, EffectorInterface<Double> effector,
@@ -39,7 +40,8 @@ public abstract class AbstractNumberEffect extends AbstractEffect<Double> {
         super(id, type, affectTo, effector);
     }
 
-    public final double getValue() {
+    @Override
+    public Double getValue() {
         return val;
     }
 
@@ -47,6 +49,9 @@ public abstract class AbstractNumberEffect extends AbstractEffect<Double> {
         this.val = val;
     }
     protected double val;
+
+    @Override
+    public abstract AbstractNumberEffect clone();
 
     public static EffectorInterface<Double> getNumberEffector(NumberEffectCalcType calcType, final double val) {
         if (calcType == null)

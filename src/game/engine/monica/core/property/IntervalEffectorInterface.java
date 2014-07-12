@@ -22,22 +22,11 @@
  * THE SOFTWARE.
  */
 
-package game.engine.monica.core.property.number;
+package game.engine.monica.core.property;
 
-import game.engine.monica.core.property.EffectType;
-import game.engine.monica.core.property.EffectorInterface;
-import game.engine.monica.core.property.PropertyID;
-import game.engine.monica.util.StringID;
+public interface IntervalEffectorInterface<T> extends EffectorInterface<T> {
 
-public class NumberEffect extends AbstractNumberEffect {
+    T getValue();
 
-    protected NumberEffect(StringID id, PropertyID affectTo,
-            EffectorInterface<Double> effector, double val) {
-        super(id, EffectType.TYPE_NUM_NUMBER, affectTo, effector, val);
-    }
-
-    public static NumberEffect newNumberEffect(StringID id, PropertyID affectTo,
-            NumberEffectCalcType calcType, double val) {
-        return new NumberEffect(id, affectTo, getNumberEffector(calcType, val), val);
-    }
+    void intervalIncrease();
 }

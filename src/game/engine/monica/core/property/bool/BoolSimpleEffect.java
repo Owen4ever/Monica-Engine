@@ -22,12 +22,23 @@
  * THE SOFTWARE.
  */
 
-package game.engine.monica.core.engine;
+package game.engine.monica.core.property.bool;
 
+import game.engine.monica.core.property.EffectType;
+import game.engine.monica.core.property.EffectorInterface;
+import game.engine.monica.core.property.PropertyID;
 import game.engine.monica.util.StringID;
 
-@FunctionalInterface
-public interface ConstructorInterface<T> {
+public class BoolSimpleEffect extends AbstractBoolEffect {
 
-    T newInstance(StringID id, Object... objs);
+    protected BoolSimpleEffect(StringID id, PropertyID affectTo,
+            EffectorInterface<Boolean> effector, boolean val) {
+        super(id, EffectType.TYPE_BOOL_BOOLEAN, affectTo, effector, val);
+    }
+
+    public static BoolSimpleEffect newSimpleEffect(StringID id,
+            PropertyID affectTo, EffectorInterface<Boolean> effector,
+            boolean val) {
+        return new BoolSimpleEffect(id, affectTo, effector, val);
+    }
 }

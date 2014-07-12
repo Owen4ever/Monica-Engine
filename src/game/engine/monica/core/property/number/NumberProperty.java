@@ -26,15 +26,18 @@ package game.engine.monica.core.property.number;
 
 import game.engine.monica.core.engine.CoreEngine;
 import game.engine.monica.core.engine.EngineThread;
+import game.engine.monica.core.property.AbstractProperty;
 import game.engine.monica.core.property.EffectPointer;
 import game.engine.monica.core.property.ErrorTypeException;
 import game.engine.monica.core.property.PropertyID;
 import game.engine.monica.util.StringID;
 import game.engine.monica.util.Wrapper;
+import java.util.HashMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-public class NumberProperty implements Comparable<NumberProperty> {
+public class NumberProperty extends AbstractProperty<Double>
+        implements Comparable<NumberProperty> {
 
     public NumberProperty(PropertyID id, boolean isPercentVal) {
         this(id, isPercentVal, 0, 0);
@@ -52,11 +55,21 @@ public class NumberProperty implements Comparable<NumberProperty> {
         this.offsetVal = offsetVal;
     }
 
+    private void getCalcWriteLock() {
+        while (true)
+            if (!calcLocker.isWriteLocked() && calcLocker.writeLock().tryLock())
+                if (calcLocker.getWriteHoldCount() != 1)
+                    calcLocker.writeLock().unlock();
+                else
+                    return;
+    }
+
     public final double getDefaultValue() {
         return defaultVal;
     }
 
     public final void setDefaultValue(double val) {
+        getCalcWriteLock();
         this.defaultVal = val;
         isCalc = false;
     }
@@ -66,67 +79,48 @@ public class NumberProperty implements Comparable<NumberProperty> {
     }
 
     public final void setOffsetValue(double val) {
+        getCalcWriteLock();
         this.offsetVal = val;
         isCalc = false;
     }
 
-    public EffectPointer addAdditionValue(AbstractNumberEffect e) {
-        calcLocker.lock();
-        try {
-            currentEffectPointer = currentEffectPointer.linkNew();
-            effects.put(currentEffectPointer, e);
-            isCalc = false;
-        } finally {
-            calcLocker.unlock();
-        }
+    private EffectPointer addAdditionValue(AbstractNumberEffect e) {
+        currentEffectPointer = currentEffectPointer.linkNew();
+        effects.put(currentEffectPointer, e);
         return currentEffectPointer;
     }
 
     private EffectPointer addBuffEffect(NumberBuffEffect e) {
-        calcLocker.lock();
-        try {
-            currentEffectPointer = currentEffectPointer.linkNew();
-            effects.put(currentEffectPointer, e);
-            BuffRunnable r = new BuffRunnable(currentEffectPointer);
+        currentEffectPointer = currentEffectPointer.linkNew();
+        effects.put(currentEffectPointer, e);
+        BuffRunnable r = new BuffRunnable(currentEffectPointer);
+        bltThreads.put(currentEffectPointer, r);
+        EngineThread t = new EngineThread(r);
+        if (CoreEngine.isContinuing())
+            t.start();
+        else
+            CoreEngine.runThreadNextStart(t);
+        return currentEffectPointer;
+    }
+
+    private EffectPointer addLongTimeEffect(NumberLongTimeEffect e) {
+        currentEffectPointer = currentEffectPointer.linkNew();
+        effects.put(currentEffectPointer, e);
+        LTRunnable r = new LTRunnable(currentEffectPointer);
+        if (e.isInterval()) {
             bltThreads.put(currentEffectPointer, r);
             EngineThread t = new EngineThread(r);
             if (CoreEngine.isContinuing())
                 t.start();
             else
-                //CoreEngine.set
-            isCalc = false;
-        } finally {
-            calcLocker.unlock();
-        }
-        return currentEffectPointer;
-    }
-
-    private EffectPointer addLongTimeEffect(NumberLongTimeEffect e) {
-        calcLocker.lock();
-        try {
-            currentEffectPointer = currentEffectPointer.linkNew();
-            effects.put(currentEffectPointer, e);
-            LTRunnable r = new LTRunnable(currentEffectPointer);
-            if (e.isInterval()) {
-                bltThreads.put(currentEffectPointer, r);
-                new EngineThread(r).start();
-            }
-            isCalc = false;
-        } finally {
-            calcLocker.unlock();
+                CoreEngine.runThreadNextStart(t);
         }
         return currentEffectPointer;
     }
 
     private void setFixedEffect(NumberFixedEffect e) {
-        calcLocker.lock();
-        try {
-            fixedEffect = e;
-            isFixed = true;
-            isCalc = false;
-        } finally {
-            calcLocker.unlock();
-        }
+        fixedEffect = e;
+        isFixed = true;
     }
 
     public final boolean isFixed() {
@@ -136,72 +130,132 @@ public class NumberProperty implements Comparable<NumberProperty> {
     public final EffectPointer addEffect(AbstractNumberEffect e) {
         if (e == null)
             throw new NullPointerException("The effect is null.");
-        switch (e.getEffectType()) {
-            case TYPE_NUM_NUMBER:
-                return addAdditionValue(e);
-            case TYPE_NUM_BUFF:
-            case TYPE_NUM_BUFF_INTERVAL:
-            case TYPE_NUM_DEBUFF:
-            case TYPE_NUM_DEBUFF_INTERVAL:
-                return addBuffEffect((NumberBuffEffect) e);
-            case TYPE_NUM_FIXED:
-                setFixedEffect((NumberFixedEffect) e);
-                return null;
-            case TYPE_NUM_LONGTIME:
-                return addLongTimeEffect((NumberLongTimeEffect) e);
-            default:
-                throw new ErrorTypeException("Error effect type.");
+        getCalcWriteLock();
+        try {
+            switch (e.getEffectType()) {
+                case TYPE_NUM_NUMBER:
+                    return addAdditionValue(e);
+                case TYPE_NUM_BUFF:
+                case TYPE_NUM_BUFF_INTERVAL:
+                case TYPE_NUM_DEBUFF:
+                case TYPE_NUM_DEBUFF_INTERVAL:
+                    return addBuffEffect((NumberBuffEffect) e);
+                case TYPE_NUM_FIXED:
+                    setFixedEffect((NumberFixedEffect) e);
+                    return null;
+                case TYPE_NUM_LONGTIME:
+                    return addLongTimeEffect((NumberLongTimeEffect) e);
+                default:
+                    throw new ErrorTypeException("Error effect type.");
+            }
+        } finally {
+            isCalc = false;
+            calcLocker.writeLock().unlock();
         }
     }
 
     public final void removeEffect(final StringID sid) {
         if (sid == null)
             throw new NullPointerException("The StringID is null.");
-        calcLocker.lock();
+        getCalcWriteLock();
         try {
             if (isFixed && fixedEffect.getID().equals(sid))
                 isFixed = false;
-            effects.forEach((EffectPointer p, AbstractNumberEffect e) -> {
-                if (e.getID().equals(sid)) {
-                    p.delete();
+            effects.entrySet().parallelStream().forEach(entry -> {
+                if (entry.getValue().getID().equals(sid)) {
+                    EffectPointer p = entry.getKey();
+                    AbstractNumberEffect e = entry.getValue();
                     effects.remove(p);
+                    p.delete();
+                    switch (e.getEffectType()) {
+                        case TYPE_NUM_BUFF:
+                        case TYPE_NUM_BUFF_INTERVAL:
+                        case TYPE_NUM_DEBUFF:
+                        case TYPE_NUM_DEBUFF_INTERVAL:
+                            bltThreads.remove(p);
+                            return;
+                        case TYPE_NUM_LONGTIME:
+                            if (((NumberLongTimeEffect) e).isInterval())
+                                bltThreads.remove(p);
+                            return;
+                    }
                 }
             });
             isCalc = false;
         } finally {
-            calcLocker.unlock();
+            calcLocker.writeLock().unlock();
         }
     }
 
+    public final void removeEffect(EffectPointer pointer) {
+        getCalcWriteLock();
+        try {
+            effects.remove(pointer);
+            bltThreads.remove(pointer);
+            pointer.delete();
+            isCalc = false;
+        } finally {
+            calcLocker.writeLock().unlock();
+        }
+    }
+
+    public final int hasAdjustment() {
+        return hasAdjustment;
+    }
+
     public final NumberPropertyAdjustment getAdjustment() {
-        return adjustment;
+        switch (hasAdjustment) {
+            case -1:
+                return null;
+            case 0:
+                return adjustment;
+            case 1:
+                return parentProperty;
+            default:
+                return null;
+        }
     }
 
     public final void setAdjustment(NumberPropertyAdjustment a) {
         if (a == null)
             throw new NullPointerException("The adjustment is null.");
-        calcLocker.lock();
+        getCalcWriteLock();
         try {
-            this.hasAdjustment = true;
+            this.hasAdjustment = 0;
             this.adjustment = a;
             if (isCalc)
                 totalVal = adjustment.adjust(totalVal);
         } finally {
-            calcLocker.unlock();
+            calcLocker.writeLock().unlock();
         }
     }
 
     public final void removeAdjustment() {
-        calcLocker.lock();
+        getCalcWriteLock();
         try {
-            this.hasAdjustment = false;
+            this.hasAdjustment = -1;
             isCalc = false;
         } finally {
-            calcLocker.unlock();
+            calcLocker.writeLock().unlock();
         }
     }
 
-    public final double getTotalValue() {
+    public final void setAdjustment(NumberParentProperty p) {
+        if (p == null)
+            throw new NullPointerException("The NumberParentProperty is null.");
+        getCalcWriteLock();
+        try {
+            this.hasAdjustment = 1;
+            this.parentProperty = p;
+            if (isCalc)
+                totalVal = parentProperty.adjust(totalVal);
+        } finally {
+            calcLocker.writeLock().unlock();
+        }
+    }
+
+    @Override
+    public final Double getTotalValue() {
         if (isCalc)
             return totalVal;
         else {
@@ -210,24 +264,51 @@ public class NumberProperty implements Comparable<NumberProperty> {
         }
     }
 
-    private void calcTotalValue() {
-        calcLocker.lock();
+    /**
+     * Please do not override this mothed, only if you are under the special
+     * requirements.
+     */
+    protected void calcTotalValue() {
+        getCalcWriteLock();
         try {
             if (isFixed)
                 totalVal = fixedEffect.affect(0d);
             else {
                 Wrapper<Double> tval = new Wrapper<>(defaultVal + offsetVal);
-                effects.forEach((EffectPointer p, AbstractNumberEffect e) -> {
-                    tval.pack = e.affect(tval.pack);
-                    System.out.println("\t" + tval.pack);
-                });
-                totalVal = hasAdjustment ? adjustment.adjust(tval.pack)
-                        : tval.pack;
+                switch (hasAdjustment) {
+                    case -1:
+                        effects.forEach((EffectPointer p,
+                                AbstractNumberEffect e) -> {
+                                    tval.pack = e.affect(tval.pack);
+                                });
+                        totalVal = tval.pack;
+                        break;
+                    case 0:
+                        effects.forEach((EffectPointer p,
+                                AbstractNumberEffect e) -> {
+                                    tval.pack = adjustment
+                                    .adjust(e.affect(tval.pack));
+                                });
+                        break;
+                    case 1:
+                        effects.forEach((EffectPointer p,
+                                AbstractNumberEffect e) -> {
+                                    tval.pack = parentProperty
+                                    .adjust(e.affect(tval.pack));
+                                });
+                        break;
+                }
+                totalVal = tval.pack;
             }
             isCalc = true;
         } finally {
-            calcLocker.unlock();
+            calcLocker.writeLock().unlock();
         }
+    }
+
+    @Override
+    public void beNotify() {
+        calcTotalValue();
     }
 
     @Override
@@ -250,28 +331,51 @@ public class NumberProperty implements Comparable<NumberProperty> {
 
     @Override
     public String toString() {
-        return getClass().getName() + "[ ID = " + type.getID()
-                + ", Type = " + type.getType()
-                + ", Default value = " + defaultVal
-                + ", Offset value = " + offsetVal
-                + ", Total value = " + getTotalValue()
-                + ",  Has adjustment" + " ]";
+        String strAdjustment;
+        switch (hasAdjustment) {
+            case 0:
+                strAdjustment = ", Has Adjustment";
+                break;
+            case 1:
+                strAdjustment = ", Has Parent";
+                break;
+            case -1:
+            default:
+                strAdjustment = ", No Adjustment";
+        } // 160
+        String strTypeID = type.getID().toString();
+        return new StringBuilder(160 + strTypeID.length())
+                .append(getClass().getName())
+                .append("[ ID = ").append(strTypeID)
+                .append(", Type = ").append(type.getType().toString())
+                .append(", Default value = ").append(defaultVal)
+                .append(", Offset value = ").append(offsetVal)
+                .append(", Total value = ").append(getTotalValue())
+                .append(strAdjustment).append(" ]").toString();
     }
     private final PropertyID type;
     protected double defaultVal, offsetVal;
     protected final ConcurrentHashMap<EffectPointer, AbstractNumberEffect> effects
             = new ConcurrentHashMap<>(CoreEngine.getDefaultQuantily(), 0.5f);
-    protected EffectPointer currentEffectPointer = null;
-    private final ConcurrentHashMap<EffectPointer, Runnable> bltThreads
-            = new ConcurrentHashMap<>(CoreEngine.getDefaultQuantily(), 0.2f);
-    protected boolean hasAdjustment = false;
+    protected EffectPointer currentEffectPointer = EffectPointer.newFirstPointer();
+    private final HashMap<EffectPointer, Runnable> bltThreads
+            = new HashMap<>(CoreEngine.getDefaultQuantily(), 0.2f);
+    /**
+     * The {@code NumberProperty} does not have an {@code adjustment} or a
+     * {@code NumberParentProperty} if {@code hasAdjustment} equals -1; The
+     * number property only has an {@code adjustment} if {@code hasAdjustment}
+     * equals 0; In addition, the {@code NumberProperty} only has a
+     * {@code NumberParentProperty} if {@code hasAdjustment} equals 1.
+     */
+    protected int hasAdjustment = -1;
     protected NumberPropertyAdjustment adjustment = null;
+    protected NumberParentProperty parentProperty = null;
     private boolean isFixed = false;
     protected NumberFixedEffect fixedEffect;
     protected final boolean isPerVal;
     protected transient volatile boolean isCalc = false;
-    private final transient ReentrantReadWriteLock.WriteLock calcLocker
-            = new ReentrantReadWriteLock().writeLock();
+    private final transient ReentrantReadWriteLock calcLocker
+            = new ReentrantReadWriteLock();
     protected transient double totalVal;
 
     private final class BuffRunnable
@@ -285,39 +389,51 @@ public class NumberProperty implements Comparable<NumberProperty> {
         public void run() {
             NumberBuffEffect effect = (NumberBuffEffect) effects.get(pointer);
             int ce1mscc = CoreEngine.get1msSuspendTimeChangeCount();
-            int time = CoreEngine.get1msSuspendTime() * effect.getMaxDuration();
+            int time = CoreEngine.calcSuspendTime(effect.getMaxDuration());
+            if (effect.getStartingTime() > 0) {
+                isInStartingTime = true;
+                startingTimeAlready = effect.getStartingTime();
+            }
             if (effect.isInterval()) {
                 int it = CoreEngine
                         .calcSuspendTime(effect.getIntervalDuration());
                 while (CoreEngine.isStart()) {
-                    if (CoreEngine.is1msSuspendTimeChanged(ce1mscc)) {
-                        time = CoreEngine
-                                .calcSuspendTime(effect.getMaxDuration());
+                    if (CoreEngine.is1msSuspendTimeChanged(ce1mscc))
                         it = CoreEngine
                                 .calcSuspendTime(effect.getIntervalDuration());
-                    }
-                    if (time % it == 0) {
-                        while (CoreEngine.isContinuing()) {
+                    while (CoreEngine.isContinuing()) {
+                        if (isInStartingTime) {
                             long startingTime = System.currentTimeMillis();
                             try {
-                                EngineThread.sleepAndNeedWakeUp(it
-                                        - CoreEngine.calcSuspendTime(time));
+                                EngineThread
+                                        .sleepAndNeedWakeUp(CoreEngine
+                                                .calcSuspendTime(startingTimeAlready));
                             } catch (InterruptedException ex) {
                                 long endTime = System.currentTimeMillis();
-                                already = (int) (endTime - startingTime)
-                                        / CoreEngine.get1msSuspendTime();
+                                startingTimeAlready = CoreEngine.calcQuondamTime((int) (endTime - startingTime));
                             }
-                            currentCount++;
-                            if (currentCount == time) {
-                                removeEffect(effect.getID());
-                                return;
-                            }
-                            if (CoreEngine.calcSuspendTime(currentCount)
-                                    % it == 0)
-                                ((NumberIntervalBuffEffect) effect)
-                                        .intervalBuffIncrease();
+                            isInStartingTime = false;
                         }
-                    } else {
+                        long startingTime = System.currentTimeMillis();
+                        try {
+                            EngineThread.sleepAndNeedWakeUp(it
+                                    - CoreEngine.calcSuspendTime(already));
+                        } catch (InterruptedException ex) {
+                            long endTime = System.currentTimeMillis();
+                            already += CoreEngine.calcQuondamTime((int) (endTime - startingTime));
+                        }
+                        already = 0;
+                        alreadyTime += effect.getIntervalDuration();
+                        if (alreadyTime + effect.getStartingTime()
+                                >= effect.getMaxDuration()) {
+                            removeEffect(pointer);
+                            return;
+                        }
+                        getCalcWriteLock();
+                        ((NumberIntervalBuffEffect) effect)
+                                .getIntervalEffector().intervalIncrease();
+                        isCalc = false;
+                        calcLocker.writeLock().unlock();
                     }
                 }
             } else {
@@ -326,31 +442,46 @@ public class NumberProperty implements Comparable<NumberProperty> {
                         time = CoreEngine
                                 .calcSuspendTime(effect.getMaxDuration());
                     while (CoreEngine.isContinuing()) {
+                        if (isInStartingTime) {
+                            long startingTime = System.currentTimeMillis();
+                            try {
+                                EngineThread
+                                        .sleepAndNeedWakeUp(CoreEngine
+                                                .calcSuspendTime(startingTimeAlready));
+                            } catch (InterruptedException ex) {
+                                long endTime = System.currentTimeMillis();
+                                startingTimeAlready -= CoreEngine.calcQuondamTime((int) (endTime - startingTime));
+                                continue;
+                            }
+                            isInStartingTime = false;
+                        }
                         long startingTime = System.currentTimeMillis();
                         try {
                             EngineThread.sleepAndNeedWakeUp(time
                                     - CoreEngine.calcSuspendTime(already));
                         } catch (InterruptedException ex) {
                             long endTime = System.currentTimeMillis();
-                            already += (int) (endTime - startingTime)
-                                    / CoreEngine.get1msSuspendTime();
+                            already += CoreEngine.calcQuondamTime((int) (endTime - startingTime));
                             continue;
                         }
-                        removeEffect(effect.getID());
+                        removeEffect(pointer);
                     }
                 }
             }
         }
 
         @Override
-        public int compareTo(BuffRunnable r) {
+        public int compareTo(BuffRunnable r
+        ) {
             if (r == null)
                 throw new NullPointerException("Compare with"
                         + " a null NumberBuffRunnable.");
             return Integer.compare(pointer.pointer(), r.pointer.pointer());
         }
         protected EffectPointer pointer;
-        private int currentCount = 0;
+        private boolean isInStartingTime;
+        private int startingTimeAlready;
+        private int alreadyTime = 0;
         private int already = 0;
     }
 
@@ -369,11 +500,24 @@ public class NumberProperty implements Comparable<NumberProperty> {
             int it = CoreEngine
                     .calcSuspendTime(effect.getIntervalDuration());
             while (CoreEngine.isStart()) {
-                if (CoreEngine.is1msSuspendTimeChanged(ce1mscc)) {
+                if (CoreEngine.is1msSuspendTimeChanged(ce1mscc))
                     it = CoreEngine
                             .calcSuspendTime(effect.getIntervalDuration());
-                }
                 while (CoreEngine.isContinuing()) {
+                    if (isInStartingTime) {
+                        long startingTime = System.currentTimeMillis();
+                        try {
+                            EngineThread
+                                    .sleepAndNeedWakeUp(CoreEngine
+                                            .calcSuspendTime(startingTimeAlready));
+                        } catch (InterruptedException ex) {
+                            long endTime = System.currentTimeMillis();
+                            startingTimeAlready = (int) ((endTime - startingTime)
+                                    / CoreEngine.get1msSuspendTime());
+                        }
+                        isInStartingTime = false;
+                        startingTimeAlready = 0;
+                    }
                     long startingTime = System.currentTimeMillis();
                     try {
                         EngineThread.sleepAndNeedWakeUp(it - already);
@@ -382,10 +526,9 @@ public class NumberProperty implements Comparable<NumberProperty> {
                         already = (int) (endTime - startingTime)
                                 / CoreEngine.get1msSuspendTime();
                     }
-                    currentCount++;
-                    if (currentCount % it == 0)
+                    if (already == effect.getIntervalDuration())
                         ((NumberIntervalLongTimeEffect) effect)
-                                .intervalBuffIncrease();
+                                .getIntervalEffector().intervalIncrease();
                 }
             }
         }
@@ -397,8 +540,9 @@ public class NumberProperty implements Comparable<NumberProperty> {
                         + " a null NumberIntervalLongTimeRunnable.");
             return Integer.compare(pointer.pointer(), r.pointer.pointer());
         }
+        private boolean isInStartingTime;
+        private int startingTimeAlready;
         protected EffectPointer pointer;
-        private int currentCount = 0;
         private int already = 0;
     }
 }

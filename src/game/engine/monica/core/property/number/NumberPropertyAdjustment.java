@@ -24,6 +24,7 @@
 
 package game.engine.monica.core.property.number;
 
+@FunctionalInterface
 public interface NumberPropertyAdjustment {
 
     double adjust(double val);

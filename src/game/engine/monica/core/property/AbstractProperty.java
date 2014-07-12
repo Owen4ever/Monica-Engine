@@ -22,25 +22,11 @@
  * THE SOFTWARE.
  */
 
-package game.engine.monica.core.property.number;
+package game.engine.monica.core.property;
 
-import game.engine.monica.core.property.EffectType;
-import game.engine.monica.core.property.PropertyID;
-import game.engine.monica.util.StringID;
+public abstract class AbstractProperty<T> {
 
-public class NumberFixedEffect extends AbstractNumberEffect {
+    public abstract T getTotalValue();
 
-    protected NumberFixedEffect(StringID id, PropertyID affectTo, double val) {
-        super(id, EffectType.TYPE_NUM_FIXED, affectTo, v -> val, val);
-    }
-
-    @Override
-    public NumberFixedEffect clone() {
-        return new NumberFixedEffect(id, affectTo, val);
-    }
-
-    public static NumberFixedEffect newFixedEffect(StringID id,
-            PropertyID affectTo, double val) {
-        return new NumberFixedEffect(id, affectTo, val);
-    }
+    protected abstract void beNotify();
 }

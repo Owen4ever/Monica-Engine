@@ -25,22 +25,25 @@
 package game.engine.monica.core.property.number;
 
 import game.engine.monica.core.property.EffectType;
+import game.engine.monica.core.property.EffectorInterface;
 import game.engine.monica.core.property.PropertyID;
 import game.engine.monica.util.StringID;
 
-public class NumberFixedEffect extends AbstractNumberEffect {
+public class NumberSimpleEffect extends AbstractNumberEffect {
 
-    protected NumberFixedEffect(StringID id, PropertyID affectTo, double val) {
-        super(id, EffectType.TYPE_NUM_FIXED, affectTo, v -> val, val);
+    protected NumberSimpleEffect(StringID id, PropertyID affectTo,
+            EffectorInterface<Double> effector, double val) {
+        super(id, EffectType.TYPE_NUM_NUMBER, affectTo, effector, val);
     }
 
     @Override
-    public NumberFixedEffect clone() {
-        return new NumberFixedEffect(id, affectTo, val);
+    public NumberSimpleEffect clone() {
+        return new NumberSimpleEffect(id, affectTo, effector, val);
     }
 
-    public static NumberFixedEffect newFixedEffect(StringID id,
-            PropertyID affectTo, double val) {
-        return new NumberFixedEffect(id, affectTo, val);
+    public static NumberSimpleEffect newSimpleEffect(StringID id,
+            PropertyID affectTo, NumberEffectCalcType calcType, double val) {
+        return new NumberSimpleEffect(id, affectTo,
+                getNumberEffector(calcType, val), val);
     }
 }

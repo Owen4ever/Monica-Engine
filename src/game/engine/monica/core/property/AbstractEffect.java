@@ -60,6 +60,8 @@ public abstract class AbstractEffect<T> {
         this.effectType = type;
     }
 
+    public abstract T getValue();
+
     public final PropertyID affectTo() {
         return affectTo;
     }

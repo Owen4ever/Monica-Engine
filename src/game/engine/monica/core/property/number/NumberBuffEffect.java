@@ -27,6 +27,7 @@ package game.engine.monica.core.property.number;
 import game.engine.monica.core.property.EffectInitializeException;
 import game.engine.monica.core.property.EffectType;
 import game.engine.monica.core.property.EffectorInterface;
+import game.engine.monica.core.property.IntervalEffectorInterface;
 import game.engine.monica.core.property.PropertyID;
 import game.engine.monica.util.StringID;
 
@@ -44,6 +45,7 @@ public class NumberBuffEffect extends AbstractNumberEffect {
             throw new EffectInitializeException("The starting time of the effect"
                     + "is less than 0 or is greater than max duration.");
         this.duration = duration;
+        this.startingTime = startingTime;
         this.isInterval = isInterval;
         if (this.isInterval) {
             if (intervalDuration <= 0)
@@ -52,6 +54,10 @@ public class NumberBuffEffect extends AbstractNumberEffect {
             this.intervalDuration = intervalDuration;
         } else
             this.intervalDuration = 0;
+    }
+
+    public final int getStartingTime() {
+        return startingTime;
     }
 
     public final boolean isInterval() {
@@ -65,27 +71,42 @@ public class NumberBuffEffect extends AbstractNumberEffect {
     public final int getMaxDuration() {
         return duration;
     }
+
+    @Override
+    public NumberBuffEffect clone() {
+        return new NumberBuffEffect(id, affectTo, effector, val,
+                startingTime, intervalDuration, duration, isInterval);
+    }
+    protected final int startingTime;
     protected final int duration;
     protected final boolean isInterval;
     protected final int intervalDuration;
 
     public static NumberBuffEffect newBuffEffect(StringID id,
-            PropertyID affectTo, NumberEffectCalcType calcType,
-            EffectorInterface<Double> effector, int val, int startingTime,
-            int duration) {
-        return newBuffEffect(id, affectTo, calcType, effector, val,
-                startingTime, 0, duration, false);
+            PropertyID affectTo, NumberEffectCalcType calcType, double val,
+            int startingTime, int duration) {
+        return newBuffEffect(id, affectTo, calcType, null, val, startingTime,
+                0, duration, false);
     }
 
     public static NumberBuffEffect newBuffEffect(StringID id,
             PropertyID affectTo, NumberEffectCalcType calcType,
-            EffectorInterface<Double> effector, int val, int startingTime,
-            int intervalDuration, int duration, boolean isInterval) {
+            IntervalEffectorInterface<Double> effector, double val,
+            int startingTime, int intervalDuration, int duration,
+            boolean isInterval) {
         if (isInterval)
             return new NumberIntervalBuffEffect(id, affectTo, effector, val,
                     startingTime, intervalDuration, duration);
         else
-            return new NumberBuffEffect(id, affectTo, effector, val,
+            return new NumberBuffEffect(id, affectTo,
+                    getNumberEffector(calcType, val), val,
                     startingTime, intervalDuration, duration, isInterval);
+    }
+
+    public static NumberIntervalBuffEffect newIntervalBuffEffect(StringID id,
+            PropertyID affectTo, IntervalEffectorInterface<Double> effector,
+            int startingTime, int intervalDuration, int duration) {
+        return (NumberIntervalBuffEffect) newBuffEffect(id, affectTo, null,
+                effector, 0, startingTime, intervalDuration, duration, true);
     }
 }

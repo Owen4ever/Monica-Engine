@@ -26,7 +26,7 @@ package game.engine.monica.core.property;
 
 public final class EffectPointer {
 
-    private EffectPointer(int pointer) {
+    public EffectPointer(int pointer) {
         this.pointer = pointer;
     }
 
@@ -47,8 +47,9 @@ public final class EffectPointer {
             previous.next = next;
         if (next != null) {
             next.previous = previous;
-            next.decrease();
+            //next.decrease();
         }
+        pointer = -1;
     }
 
     private void decrease() {
@@ -60,11 +61,14 @@ public final class EffectPointer {
     public EffectPointer linkNew() {
         EffectPointer newOne = new EffectPointer(pointer + 1);
         this.next = newOne;
+        newOne.previous = this;
         return newOne;
     }
 
     @Override
     public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
         if (obj == null || obj.getClass() != getClass())
             return false;
         EffectPointer p = (EffectPointer) obj;
@@ -74,6 +78,11 @@ public final class EffectPointer {
     @Override
     public int hashCode() {
         return pointer;
+    }
+
+    @Override
+    public String toString() {
+        return Integer.toString(pointer, 10);
     }
     int pointer;
     EffectPointer previous = null;

@@ -24,33 +24,27 @@
 
 package game.engine.monica.core.property.number;
 
-import game.engine.monica.core.property.EffectorInterface;
+import game.engine.monica.core.property.IntervalEffectorInterface;
 import game.engine.monica.core.property.PropertyID;
 import game.engine.monica.util.StringID;
 
 public class NumberIntervalLongTimeEffect extends NumberLongTimeEffect {
 
-    public NumberIntervalLongTimeEffect(StringID id, PropertyID affectTo,
-            EffectorInterface effector, int val,
+    protected NumberIntervalLongTimeEffect(StringID id, PropertyID affectTo,
+            IntervalEffectorInterface<Double> effector, double val,
             int startingTime, int intervalDuration) {
         super(id, affectTo, effector, val,
                 startingTime, intervalDuration, true);
-        if (startingTime == 0)
-            currentVal = val;
-        else
-            currentVal = 0;
     }
 
-    public void intervalBuffIncrease() {
-        currentVal += val;
+    public IntervalEffectorInterface<Double> getIntervalEffector() {
+        return (IntervalEffectorInterface<Double>) getEffector();
     }
 
-    public int getCurrentValue() {
-        return currentVal;
+    @Override
+    public NumberIntervalLongTimeEffect clone() {
+        return new NumberIntervalLongTimeEffect(id, affectTo,
+                (IntervalEffectorInterface<Double>) getEffector(), val,
+                startingTime, intervalDuration);
     }
-
-    public void setCurrentValue(int currentVal) {
-        this.currentVal = currentVal;
-    }
-    private int currentVal;
 }

@@ -24,29 +24,42 @@
 
 package game.engine.monica.core.property.bool;
 
-import game.engine.monica.core.property.AbstractEffect;
+import game.engine.monica.core.property.EffectInitializeException;
 import game.engine.monica.core.property.EffectType;
 import game.engine.monica.core.property.EffectorInterface;
 import game.engine.monica.core.property.PropertyID;
 import game.engine.monica.util.StringID;
-import game.engine.monica.util.annotation.UnOverridable;
 
-public abstract class AbstractBoolEffect extends AbstractEffect<Boolean> {
+public class BoolBuffEffect extends AbstractBoolEffect {
 
-    protected AbstractBoolEffect(StringID id, EffectType type,
+    protected BoolBuffEffect(StringID id, PropertyID affectTo,
+            EffectorInterface<Boolean> effector,
+            boolean val, int startingTime, int duration) {
+        super(id, EffectType.TYPE_BOOL_BUFF, affectTo, effector, val);
+        if (duration < 100)
+            throw new EffectInitializeException("The duration of the effect"
+                    + "is less than 100 milliseconds (0.001 seconds).");
+        if (startingTime < 0 || startingTime > duration)
+            throw new EffectInitializeException("The starting time of the effect"
+                    + "is less than 0 or is greater than max duration.");
+        this.startingTime = startingTime;
+        this.duration = duration;
+    }
+
+    public final int getStartingTime() {
+        return startingTime;
+    }
+
+    public final int getMaxDuration() {
+        return duration;
+    }
+    protected final int startingTime;
+    protected final int duration;
+
+    public static BoolBuffEffect newBuffEffect(StringID id,
             PropertyID affectTo, EffectorInterface<Boolean> effector,
-            boolean val) {
-        super(id, type, affectTo, effector);
+            boolean val, int startingTime, int duration) {
+        return new BoolBuffEffect(id, affectTo, effector, val,
+                startingTime, duration);
     }
-
-    @Override
-    @UnOverridable
-    public Boolean getValue() {
-        return val;
-    }
-
-    public void setValue(boolean val) {
-        this.val = val;
-    }
-    protected boolean val;
 }

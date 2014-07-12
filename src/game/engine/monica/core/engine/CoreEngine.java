@@ -26,15 +26,11 @@ package game.engine.monica.core.engine;
 
 import game.engine.monica.core.datetime.DateTime;
 import game.engine.monica.core.datetime.WorldDate;
-import game.engine.monica.core.property.AbstractEffect;
-import game.engine.monica.core.property.PropertyID;
-import game.engine.monica.core.property.PropertyID.PropertyType;
 import game.engine.monica.util.OMath;
 import game.engine.monica.util.StringID;
 import game.engine.monica.util.ThreadRouser;
 import java.math.BigInteger;
 import java.util.HashSet;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
@@ -47,13 +43,16 @@ public final class CoreEngine {
     public static void start() {
         if (date == null)
             throw new EngineException("Cannot start the game until WorldDate sets up.");
-        if (engineSCLock.tryLock())
+        if (engineSCLock.tryLock() && omsSuspendTimeLocker.tryLock())
             try {
+                date.ready();
                 isStart = true;
                 isContinuing = true;
+                startTiming();
                 date.start();
                 runAll();
             } finally {
+                omsSuspendTimeLocker.unlock();
                 engineSCLock.unlock();
             }
     }
@@ -61,12 +60,14 @@ public final class CoreEngine {
     public static void stop() {
         if (!isStart)
             throw new EngineException("The game engine has not started yet.");
-        if (engineSCLock.tryLock())
+        if (engineSCLock.tryLock() && omsSuspendTimeLocker.tryLock())
             try {
                 isStart = false;
                 isContinuing = false;
                 date.stop();
+                endTiming();
             } finally {
+                omsSuspendTimeLocker.unlock();
                 engineSCLock.unlock();
             }
     }
@@ -81,12 +82,15 @@ public final class CoreEngine {
             throw new EngineException("The game engine has not started yet.");
         if (isContinuing)
             throw new EngineException("The game engine has already started.");
-        if (engineSCLock.tryLock())
+        if (engineSCLock.tryLock() && omsSuspendTimeLocker.tryLock())
             try {
+                date.ready();
                 isContinuing = true;
+                startTiming();
                 date.start();
                 runAll();
             } finally {
+                omsSuspendTimeLocker.unlock();
                 engineSCLock.unlock();
             }
     }
@@ -97,32 +101,81 @@ public final class CoreEngine {
         if (!isContinuing)
             throw new EngineException("The game engine has already"
                     + " set to continue.");
-        if (engineSCLock.tryLock())
+        if (engineSCLock.tryLock() && omsSuspendTimeLocker.tryLock())
             try {
-                date.stop();
                 isContinuing = false;
+                date.stop();
+                endTiming();
             } finally {
+                omsSuspendTimeLocker.unlock();
                 engineSCLock.unlock();
             }
     }
     private static volatile boolean isContinuing = false;
-    private static transient ReentrantReadWriteLock.WriteLock engineSCLock
+    private static final transient ReentrantReadWriteLock.WriteLock engineSCLock
             = new ReentrantReadWriteLock().writeLock();
+
+    public static void setEngineAlreadyRunningTime(long time) {
+        if (isContinuing())
+            throw new EngineException("The game engine"
+                    + "has already started yet.");
+        if (time < 0)
+            throw new EngineException("The engine already running time is"
+                    + " less than 0.");
+        engineRunningTime = time;
+    }
+
+    public static long getEngineRunningTime() {
+        return engineRunningTime;
+    }
+
+    private static void startTiming() {
+        startTimingTime = System.currentTimeMillis();
+    }
+
+    private static void endTiming() {
+        engineRunningTime += System.currentTimeMillis() - startTimingTime;
+    }
+    private static transient long engineRunningTime = 0;
+    private static transient long startTimingTime;
 
     public static final ThreadRouser engineThreadRouser = new ThreadRouser();
 
     public static void runThreadIfStart(Thread t) {
+        if (isContinuing())
+            t.start();
+        else
+            runThreadNextStart(t);
+    }
+
+    public static void runThreadIfStart(Runnable r) {
+        if (isContinuing())
+            new EngineThread(r).start();
+        else
+            runThreadNextStart(r);
+    }
+
+    public static void runThreadNextStart(Thread t) {
         if (t == null)
             throw new NullPointerException("The thread which will run"
-                    + " if the game engine starts is null.");
+                    + " when the game engine starts is null.");
         engineThreadRunner.add(t);
     }
 
+    public static void runThreadNextStart(Runnable r) {
+        if (r == null)
+            throw new NullPointerException("The runnable which will run"
+                    + " when the game engine starts is null.");
+        engineThreadRunner.add(new EngineThread(r));
+    }
+
     private static void runAll() {
-        engineThreadRunner.parallelStream().forEach((Thread t) -> {
-            t.start();
-        });
-        engineThreadRunner.clear();
+        if (!engineThreadRunner.isEmpty()) {
+            engineThreadRunner.parallelStream().forEach((Thread t) -> {
+                t.start();
+            });
+            engineThreadRunner.clear();
+        }
     }
     private static final HashSet<Thread> engineThreadRunner = new HashSet<>();
 
@@ -133,50 +186,34 @@ public final class CoreEngine {
     }
 
     public static int getCurrentYear() {
-        if (!isStart())
-            throw new EngineException("The game has not started yet.");
         return date.getYear();
     }
 
     public static int getCurrentMonth() {
-        if (!isStart())
-            throw new EngineException("The game has not started yet.");
         return date.getMonth();
     }
 
     public static int getCurrentDay() {
-        if (!isStart())
-            throw new EngineException("The game has not started yet.");
         return date.getDay();
     }
 
     public static int getCurrentHour() {
-        if (!isStart())
-            throw new EngineException("The game has not started yet.");
         return date.getHour();
     }
 
     public static int getCurrentMinute() {
-        if (!isStart())
-            throw new EngineException("The game has not started yet.");
         return date.getMinute();
     }
 
     public static int getCurrentSecond() {
-        if (!isStart())
-            throw new EngineException("The game has not started yet.");
         return date.getSecond();
     }
 
     public static int getCurrentMilliSecond() {
-        if (!isStart())
-            throw new EngineException("The game has not started yet.");
         return date.getMilliSecond();
     }
 
     public static DateTime getCurrentDateTime() {
-        if (!isStart())
-            throw new EngineException("The game has not started yet.");
         return date.getCurrentDateTime();
     }
 
@@ -228,19 +265,22 @@ public final class CoreEngine {
             throw new EngineException("set1msStopTime( "
                     + Integer.toString(ms) + " ) < 1ms"
             );
-        boolean is = isStart;
-        if (is)
+        if (isStart)
             pause();
         omsSuspendTimeLocker.lock();
         try {
             if (ms != suspendTimeCalc.omsSuspendTime) {
                 int i = OMath.isPowerOfTwo(ms);
-                if (i == 1)
+                if (i == 1) {
                     suspendTimeCalc = new SuspendTimeCalculator.SuspendTimeCalculator_1();
-                else if (i != -1)
+                    quondamTimeCalc = new QuondamTimeCalculator.QuondamTimeCalculator_1();
+                } else if (i != -1) {
                     suspendTimeCalc = new SuspendTimeCalculator.SuspendTimeCalculator_P2(i);
-                else
+                    quondamTimeCalc = new QuondamTimeCalculator.QuondamTimeCalculator_P2(i);
+                } else {
                     suspendTimeCalc = new SuspendTimeCalculator.SuspendTimeCalculator_Other(ms);
+                    quondamTimeCalc = new QuondamTimeCalculator.QuondamTimeCalculator_Other(ms);
+                }
                 omsSuspendTimeChangeCount++;
             }
         } finally {
@@ -250,7 +290,7 @@ public final class CoreEngine {
             Thread.sleep(100);
         } catch (InterruptedException ex) {
         }
-        if (is)
+        if (isStart)
             setContinue();
     }
 
@@ -313,6 +353,61 @@ public final class CoreEngine {
         }
     }
 
+    public static int calcQuondamTime(int time) {
+        return quondamTimeCalc.calc(time);
+    }
+    private static QuondamTimeCalculator quondamTimeCalc
+            = new QuondamTimeCalculator.QuondamTimeCalculator_1();
+
+    private static abstract class QuondamTimeCalculator {
+
+        public QuondamTimeCalculator(int omsSuspendTime) {
+            this.omsSuspendTime = omsSuspendTime;
+        }
+
+        abstract int calc(int t);
+        protected int omsSuspendTime;
+
+        private static final class QuondamTimeCalculator_1
+                extends QuondamTimeCalculator {
+
+            public QuondamTimeCalculator_1() {
+                super(1);
+            }
+
+            @Override
+            int calc(int t) {
+                return t;
+            }
+        }
+
+        private static final class QuondamTimeCalculator_P2
+                extends QuondamTimeCalculator {
+
+            public QuondamTimeCalculator_P2(int omsSuspendTime) {
+                super(omsSuspendTime);
+            }
+
+            @Override
+            int calc(int t) {
+                return t >> omsSuspendTime;
+            }
+        }
+
+        private static final class QuondamTimeCalculator_Other
+                extends QuondamTimeCalculator {
+
+            public QuondamTimeCalculator_Other(int omsSuspendTime) {
+                super(omsSuspendTime);
+            }
+
+            @Override
+            int calc(int t) {
+                return t / omsSuspendTime;
+            }
+        }
+    }
+
     public static boolean is1msSuspendTimeChanged(int count) {
         return omsSuspendTimeChangeCount == count;
     }
@@ -320,6 +415,7 @@ public final class CoreEngine {
     public static int get1msSuspendTimeChangeCount() {
         return omsSuspendTimeChangeCount;
     }
+
     private static transient volatile int omsSuspendTimeChangeCount = 0;
     private static final transient ReentrantReadWriteLock.WriteLock omsSuspendTimeLocker
             = new ReentrantReadWriteLock().writeLock();
@@ -337,7 +433,7 @@ public final class CoreEngine {
     }
     private static int defaultQuantily = 16;
 
-    public StringID newStringID(String id) {
+    public static StringID newStringID(String id) {
         if (id == null || id.isEmpty())
             throw new NullPointerException("The string id is null.");
         int index = strIds.indexOf(id);
@@ -352,6 +448,8 @@ public final class CoreEngine {
     }
 
     public static StringID getStringID(String id) {
+        if (id == null || id.isEmpty())
+            throw new NullPointerException("The string id is null.");
         int index = strIds.indexOf(id);
         if (index >= 0)
             return ids.get(index);
@@ -362,25 +460,4 @@ public final class CoreEngine {
             = new CopyOnWriteArrayList<>();
     private static final CopyOnWriteArrayList<String> strIds
             = new CopyOnWriteArrayList<>();
-
-    public static ConstructorGroup getConstrucorGroup() {
-        return constructorGroup;
-    }
-    private static final ConstructorGroup constructorGroup
-            = new ConstructorGroup();
-
-    private static final ConcurrentHashMap<StringID, PropertyID> pids
-            = new ConcurrentHashMap<>(108, 0.6f);
-    private static final ConcurrentHashMap<StringID, AbstractEffect> effects
-            = new ConcurrentHashMap<>(108, 0.6f);
-
-    static {
-        constructorGroup.addConstructor(PropertyID.class,
-                (StringID id, Object... objs) -> {
-                    PropertyID pid = new PropertyID(id, (PropertyType) objs[0],
-                            (String) objs[1], (String) objs[2]);
-                    pids.put(id, pid);
-                    return pid;
-                });
-    }
 }
