@@ -149,13 +149,11 @@ public final class WorldDate {
             if (firstWaitTime > 1)
                 EngineThread.sleepWithoutException(firstWaitTime * wait_msec);
             while (isStart) {
-                if (msec >= loopMSec) {
-                    msec = 0;
+                while (msec >= loopMSec) {
+                    msec -= loopMSec;
                     sec++;
-                    EngineThread.sleepWithoutException(wt_msec);
-                    continue;
                 }
-                EngineThread.sleepWithoutException(0);
+                EngineThread.sleepWithoutException(wt_msec);
             }
         }, "MilliSecond Checker");
         t_c_sec = new EngineThread(TG_TIME, () -> {
@@ -163,13 +161,11 @@ public final class WorldDate {
             if (firstWaitTime > 1)
                 EngineThread.sleepWithoutException(firstWaitTime * wait_sec);
             while (isStart) {
-                if (sec >= loopSec) {
-                    sec = 0;
+                while (sec >= loopSec) {
+                    sec -= loopSec;
                     min++;
-                    EngineThread.sleepWithoutException(wt_sec);
-                    continue;
                 }
-                EngineThread.sleepWithoutException(0);
+                EngineThread.sleepWithoutException(wt_sec);
             }
         }, "Second Checker");
         t_c_min = new EngineThread(TG_TIME, () -> {
@@ -177,13 +173,11 @@ public final class WorldDate {
             if (firstWaitTime > 1)
                 EngineThread.sleepWithoutException(firstWaitTime * wait_min);
             while (isStart) {
-                if (min >= loopMin) {
-                    min = 0;
+                while (min >= loopMin) {
+                    min -= loopMin;
                     hour++;
-                    EngineThread.sleepWithoutException(wt_min);
-                    continue;
                 }
-                EngineThread.sleepWithoutException(0);
+                EngineThread.sleepWithoutException(wt_min);
             }
         }, "Minute Checker");
         t_c_hour = new EngineThread(TG_TIME, () -> {
@@ -191,13 +185,11 @@ public final class WorldDate {
             if (firstWaitTime > 0)
                 EngineThread.sleepWithoutException(firstWaitTime * wait_hour);
             while (isStart) {
-                if (hour >= loopHour) {
-                    hour = 0;
+                while (hour >= loopHour) {
+                    hour -= loopHour;
                     day++;
-                    EngineThread.sleepWithoutException(wt_hour);
-                    continue;
                 }
-                EngineThread.sleepWithoutException(0);
+                EngineThread.sleepWithoutException(wt_hour);
             }
         }, "Hour Checker");
         t_c_day = new EngineThread(TG_TIME, () -> {
@@ -205,13 +197,11 @@ public final class WorldDate {
             if (firstWaitTime > 0)
                 EngineThread.sleepWithoutException(firstWaitTime * wait_day);
             while (isStart) {
-                if (day >= loopDay) {
-                    day = 0;
+                while (day >= loopDay) {
+                    day -= loopDay;
                     mon++;
-                    EngineThread.sleepWithoutException(wt_day);
-                    continue;
                 }
-                EngineThread.sleepWithoutException(0);
+                EngineThread.sleepWithoutException(wt_day);
             }
         }, "Day Checker");
         t_c_mon = new EngineThread(TG_TIME, () -> {
@@ -220,12 +210,10 @@ public final class WorldDate {
                 EngineThread.sleepWithoutException(firstWaitTime * wait_mon);
             while (isStart) {
                 if (mon >= loopMon) {
-                    mon = 0;
+                    mon -= loopMon;
                     year++;
-                    EngineThread.sleepWithoutException(wt_mon);
-                    continue;
                 }
-                EngineThread.sleepWithoutException(0);
+                EngineThread.sleepWithoutException(wt_mon);
             }
         }, "Month Checker");
         timeMainThread

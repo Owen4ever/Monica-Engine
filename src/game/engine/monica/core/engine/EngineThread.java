@@ -35,7 +35,7 @@ public class EngineThread extends Thread {
     }
 
     public EngineThread(EngineThreadGroup g, Runnable r) {
-        this(g, r, "Eternal World - Unname Thread " + getCurrentThreadCount());
+        this(g, r, "Unname Thread " + getCurrentThreadCount());
     }
 
     public EngineThread(EngineThreadGroup g, Runnable r, String name) {

@@ -25,7 +25,6 @@
 package game.engine.monica.core.property.number;
 
 import game.engine.monica.core.property.PropertyID;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public abstract class NumberParentProperty extends NumberProperty
         implements NumberPropertyAdjustment {
@@ -38,55 +37,4 @@ public abstract class NumberParentProperty extends NumberProperty
             double defaultVal, double offsetVal) {
         super(id, isPercentVal, defaultVal, offsetVal);
     }
-
-    public NumberParentProperty(PropertyID id, boolean isPercentVal,
-            double defaultVal, double offsetVal, NumberProperty childProperty) {
-        super(id, isPercentVal, defaultVal, offsetVal);
-        setChild(childProperty);
-    }
-
-    public final boolean hasChild() {
-        return hasChild;
-    }
-
-    public final NumberProperty getChild() {
-        return childProperty;
-    }
-
-    public final void setChild(NumberProperty childProperty) {
-        if (childProperty == null)
-            throw new NullPointerException("The child property is null.");
-        childLock.lock();
-        try {
-            this.childProperty = childProperty;
-            hasChild = true;
-        } finally {
-            childLock.unlock();
-        }
-    }
-
-    public final void removeChild() {
-        if (hasChild) {
-            childLock.lock();
-            try {
-                if (hasChild) {
-                    hasChild = false;
-                    childProperty = null;
-                }
-            } finally {
-                childLock.unlock();
-            }
-        }
-    }
-
-    @Override
-    protected final void calcTotalValue() {
-        super.calcTotalValue();
-        if (hasChild)
-            childProperty.beNotify();
-    }
-    protected volatile boolean hasChild = false;
-    protected NumberProperty childProperty = null;
-    private transient final ReentrantReadWriteLock.WriteLock childLock
-            = new ReentrantReadWriteLock().writeLock();
 }

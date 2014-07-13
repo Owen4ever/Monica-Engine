@@ -47,7 +47,7 @@ public final class EffectPointer {
             previous.next = next;
         if (next != null) {
             next.previous = previous;
-            //next.decrease();
+            next.decrease();
         }
         pointer = -1;
     }
