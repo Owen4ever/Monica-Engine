@@ -24,7 +24,8 @@
 
 package game.engine.monica.core.property;
 
-public abstract class AbstractProperty<T> {
+public abstract class AbstractProperty<T>
+        implements Comparable<AbstractProperty> {
 
     public AbstractProperty(PropertyID id, T defaultVal, T offsetVal) {
         if (id == null)
@@ -49,6 +50,14 @@ public abstract class AbstractProperty<T> {
     public abstract void setAdjustment(ParentPropertyInterface<T> parent);
 
     public abstract T getTotalValue();
+
+    @Override
+    public int compareTo(AbstractProperty p) {
+        if (p == null)
+            throw new NullPointerException("The property which compares to"
+                    + " is null.");
+        return type.compareTo(p.type);
+    }
 
     protected final PropertyID type;
     protected T defaultVal, offsetVal;

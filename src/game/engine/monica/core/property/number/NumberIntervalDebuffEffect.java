@@ -30,7 +30,8 @@ import game.engine.monica.core.property.IntervalEffectorInterface;
 import game.engine.monica.core.property.PropertyID;
 import game.engine.monica.util.StringID;
 
-public class NumberIntervalDebuffEffect extends AbstractIntervalBuffEffect {
+public class NumberIntervalDebuffEffect
+        extends AbstractIntervalBuffEffect<Double> {
 
     protected NumberIntervalDebuffEffect(StringID id, PropertyID affectTo,
             IntervalEffectorInterface<Double> effector,
@@ -42,7 +43,7 @@ public class NumberIntervalDebuffEffect extends AbstractIntervalBuffEffect {
     @Override
     public NumberIntervalDebuffEffect clone() {
         return new NumberIntervalDebuffEffect(id, affectTo,
-                (IntervalEffectorInterface) effector, startingTime,
+                (IntervalEffectorInterface<Double>) effector, startingTime,
                 intervalDuration, duration);
     }
 }

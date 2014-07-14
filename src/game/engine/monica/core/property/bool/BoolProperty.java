@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  */
 
-package game.engine.monica.core.property.number;
+package game.engine.monica.core.property.bool;
 
 import game.engine.monica.core.engine.CoreEngine;
 import game.engine.monica.core.engine.EngineThread;
@@ -45,13 +45,13 @@ import java.util.HashMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-public class NumberProperty extends AbstractProperty<Double> {
+public class BoolProperty extends AbstractProperty<Boolean> {
 
-    public NumberProperty(PropertyID id) {
-        this(id, 0, 0);
+    public BoolProperty(PropertyID id) {
+        this(id, false, false);
     }
 
-    public NumberProperty(PropertyID id, double defaultVal, double offsetVal) {
+    public BoolProperty(PropertyID id, boolean defaultVal, boolean offsetVal) {
         super(id, defaultVal, offsetVal);
     }
 
@@ -66,7 +66,7 @@ public class NumberProperty extends AbstractProperty<Double> {
                 if (calcLocker.getWriteHoldCount() != 1)
                     calcLocker.writeLock().unlock();
                 else if (hasAdjustment() == PRO_ADJ_PAR
-                        && ((NumberProperty) ((AbstractProperty) parentProperty))
+                        && ((BoolProperty) ((AbstractProperty) parentProperty))
                                 .calcLocker.isWriteLocked())
                     calcLocker.writeLock().unlock();
                 else
@@ -80,33 +80,33 @@ public class NumberProperty extends AbstractProperty<Double> {
         calcLocker.writeLock().unlock();
     }
 
-    public final double getDefaultValue() {
+    public final boolean getDefaultValue() {
         return defaultVal;
     }
 
-    public final void setDefaultValue(double val) {
+    public final void setDefaultValue(boolean val) {
         getCalcWriteLock();
         this.defaultVal = val;
         unlockCalcWriteLock();
     }
 
-    public final double getOffsetValue() {
+    public final boolean getOffsetValue() {
         return offsetVal;
     }
 
-    public final void setOffsetValue(double val) {
+    public final void setOffsetValue(boolean val) {
         getCalcWriteLock();
         this.offsetVal = val;
         unlockCalcWriteLock();
     }
 
-    private EffectPointer addAdditionValue(AbstractEffect<Double> e) {
+    private EffectPointer addAdditionValue(AbstractEffect<Boolean> e) {
         currentEffectPointer = currentEffectPointer.linkNew();
         effects.put(currentEffectPointer, e);
         return currentEffectPointer;
     }
 
-    private EffectPointer addBuffEffect(AbstractBuffEffect<Double> e) {
+    private EffectPointer addBuffEffect(AbstractBuffEffect<Boolean> e) {
         currentEffectPointer = currentEffectPointer.linkNew();
         effects.put(currentEffectPointer, e);
         BuffRunnable r = new BuffRunnable(currentEffectPointer);
@@ -118,7 +118,7 @@ public class NumberProperty extends AbstractProperty<Double> {
         return currentEffectPointer;
     }
 
-    private EffectPointer addLongTimeEffect(AbstractLongTimeEffect<Double> e) {
+    private EffectPointer addLongTimeEffect(AbstractLongTimeEffect<Boolean> e) {
         currentEffectPointer = currentEffectPointer.linkNew();
         effects.put(currentEffectPointer, e);
         LTRunnable r = new LTRunnable(currentEffectPointer);
@@ -132,9 +132,9 @@ public class NumberProperty extends AbstractProperty<Double> {
         return currentEffectPointer;
     }
     protected static final EngineThreadGroup TG_PROPERTY_NUM
-            = new EngineThreadGroup("NumberProperty Thread Group");
+            = new EngineThreadGroup("BoolProperty Thread Group");
 
-    private void setFixedEffect(NumberFixedEffect e) {
+    private void setFixedEffect(BoolFixedEffect e) {
         fixedEffect = e;
         isFixed = true;
     }
@@ -145,7 +145,7 @@ public class NumberProperty extends AbstractProperty<Double> {
     }
 
     @Override
-    public final EffectPointer addEffect(AbstractEffect<Double> e) {
+    public final EffectPointer addEffect(AbstractEffect<Boolean> e) {
         if (e == null)
             throw new NullPointerException("The effect is null.");
         if (!e.affectTo().equals(type))
@@ -160,13 +160,12 @@ public class NumberProperty extends AbstractProperty<Double> {
                 case TYPE_NUM_BUFF_INTERVAL:
                 case TYPE_NUM_DEBUFF:
                 case TYPE_NUM_DEBUFF_INTERVAL:
-                    return addBuffEffect((AbstractBuffEffect<Double>) e);
+                    return addBuffEffect((AbstractBuffEffect<Boolean>) e);
                 case TYPE_NUM_FIXED:
-                    setFixedEffect((NumberFixedEffect) e);
+                    setFixedEffect((BoolFixedEffect) e);
                     return null;
                 case TYPE_NUM_LONGTIME:
-                case TYPE_NUM_LONGTIME_INTERVAL:
-                    return addLongTimeEffect((AbstractLongTimeEffect<Double>) e);
+                    return addLongTimeEffect((AbstractLongTimeEffect<Boolean>) e);
                 default:
                     throw new ErrorTypeException("Error effect type.");
             }
@@ -185,7 +184,7 @@ public class NumberProperty extends AbstractProperty<Double> {
             effects.entrySet().parallelStream().forEach(entry -> {
                 if (entry.getValue().getID().equals(sid)) {
                     EffectPointer p = entry.getKey();
-                    AbstractEffect<Double> e = entry.getValue();
+                    AbstractEffect<Boolean> e = entry.getValue();
                     effects.remove(p);
                     tempEffects.clear();
                     tempEffects.putAll(effects);
@@ -205,7 +204,6 @@ public class NumberProperty extends AbstractProperty<Double> {
                             return;
                         case TYPE_NUM_LONGTIME_INTERVAL:
                             bltThreads.remove(p);
-                            return;
                     }
                 }
             });
@@ -231,7 +229,7 @@ public class NumberProperty extends AbstractProperty<Double> {
         }
     }
 
-    public final PropertyAdjustment<Double> getAdjustment() {
+    public final PropertyAdjustment<Boolean> getAdjustment() {
         switch (hasAdjustment) {
             case PRO_ADJ_NONE:
                 return null;
@@ -244,7 +242,8 @@ public class NumberProperty extends AbstractProperty<Double> {
         }
     }
 
-    public final void setAdjustment(PropertyAdjustment<Double> a) {
+    @Override
+    public final void setAdjustment(PropertyAdjustment<Boolean> a) {
         if (a == null)
             throw new NullPointerException("The adjustment is null.");
         getCalcWriteLock();
@@ -258,7 +257,8 @@ public class NumberProperty extends AbstractProperty<Double> {
         }
     }
 
-    public final void setAdjustment(ParentPropertyInterface<Double> p) {
+    @Override
+    public final void setAdjustment(ParentPropertyInterface<Boolean> p) {
         if (p == null)
             throw new NullPointerException("The ParentProperty is null.");
         getCalcWriteLock();
@@ -282,7 +282,7 @@ public class NumberProperty extends AbstractProperty<Double> {
     }
 
     @Override
-    public final Double getTotalValue() {
+    public final Boolean getTotalValue() {
         if (isCalc)
             return totalVal;
         else {
@@ -295,31 +295,28 @@ public class NumberProperty extends AbstractProperty<Double> {
         getCalcWriteLock();
         try {
             if (isFixed)
-                totalVal = fixedEffect.affect(0d);
+                totalVal = fixedEffect.affect(false);
             else {
-                Wrapper<Double> tval = new Wrapper<>(defaultVal + offsetVal);
+                Wrapper<Boolean> tval = new Wrapper<>(defaultVal | offsetVal);
                 switch (hasAdjustment) {
                     case -1:
-                        effects.forEach((EffectPointer p,
-                                AbstractEffect<Double> e) -> {
-                                    tval.pack = e.affect(tval.pack);
-                                });
+                        effects.forEach((p, e) -> {
+                            tval.pack = e.affect(tval.pack);
+                        });
                         totalVal = tval.pack;
                         break;
                     case 0:
-                        effects.forEach((EffectPointer p,
-                                AbstractEffect<Double> e) -> {
-                                    tval.pack = adjustment
+                        effects.forEach((p, e) -> {
+                            tval.pack = adjustment
                                     .adjust(e.affect(tval.pack));
-                                });
+                        });
                         break;
                     case 1:
-                        effects.forEach((EffectPointer p,
-                                AbstractEffect<Double> e) -> {
-                                    parentProperty.getTotalValue();
-                                    tval.pack = parentProperty
+                        effects.forEach((p, e) -> {
+                            parentProperty.getTotalValue();
+                            tval.pack = parentProperty
                                     .adjust(e.affect(tval.pack));
-                                });
+                        });
                         break;
                 }
                 totalVal = tval.pack;
@@ -332,9 +329,9 @@ public class NumberProperty extends AbstractProperty<Double> {
 
     @Override
     public boolean equals(Object obj) {
-        if (obj == null || obj.getClass() != NumberProperty.class)
+        if (obj == null || obj.getClass() != BoolProperty.class)
             return false;
-        NumberProperty p = (NumberProperty) obj;
+        BoolProperty p = (BoolProperty) obj;
         return type.equals(p.type);
     }
 
@@ -367,9 +364,9 @@ public class NumberProperty extends AbstractProperty<Double> {
                 .append(", Total value = ").append(getTotalValue())
                 .append(strAdjustment).toString();
     }
-    private final ConcurrentHashMap<EffectPointer, AbstractEffect<Double>> effects
+    private final ConcurrentHashMap<EffectPointer, AbstractEffect<Boolean>> effects
             = new ConcurrentHashMap<>(CoreEngine.getDefaultQuantily(), .5f);
-    private transient final HashMap<EffectPointer, AbstractEffect<Double>> tempEffects
+    private transient final HashMap<EffectPointer, AbstractEffect<Boolean>> tempEffects
             = new HashMap<>(CoreEngine.getDefaultQuantily(), .5f);
     private final HashMap<EffectPointer, Runnable> bltThreads
             = new HashMap<>(CoreEngine.getDefaultQuantily(), .2f);
@@ -377,11 +374,11 @@ public class NumberProperty extends AbstractProperty<Double> {
             = new HashMap<>(CoreEngine.getDefaultQuantily(), .2f);
     protected EffectPointer currentEffectPointer = EffectPointer.newFirstPointer();
     private boolean isFixed = false;
-    protected NumberFixedEffect fixedEffect;
+    protected BoolFixedEffect fixedEffect;
     protected transient volatile boolean isCalc = false;
     private final transient ReentrantReadWriteLock calcLocker
             = new ReentrantReadWriteLock();
-    protected transient double totalVal;
+    protected transient boolean totalVal;
 
     private final class BuffRunnable
             implements Comparable<BuffRunnable>, Runnable {
@@ -392,8 +389,8 @@ public class NumberProperty extends AbstractProperty<Double> {
 
         @Override
         public void run() {
-            AbstractBuffEffect<Double> effect
-                    = (AbstractBuffEffect<Double>) effects.get(pointer);
+            AbstractBuffEffect<Boolean> effect
+                    = (AbstractBuffEffect<Boolean>) effects.get(pointer);
             int ce1mscc = CoreEngine.get1msSuspendTimeChangeCount();
             int time = CoreEngine.calcSuspendTime(effect.getMaxDuration());
             if (effect.getStartingTime() > 0) {
@@ -438,7 +435,7 @@ public class NumberProperty extends AbstractProperty<Double> {
                             return;
                         }
                         getCalcWriteLock();
-                        ((AbstractIntervalBuffEffect<Double>) effect)
+                        ((AbstractIntervalBuffEffect<Boolean>) effect)
                                 .getIntervalEffector().intervalChange();
                         unlockCalcWriteLock();
                     }
@@ -481,7 +478,7 @@ public class NumberProperty extends AbstractProperty<Double> {
         public int compareTo(BuffRunnable r) {
             if (r == null)
                 throw new NullPointerException("Compare with"
-                        + " a null NumberBuffRunnable.");
+                        + " a null BoolBuffRunnable.");
             return Integer.compare(pointer.pointer(), r.pointer.pointer());
         }
         protected EffectPointer pointer;
@@ -500,8 +497,8 @@ public class NumberProperty extends AbstractProperty<Double> {
 
         @Override
         public void run() {
-            AbstractLongTimeEffect<Double> effect
-                    = (AbstractLongTimeEffect<Double>) effects.get(pointer);
+            AbstractLongTimeEffect<Boolean> effect
+                    = (AbstractLongTimeEffect<Boolean>) effects.get(pointer);
             int ce1mscc = CoreEngine.get1msSuspendTimeChangeCount();
             int it = CoreEngine
                     .calcSuspendTime(effect.getIntervalDuration());
@@ -535,7 +532,7 @@ public class NumberProperty extends AbstractProperty<Double> {
                         continue;
                     }
                     if (already == effect.getIntervalDuration())
-                        ((AbstractIntervalLongTimeEffect<Double>) effect)
+                        ((AbstractIntervalLongTimeEffect<Boolean>) effect)
                                 .getIntervalEffector().intervalChange();
                 }
             }
@@ -545,7 +542,7 @@ public class NumberProperty extends AbstractProperty<Double> {
         public int compareTo(LTRunnable r) {
             if (r == null)
                 throw new NullPointerException("Compare with"
-                        + " a null NumberLongTimeRunnable.");
+                        + " a null BoolLongTimeRunnable.");
             return Integer.compare(pointer.pointer(), r.pointer.pointer());
         }
         private boolean isInStartingTime;

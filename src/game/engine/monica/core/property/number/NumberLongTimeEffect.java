@@ -31,7 +31,7 @@ import game.engine.monica.core.property.IntervalEffectorInterface;
 import game.engine.monica.core.property.PropertyID;
 import game.engine.monica.util.StringID;
 
-public class NumberLongTimeEffect extends AbstractLongTimeEffect {
+public class NumberLongTimeEffect extends AbstractLongTimeEffect<Double> {
 
     protected NumberLongTimeEffect(StringID id, PropertyID affectTo,
             EffectorInterface<Double> effector, int startingTime) {
@@ -41,8 +41,7 @@ public class NumberLongTimeEffect extends AbstractLongTimeEffect {
 
     @Override
     public NumberLongTimeEffect clone() {
-        return new NumberLongTimeEffect(id, affectTo, effector,
-                startingTime);
+        return new NumberLongTimeEffect(id, affectTo, effector, startingTime);
     }
 
     public static NumberLongTimeEffect newLongTimeEffect(StringID id,

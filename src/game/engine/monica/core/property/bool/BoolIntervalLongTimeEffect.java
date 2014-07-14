@@ -22,28 +22,27 @@
  * THE SOFTWARE.
  */
 
-package game.engine.monica.core.property.number;
+package game.engine.monica.core.property.bool;
 
-import game.engine.monica.core.property.AbstractIntervalBuffEffect;
+import game.engine.monica.core.property.AbstractIntervalLongTimeEffect;
 import game.engine.monica.core.property.EffectType;
 import game.engine.monica.core.property.IntervalEffectorInterface;
 import game.engine.monica.core.property.PropertyID;
 import game.engine.monica.util.StringID;
 
-public class NumberIntervalBuffEffect
-        extends AbstractIntervalBuffEffect<Double> {
+public class BoolIntervalLongTimeEffect
+        extends AbstractIntervalLongTimeEffect<Double> {
 
-    protected NumberIntervalBuffEffect(StringID id, PropertyID affectTo,
+    public BoolIntervalLongTimeEffect(StringID id, PropertyID affectTo,
             IntervalEffectorInterface<Double> effector,
-            int startingTime, int intervalDuration, int duration) {
-        super(id, EffectType.TYPE_NUM_BUFF_INTERVAL, affectTo, effector,
-                startingTime, intervalDuration, duration);
+            int startingTime, int intervalDuration) {
+        super(id, EffectType.TYPE_BOOL_LONGTIME_INTERVAL, affectTo,
+                effector, startingTime, intervalDuration);
     }
 
     @Override
-    public NumberIntervalBuffEffect clone() {
-        return new NumberIntervalBuffEffect(id, affectTo,
-                getIntervalEffector(), startingTime,
-                intervalDuration, duration);
+    public BoolIntervalLongTimeEffect clone() {
+        return new BoolIntervalLongTimeEffect(id, affectTo,
+                getIntervalEffector(), startingTime, intervalDuration);
     }
 }
