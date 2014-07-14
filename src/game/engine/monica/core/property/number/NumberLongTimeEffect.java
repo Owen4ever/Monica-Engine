@@ -24,68 +24,42 @@
 
 package game.engine.monica.core.property.number;
 
-import game.engine.monica.core.property.EffectInitializeException;
+import game.engine.monica.core.property.AbstractLongTimeEffect;
 import game.engine.monica.core.property.EffectType;
 import game.engine.monica.core.property.EffectorInterface;
 import game.engine.monica.core.property.IntervalEffectorInterface;
 import game.engine.monica.core.property.PropertyID;
 import game.engine.monica.util.StringID;
 
-public class NumberLongTimeEffect extends AbstractNumberEffect {
+public class NumberLongTimeEffect extends AbstractLongTimeEffect {
 
     protected NumberLongTimeEffect(StringID id, PropertyID affectTo,
-            EffectorInterface<Double> effector, double val, int startingTime,
-            int intervalDuration, boolean isInterval) {
-        super(id, EffectType.TYPE_NUM_LONGTIME, affectTo, effector, val);
-        if (startingTime < 0)
-            throw new EffectInitializeException("The starting time of the effect"
-                    + " is less than 0.");
-        this.isInterval = isInterval;
-        this.startingTime = startingTime;
-        if (this.isInterval) {
-            if (intervalDuration <= 0)
-                throw new EffectInitializeException("The duration of the effect"
-                        + " is less than 1 milliseconds (0.001 seconds).");
-            this.intervalDuration = intervalDuration;
-        } else
-            this.intervalDuration = 0;
-    }
-
-    public final boolean isInterval() {
-        return isInterval;
-    }
-
-    public final int getIntervalDuration() {
-        return intervalDuration;
+            EffectorInterface<Double> effector, int startingTime) {
+        super(id, EffectType.TYPE_NUM_LONGTIME, affectTo, effector,
+                startingTime, 0, false);
     }
 
     @Override
     public NumberLongTimeEffect clone() {
         return new NumberLongTimeEffect(id, affectTo, effector,
-                val, startingTime, intervalDuration, isInterval);
+                startingTime);
     }
-    protected final int startingTime;
-    protected final boolean isInterval;
-    protected final int intervalDuration;
 
     public static NumberLongTimeEffect newLongTimeEffect(StringID id,
-            PropertyID affectTo, NumberEffectCalcType calcType, double val,
+            PropertyID affectTo, EffectorInterface<Double> effector,
             int startingTime) {
-        return newLongTimeEffect(id, affectTo, calcType, null, val,
-                startingTime, 0, false);
+        return new NumberLongTimeEffect(id, affectTo, effector,
+                startingTime);
     }
 
-    public static NumberLongTimeEffect newLongTimeEffect(StringID id,
-            PropertyID affectTo, NumberEffectCalcType calcType,
-            EffectorInterface<Double> effector, double val, int startingTime,
-            int intervalDuration, boolean isInterval) {
+    public static AbstractLongTimeEffect<Double> newLongTimeEffect(StringID id,
+            PropertyID affectTo, EffectorInterface<Double> effector,
+            int startingTime, int intervalDuration, boolean isInterval) {
         if (isInterval)
             return new NumberIntervalLongTimeEffect(id, affectTo,
-                    (IntervalEffectorInterface<Double>) effector, val,
+                    (IntervalEffectorInterface<Double>) effector,
                     startingTime, intervalDuration);
         else
-            return new NumberLongTimeEffect(id, affectTo,
-                    getNumberEffector(calcType, val), val,
-                    startingTime, intervalDuration, isInterval);
+            return newLongTimeEffect(id, affectTo, effector, startingTime);
     }
 }

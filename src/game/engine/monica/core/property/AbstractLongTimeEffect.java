@@ -22,18 +22,38 @@
  * THE SOFTWARE.
  */
 
-package game.engine.monica.core.property.number;
+package game.engine.monica.core.property;
 
-import game.engine.monica.core.property.AbstractEffect;
-import game.engine.monica.core.property.EffectType;
-import game.engine.monica.core.property.EffectorInterface;
-import game.engine.monica.core.property.PropertyID;
 import game.engine.monica.util.StringID;
 
-public abstract class AbstractNumberEffect extends AbstractEffect<Double> {
+public abstract class AbstractLongTimeEffect<T> extends AbstractEffect<T> {
 
-    protected AbstractNumberEffect(StringID id, EffectType type,
-            PropertyID affectTo, EffectorInterface<Double> effector) {
+    protected AbstractLongTimeEffect(StringID id, EffectType type,
+            PropertyID affectTo, EffectorInterface<T> effector,
+            int startingTime, int intervalDuration, boolean isInterval) {
         super(id, type, affectTo, effector);
+        if (startingTime < 0)
+            throw new EffectInitializeException("The starting time of the effect"
+                    + " is less than 0.");
+        this.isInterval = isInterval;
+        this.startingTime = startingTime;
+        if (this.isInterval) {
+            if (intervalDuration <= 0)
+                throw new EffectInitializeException("The duration of the effect"
+                        + " is less than 1 milliseconds (0.001 seconds).");
+            this.intervalDuration = intervalDuration;
+        } else
+            this.intervalDuration = 0;
     }
+
+    public final boolean isInterval() {
+        return isInterval;
+    }
+
+    public final int getIntervalDuration() {
+        return intervalDuration;
+    }
+    protected final int startingTime;
+    protected final boolean isInterval;
+    protected final int intervalDuration;
 }

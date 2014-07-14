@@ -31,8 +31,15 @@ import game.engine.monica.util.StringID;
 public class BoolFixedEffect extends AbstractBoolEffect {
 
     protected BoolFixedEffect(StringID id, PropertyID affectTo, boolean val) {
-        super(id, EffectType.TYPE_BOOL_FIXED, affectTo, v -> val, val);
+        super(id, EffectType.TYPE_BOOL_FIXED, affectTo, v -> val);
+        this.val = val;
     }
+
+    @Override
+    public BoolFixedEffect clone() {
+        return new BoolFixedEffect(id, affectTo, val);
+    }
+    private boolean val;
 
     public static BoolFixedEffect newFixedEffect(StringID id,
             PropertyID affectTo, boolean val) {

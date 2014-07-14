@@ -24,42 +24,45 @@
 
 package game.engine.monica.core.property.bool;
 
-import game.engine.monica.core.property.EffectInitializeException;
+import game.engine.monica.core.property.AbstractBuffEffect;
 import game.engine.monica.core.property.EffectType;
 import game.engine.monica.core.property.EffectorInterface;
+import game.engine.monica.core.property.IntervalEffectorInterface;
 import game.engine.monica.core.property.PropertyID;
 import game.engine.monica.util.StringID;
 
-public class BoolBuffEffect extends AbstractBoolEffect {
+public class BoolBuffEffect extends AbstractBuffEffect<Boolean> {
 
     protected BoolBuffEffect(StringID id, PropertyID affectTo,
             EffectorInterface<Boolean> effector,
-            boolean val, int startingTime, int duration) {
-        super(id, EffectType.TYPE_BOOL_BUFF, affectTo, effector, val);
-        if (duration < 100)
-            throw new EffectInitializeException("The duration of the effect"
-                    + "is less than 100 milliseconds (0.001 seconds).");
-        if (startingTime < 0 || startingTime > duration)
-            throw new EffectInitializeException("The starting time of the effect"
-                    + "is less than 0 or is greater than max duration.");
-        this.startingTime = startingTime;
-        this.duration = duration;
+            int startingTime, int duration) {
+        super(id, EffectType.TYPE_BOOL_BUFF, affectTo, effector,
+                startingTime, 0, duration, false);
     }
 
-    public final int getStartingTime() {
-        return startingTime;
+    @Override
+    public BoolBuffEffect clone() {
+        return new BoolBuffEffect(id, affectTo, getEffector(),
+                startingTime, duration);
     }
-
-    public final int getMaxDuration() {
-        return duration;
-    }
-    protected final int startingTime;
-    protected final int duration;
 
     public static BoolBuffEffect newBuffEffect(StringID id,
             PropertyID affectTo, EffectorInterface<Boolean> effector,
-            boolean val, int startingTime, int duration) {
-        return new BoolBuffEffect(id, affectTo, effector, val,
+            int startingTime, int duration) {
+        return new BoolBuffEffect(id, affectTo, effector,
                 startingTime, duration);
+    }
+
+    public static AbstractBuffEffect<Boolean> newBuffEffect(StringID id,
+            PropertyID affectTo, EffectorInterface<Boolean> effector,
+            int startingTime, int intervalDuration, int duration,
+            boolean isInterval) {
+        if (isInterval)
+            return new BoolIntervalBuffEffect(id, affectTo,
+                    (IntervalEffectorInterface<Boolean>) effector,
+                    startingTime, intervalDuration, duration);
+        else
+            return new BoolBuffEffect(id, affectTo, effector,
+                    startingTime, duration);
     }
 }

@@ -24,34 +24,25 @@
 
 package game.engine.monica.core.property.number;
 
+import game.engine.monica.core.property.AbstractIntervalBuffEffect;
+import game.engine.monica.core.property.EffectType;
 import game.engine.monica.core.property.IntervalEffectorInterface;
 import game.engine.monica.core.property.PropertyID;
 import game.engine.monica.util.StringID;
-import game.engine.monica.util.annotation.UnOverridable;
 
-public class NumberIntervalBuffEffect extends NumberBuffEffect {
+public class NumberIntervalBuffEffect extends AbstractIntervalBuffEffect {
 
     protected NumberIntervalBuffEffect(StringID id, PropertyID affectTo,
-            IntervalEffectorInterface<Double> effector, double val,
+            IntervalEffectorInterface<Double> effector,
             int startingTime, int intervalDuration, int duration) {
-        super(id, affectTo, effector, val,
-                startingTime, intervalDuration, duration, true);
-    }
-
-    @Override
-    @UnOverridable
-    public Double getValue() {
-        return getIntervalEffector().getValue();
-    }
-
-    public IntervalEffectorInterface<Double> getIntervalEffector() {
-        return (IntervalEffectorInterface< Double>) getEffector();
+        super(id, EffectType.TYPE_NUM_BUFF_INTERVAL, affectTo, effector,
+                startingTime, intervalDuration, duration);
     }
 
     @Override
     public NumberIntervalBuffEffect clone() {
         return new NumberIntervalBuffEffect(id, affectTo,
-                (IntervalEffectorInterface) effector, val, startingTime,
+                (IntervalEffectorInterface) effector, startingTime,
                 intervalDuration, duration);
     }
 }

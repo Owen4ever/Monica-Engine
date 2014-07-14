@@ -32,13 +32,17 @@ import game.engine.monica.util.StringID;
 public class BoolSimpleEffect extends AbstractBoolEffect {
 
     protected BoolSimpleEffect(StringID id, PropertyID affectTo,
-            EffectorInterface<Boolean> effector, boolean val) {
-        super(id, EffectType.TYPE_BOOL_BOOLEAN, affectTo, effector, val);
+            EffectorInterface<Boolean> effector) {
+        super(id, EffectType.TYPE_BOOL_SIMPLE, affectTo, effector);
+    }
+
+    @Override
+    public BoolSimpleEffect clone() {
+        return new BoolSimpleEffect(id, affectTo, getEffector());
     }
 
     public static BoolSimpleEffect newSimpleEffect(StringID id,
-            PropertyID affectTo, EffectorInterface<Boolean> effector,
-            boolean val) {
-        return new BoolSimpleEffect(id, affectTo, effector, val);
+            PropertyID affectTo, EffectorInterface<Boolean> effector) {
+        return new BoolSimpleEffect(id, affectTo, effector);
     }
 }

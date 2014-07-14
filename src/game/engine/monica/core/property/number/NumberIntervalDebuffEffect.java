@@ -24,25 +24,25 @@
 
 package game.engine.monica.core.property.number;
 
+import game.engine.monica.core.property.AbstractIntervalBuffEffect;
 import game.engine.monica.core.property.EffectType;
+import game.engine.monica.core.property.IntervalEffectorInterface;
 import game.engine.monica.core.property.PropertyID;
 import game.engine.monica.util.StringID;
 
-public class NumberFixedEffect extends AbstractNumberEffect {
+public class NumberIntervalDebuffEffect extends AbstractIntervalBuffEffect {
 
-    protected NumberFixedEffect(StringID id, PropertyID affectTo, double val) {
-        super(id, EffectType.TYPE_NUM_FIXED, affectTo, v -> val);
-        this.val = val;
+    protected NumberIntervalDebuffEffect(StringID id, PropertyID affectTo,
+            IntervalEffectorInterface<Double> effector,
+            int startingTime, int intervalDuration, int duration) {
+        super(id, EffectType.TYPE_NUM_DEBUFF_INTERVAL, affectTo, effector,
+                startingTime, intervalDuration, duration);
     }
 
     @Override
-    public NumberFixedEffect clone() {
-        return new NumberFixedEffect(id, affectTo, val);
-    }
-    private double val;
-
-    public static NumberFixedEffect newFixedEffect(StringID id,
-            PropertyID affectTo, double val) {
-        return new NumberFixedEffect(id, affectTo, val);
+    public NumberIntervalDebuffEffect clone() {
+        return new NumberIntervalDebuffEffect(id, affectTo,
+                (IntervalEffectorInterface) effector, startingTime,
+                intervalDuration, duration);
     }
 }

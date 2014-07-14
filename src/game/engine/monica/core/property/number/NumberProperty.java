@@ -26,9 +26,17 @@ package game.engine.monica.core.property.number;
 
 import game.engine.monica.core.engine.CoreEngine;
 import game.engine.monica.core.engine.EngineThread;
+import game.engine.monica.core.engine.EngineThreadGroup;
+import game.engine.monica.core.property.AbstractBuffEffect;
+import game.engine.monica.core.property.AbstractEffect;
+import game.engine.monica.core.property.AbstractIntervalBuffEffect;
+import game.engine.monica.core.property.AbstractIntervalLongTimeEffect;
+import game.engine.monica.core.property.AbstractLongTimeEffect;
 import game.engine.monica.core.property.AbstractProperty;
 import game.engine.monica.core.property.EffectPointer;
 import game.engine.monica.core.property.ErrorTypeException;
+import game.engine.monica.core.property.ParentPropertyInterface;
+import game.engine.monica.core.property.PropertyAdjustment;
 import game.engine.monica.core.property.PropertyID;
 import game.engine.monica.util.StringID;
 import game.engine.monica.util.Wrapper;
@@ -40,20 +48,12 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 public class NumberProperty extends AbstractProperty<Double>
         implements Comparable<NumberProperty> {
 
-    public NumberProperty(PropertyID id, boolean isPercentVal) {
-        this(id, isPercentVal, 0, 0);
+    public NumberProperty(PropertyID id) {
+        this(id, 0, 0);
     }
 
-    public NumberProperty(PropertyID id, boolean isPercentVal,
-            double defaultVal, double offsetVal) {
-        if (id == null)
-            throw new NullPointerException("THe id is null.");
-        if (id.getType() != PropertyID.PropertyType.INTEGER)
-            throw new ErrorTypeException("Error property type.");
-        this.type = id;
-        isPerVal = isPercentVal;
-        this.defaultVal = defaultVal;
-        this.offsetVal = offsetVal;
+    public NumberProperty(PropertyID id, double defaultVal, double offsetVal) {
+        super(id, defaultVal, offsetVal);
     }
 
     protected final ReentrantReadWriteLock getCalcLock() {
@@ -68,7 +68,7 @@ public class NumberProperty extends AbstractProperty<Double>
                 if (calcLocker.getWriteHoldCount() != 1) {
                     calcLocker.writeLock().unlock();
                 } else if (hasAdjustment() == PRO_ADJ_PAR
-                        && ((NumberProperty) parentProperty).calcLocker.isWriteLocked())
+                        && ((NumberProperty) ((AbstractProperty) parentProperty)).calcLocker.isWriteLocked())
                     calcLocker.writeLock().unlock();
                 else {
                     return;
@@ -102,22 +102,21 @@ public class NumberProperty extends AbstractProperty<Double>
         unlockCalcWriteLock();
     }
 
-    private EffectPointer addAdditionValue(AbstractNumberEffect e) {
+    private EffectPointer addAdditionValue(AbstractEffect<Double> e) {
         currentEffectPointer = currentEffectPointer.linkNew();
         effects.put(currentEffectPointer, e);
         return currentEffectPointer;
     }
 
-    private EffectPointer addBuffEffect(NumberBuffEffect e) {
+    private EffectPointer addBuffEffect(AbstractBuffEffect<Double> e) {
         currentEffectPointer = currentEffectPointer.linkNew();
         effects.put(currentEffectPointer, e);
         BuffRunnable r = new BuffRunnable(currentEffectPointer);
         bltThreads.put(currentEffectPointer, r);
-        EngineThread t = new EngineThread(r);
         if (CoreEngine.isContinuing())
-            t.start();
+            new EngineThread(TG_PROPERTY_NUM, r).start();
         else
-            CoreEngine.runThreadNextStart(t);
+            CoreEngine.runThreadNextStart(r);
         return currentEffectPointer;
     }
 
@@ -127,25 +126,28 @@ public class NumberProperty extends AbstractProperty<Double>
         LTRunnable r = new LTRunnable(currentEffectPointer);
         if (e.isInterval()) {
             bltThreads.put(currentEffectPointer, r);
-            EngineThread t = new EngineThread(r);
             if (CoreEngine.isContinuing())
-                t.start();
+                new EngineThread(TG_PROPERTY_NUM, r).start();
             else
-                CoreEngine.runThreadNextStart(t);
+                CoreEngine.runThreadNextStart(r);
         }
         return currentEffectPointer;
     }
+    protected static final EngineThreadGroup TG_PROPERTY_NUM
+            = new EngineThreadGroup("NumberProperty Thread Group");
 
     private void setFixedEffect(NumberFixedEffect e) {
         fixedEffect = e;
         isFixed = true;
     }
 
+    @Override
     public final boolean isFixed() {
         return isFixed;
     }
 
-    public final EffectPointer addEffect(AbstractNumberEffect e) {
+    @Override
+    public final EffectPointer addEffect(AbstractEffect<Double> e) {
         if (e == null)
             throw new NullPointerException("The effect is null.");
         if (!e.affectTo().equals(type))
@@ -154,13 +156,13 @@ public class NumberProperty extends AbstractProperty<Double>
         getCalcWriteLock();
         try {
             switch (e.getEffectType()) {
-                case TYPE_NUM_NUMBER:
+                case TYPE_NUM_SIMPLE:
                     return addAdditionValue(e);
                 case TYPE_NUM_BUFF:
                 case TYPE_NUM_BUFF_INTERVAL:
                 case TYPE_NUM_DEBUFF:
                 case TYPE_NUM_DEBUFF_INTERVAL:
-                    return addBuffEffect((NumberBuffEffect) e);
+                    return addBuffEffect((AbstractBuffEffect<Double>) e);
                 case TYPE_NUM_FIXED:
                     setFixedEffect((NumberFixedEffect) e);
                     return null;
@@ -184,7 +186,7 @@ public class NumberProperty extends AbstractProperty<Double>
             effects.entrySet().parallelStream().forEach(entry -> {
                 if (entry.getValue().getID().equals(sid)) {
                     EffectPointer p = entry.getKey();
-                    AbstractNumberEffect e = entry.getValue();
+                    AbstractEffect<Double> e = entry.getValue();
                     effects.remove(p);
                     tempEffects.clear();
                     tempEffects.putAll(effects);
@@ -231,11 +233,7 @@ public class NumberProperty extends AbstractProperty<Double>
         }
     }
 
-    public final int hasAdjustment() {
-        return hasAdjustment;
-    }
-
-    public final NumberPropertyAdjustment getAdjustment() {
+    public final PropertyAdjustment<Double> getAdjustment() {
         switch (hasAdjustment) {
             case PRO_ADJ_NONE:
                 return null;
@@ -248,7 +246,7 @@ public class NumberProperty extends AbstractProperty<Double>
         }
     }
 
-    public final void setAdjustment(NumberPropertyAdjustment a) {
+    public final void setAdjustment(PropertyAdjustment<Double> a) {
         if (a == null)
             throw new NullPointerException("The adjustment is null.");
         getCalcWriteLock();
@@ -262,9 +260,9 @@ public class NumberProperty extends AbstractProperty<Double>
         }
     }
 
-    public final void setAdjustment(NumberParentProperty p) {
+    public final void setAdjustment(ParentPropertyInterface<Double> p) {
         if (p == null)
-            throw new NullPointerException("The NumberParentProperty is null.");
+            throw new NullPointerException("The ParentProperty is null.");
         getCalcWriteLock();
         try {
             this.hasAdjustment = PRO_ADJ_PAR;
@@ -305,22 +303,22 @@ public class NumberProperty extends AbstractProperty<Double>
                 switch (hasAdjustment) {
                     case -1:
                         effects.forEach((EffectPointer p,
-                                AbstractNumberEffect e) -> {
+                                AbstractEffect<Double> e) -> {
                                     tval.pack = e.affect(tval.pack);
                                 });
                         totalVal = tval.pack;
                         break;
                     case 0:
                         effects.forEach((EffectPointer p,
-                                AbstractNumberEffect e) -> {
+                                AbstractEffect<Double> e) -> {
                                     tval.pack = adjustment
                                     .adjust(e.affect(tval.pack));
                                 });
                         break;
                     case 1:
                         effects.forEach((EffectPointer p,
-                                AbstractNumberEffect e) -> {
-                                    parentProperty.beNotify();
+                                AbstractEffect<Double> e) -> {
+                                    parentProperty.getTotalValue();
                                     tval.pack = parentProperty
                                     .adjust(e.affect(tval.pack));
                                 });
@@ -332,11 +330,6 @@ public class NumberProperty extends AbstractProperty<Double>
         } finally {
             unlockCalcWriteLock();
         }
-    }
-
-    @Override
-    public void beNotify() {
-        calcTotalValue();
     }
 
     @Override
@@ -362,14 +355,14 @@ public class NumberProperty extends AbstractProperty<Double>
         String strAdjustment;
         switch (hasAdjustment) {
             case 0:
-                strAdjustment = ", Has Adjustment";
+                strAdjustment = ", Has Adjustment ]";
                 break;
             case 1:
-                strAdjustment = ", Has Parent";
+                strAdjustment = ", Has Parent ]";
                 break;
             case -1:
             default:
-                strAdjustment = ", No Adjustment";
+                strAdjustment = ", No Adjustment ]";
         }
         String strTypeID = type.getID().toString();
         return new StringBuilder(160 + strTypeID.length())
@@ -379,40 +372,24 @@ public class NumberProperty extends AbstractProperty<Double>
                 .append(", Default value = ").append(defaultVal)
                 .append(", Offset value = ").append(offsetVal)
                 .append(", Total value = ").append(getTotalValue())
-                .append(strAdjustment).append(" ]").toString();
+                .append(strAdjustment).toString();
     }
-    private final PropertyID type;
-    protected double defaultVal, offsetVal;
-    private final ConcurrentHashMap<EffectPointer, AbstractNumberEffect> effects
+    private final ConcurrentHashMap<EffectPointer, AbstractEffect<Double>> effects
             = new ConcurrentHashMap<>(CoreEngine.getDefaultQuantily(), 0.5f);
-    private transient final HashMap<EffectPointer, AbstractNumberEffect> tempEffects
+    private transient final HashMap<EffectPointer, AbstractEffect<Double>> tempEffects
             = new HashMap<>(CoreEngine.getDefaultQuantily(), 0.5f);
     protected EffectPointer currentEffectPointer = EffectPointer.newFirstPointer();
     private final HashMap<EffectPointer, Runnable> bltThreads
             = new HashMap<>(CoreEngine.getDefaultQuantily(), 0.2f);
     private transient final HashMap<EffectPointer, Runnable> tempBltThreads
             = new HashMap<>(CoreEngine.getDefaultQuantily(), 0.2f);
-    /**
-     * The {@code NumberProperty} does not have an {@code adjustment} or a
-     * {@code NumberParentProperty} if {@code hasAdjustment} equals -1; The
-     * number property only has an {@code adjustment} if {@code hasAdjustment}
-     * equals 0; In addition, the {@code NumberProperty} only has a
-     * {@code NumberParentProperty} if {@code hasAdjustment} equals 1.
-     */
-    protected int hasAdjustment = PRO_ADJ_NONE;
-    protected NumberPropertyAdjustment adjustment = null;
-    protected NumberParentProperty parentProperty = null;
     private boolean isFixed = false;
     protected NumberFixedEffect fixedEffect;
-    protected final boolean isPerVal;
     protected transient volatile boolean isCalc = false;
     private final transient ReentrantReadWriteLock calcLocker
             = new ReentrantReadWriteLock();
     protected transient double totalVal;
-
-    private static final int PRO_ADJ_NONE = -1;
-    private static final int PRO_ADJ_ADJ = 0;
-    private static final int PRO_ADJ_PAR = 1;
+    //protected NumberParentProperty parentProperty = null;
 
     private final class BuffRunnable
             implements Comparable<BuffRunnable>, Runnable {
@@ -423,7 +400,8 @@ public class NumberProperty extends AbstractProperty<Double>
 
         @Override
         public void run() {
-            NumberBuffEffect effect = (NumberBuffEffect) effects.get(pointer);
+            AbstractBuffEffect<Double> effect
+                    = (AbstractBuffEffect<Double>) effects.get(pointer);
             int ce1mscc = CoreEngine.get1msSuspendTimeChangeCount();
             int time = CoreEngine.calcSuspendTime(effect.getMaxDuration());
             if (effect.getStartingTime() > 0) {
@@ -447,6 +425,7 @@ public class NumberProperty extends AbstractProperty<Double>
                             } catch (InterruptedException ex) {
                                 long endTime = System.currentTimeMillis();
                                 startingTimeAlready = CoreEngine.calcQuondamTime((int) (endTime - startingTime));
+                                continue;
                             }
                             isInStartingTime = false;
                         }
@@ -467,8 +446,8 @@ public class NumberProperty extends AbstractProperty<Double>
                             return;
                         }
                         getCalcWriteLock();
-                        ((NumberIntervalBuffEffect) effect)
-                                .getIntervalEffector().intervalIncrease();
+                        ((AbstractIntervalBuffEffect<Double>) effect)
+                                .getIntervalEffector().intervalChange();
                         unlockCalcWriteLock();
                     }
                 }
@@ -507,8 +486,7 @@ public class NumberProperty extends AbstractProperty<Double>
         }
 
         @Override
-        public int compareTo(BuffRunnable r
-        ) {
+        public int compareTo(BuffRunnable r) {
             if (r == null)
                 throw new NullPointerException("Compare with"
                         + " a null NumberBuffRunnable.");
@@ -530,8 +508,8 @@ public class NumberProperty extends AbstractProperty<Double>
 
         @Override
         public void run() {
-            NumberLongTimeEffect effect
-                    = (NumberLongTimeEffect) effects.get(pointer);
+            AbstractLongTimeEffect<Double> effect
+                    = (AbstractLongTimeEffect<Double>) effects.get(pointer);
             int ce1mscc = CoreEngine.get1msSuspendTimeChangeCount();
             int it = CoreEngine
                     .calcSuspendTime(effect.getIntervalDuration());
@@ -548,8 +526,9 @@ public class NumberProperty extends AbstractProperty<Double>
                                             .calcSuspendTime(startingTimeAlready));
                         } catch (InterruptedException ex) {
                             long endTime = System.currentTimeMillis();
-                            startingTimeAlready = (int) ((endTime - startingTime)
-                                    / CoreEngine.get1msSuspendTime());
+                            startingTimeAlready = CoreEngine
+                                    .calcQuondamTime((int) (endTime - startingTime));
+                            continue;
                         }
                         isInStartingTime = false;
                         startingTimeAlready = 0;
@@ -561,10 +540,11 @@ public class NumberProperty extends AbstractProperty<Double>
                         long endTime = System.currentTimeMillis();
                         already = (int) (endTime - startingTime)
                                 / CoreEngine.get1msSuspendTime();
+                        continue;
                     }
                     if (already == effect.getIntervalDuration())
-                        ((NumberIntervalLongTimeEffect) effect)
-                                .getIntervalEffector().intervalIncrease();
+                        ((AbstractIntervalLongTimeEffect<Double>) effect)
+                                .getIntervalEffector().intervalChange();
                 }
             }
         }
@@ -573,7 +553,7 @@ public class NumberProperty extends AbstractProperty<Double>
         public int compareTo(LTRunnable r) {
             if (r == null)
                 throw new NullPointerException("Compare with"
-                        + " a null NumberIntervalLongTimeRunnable.");
+                        + " a null NumberLongTimeRunnable.");
             return Integer.compare(pointer.pointer(), r.pointer.pointer());
         }
         private boolean isInStartingTime;

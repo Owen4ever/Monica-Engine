@@ -43,6 +43,9 @@ public final class CoreEngine {
     public static void start() {
         if (date == null)
             throw new EngineException("Cannot start the game until WorldDate sets up.");
+        if (isStart)
+            throw new EngineException("The game engine "
+                    + "has already started.");
         if (engineSCLock.tryLock() && omsSuspendTimeLocker.tryLock())
             try {
                 date.ready();
@@ -150,34 +153,29 @@ public final class CoreEngine {
 
     public static void runThreadIfStart(Runnable r) {
         if (isContinuing())
-            new EngineThread(r).start();
+            new EngineThread(TG_TR, r).start();
         else
             runThreadNextStart(r);
-    }
-
-    public static void runThreadNextStart(Thread t) {
-        if (t == null)
-            throw new NullPointerException("The thread which will run"
-                    + " when the game engine starts is null.");
-        engineThreadRunner.add(t);
     }
 
     public static void runThreadNextStart(Runnable r) {
         if (r == null)
             throw new NullPointerException("The runnable which will run"
                     + " when the game engine starts is null.");
-        engineThreadRunner.add(new EngineThread(r));
+        engineThreadRunner.add(new EngineThread(TG_TR, r));
     }
 
     private static void runAll() {
         if (!engineThreadRunner.isEmpty()) {
-            engineThreadRunner.parallelStream().forEach((Thread t) -> {
-                t.start();
+            engineThreadRunner.parallelStream().forEach(r -> {
+                new EngineThread(TG_TR, r).start();
             });
             engineThreadRunner.clear();
         }
     }
-    private static final HashSet<Thread> engineThreadRunner = new HashSet<>();
+    private static final HashSet<Runnable> engineThreadRunner = new HashSet<>();
+    private static final EngineThreadGroup TG_TR
+            = new EngineThreadGroup("Thread Runner");
 
     public static void setWorldDate(DateTime dateTime) {
         if (isStart())
@@ -253,7 +251,7 @@ public final class CoreEngine {
         date.setLoopMilliSecond(msec);
     }
 
-    public static BigInteger toInteger() {
+    public static BigInteger dateTimeToInteger() {
         if (!isStart())
             throw new EngineException("The game has not started yet.");
         return date.getCurrentDateTime().toInteger(date);

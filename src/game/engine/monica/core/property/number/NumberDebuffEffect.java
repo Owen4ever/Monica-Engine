@@ -31,18 +31,18 @@ import game.engine.monica.core.property.IntervalEffectorInterface;
 import game.engine.monica.core.property.PropertyID;
 import game.engine.monica.util.StringID;
 
-public class NumberBuffEffect extends AbstractBuffEffect<Double> {
+public class NumberDebuffEffect extends AbstractBuffEffect<Double> {
 
-    protected NumberBuffEffect(StringID id, PropertyID affectTo,
-            EffectorInterface<Double> effector,
-            int startingTime, int duration) {
-        super(id, EffectType.TYPE_NUM_BUFF, affectTo, effector,
+    protected NumberDebuffEffect(StringID id, PropertyID affectTo,
+            EffectorInterface<Double> effector, int startingTime,
+            int duration) {
+        super(id, EffectType.TYPE_NUM_DEBUFF, affectTo, effector,
                 startingTime, 0, duration, false);
     }
 
     @Override
-    public NumberBuffEffect clone() {
-        return new NumberBuffEffect(id, affectTo, effector,
+    public NumberDebuffEffect clone() {
+        return new NumberDebuffEffect(id, affectTo, effector,
                 startingTime, duration);
     }
 

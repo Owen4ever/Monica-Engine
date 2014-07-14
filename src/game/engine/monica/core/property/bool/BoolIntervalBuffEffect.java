@@ -22,27 +22,28 @@
  * THE SOFTWARE.
  */
 
-package game.engine.monica.core.property.number;
+package game.engine.monica.core.property.bool;
 
+import game.engine.monica.core.property.AbstractIntervalBuffEffect;
 import game.engine.monica.core.property.EffectType;
+import game.engine.monica.core.property.IntervalEffectorInterface;
 import game.engine.monica.core.property.PropertyID;
 import game.engine.monica.util.StringID;
 
-public class NumberFixedEffect extends AbstractNumberEffect {
+public class BoolIntervalBuffEffect
+        extends AbstractIntervalBuffEffect<Boolean> {
 
-    protected NumberFixedEffect(StringID id, PropertyID affectTo, double val) {
-        super(id, EffectType.TYPE_NUM_FIXED, affectTo, v -> val);
-        this.val = val;
+    protected BoolIntervalBuffEffect(StringID id, PropertyID affectTo,
+            IntervalEffectorInterface<Boolean> effector,
+            int startingTime, int intervalDuration, int duration) {
+        super(id, EffectType.TYPE_BOOL_BUFF_INTERVAL, affectTo,
+                effector, startingTime, intervalDuration, duration);
     }
 
     @Override
-    public NumberFixedEffect clone() {
-        return new NumberFixedEffect(id, affectTo, val);
+    public BoolIntervalBuffEffect clone() {
+        return new BoolIntervalBuffEffect(id, affectTo, getIntervalEffector(),
+                startingTime, intervalDuration, duration);
     }
-    private double val;
 
-    public static NumberFixedEffect newFixedEffect(StringID id,
-            PropertyID affectTo, double val) {
-        return new NumberFixedEffect(id, affectTo, val);
-    }
 }

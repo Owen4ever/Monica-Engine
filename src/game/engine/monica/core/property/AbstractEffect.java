@@ -26,7 +26,7 @@ package game.engine.monica.core.property;
 
 import game.engine.monica.util.StringID;
 
-public abstract class AbstractEffect<T> {
+public abstract class AbstractEffect<T> implements Cloneable {
 
     protected AbstractEffect(StringID id, EffectType type, PropertyID affectTo,
             EffectorInterface<T> effector) {
@@ -34,10 +34,6 @@ public abstract class AbstractEffect<T> {
         setEffectType(type);
         setAffectTo(affectTo);
         setEffector(effector);
-        this.id = id;
-        effectType = type;
-        this.affectTo = affectTo;
-        this.effector = effector;
     }
 
     public final StringID getID() {
@@ -59,8 +55,6 @@ public abstract class AbstractEffect<T> {
             throw new NullPointerException("The effect type is null.");
         this.effectType = type;
     }
-
-    public abstract T getValue();
 
     public final PropertyID affectTo() {
         return affectTo;

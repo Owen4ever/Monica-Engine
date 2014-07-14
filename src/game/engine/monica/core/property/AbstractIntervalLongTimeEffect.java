@@ -22,10 +22,21 @@
  * THE SOFTWARE.
  */
 
-package game.engine.monica.core.property.number;
+package game.engine.monica.core.property;
 
-@FunctionalInterface
-public interface NumberPropertyAdjustment {
+import game.engine.monica.util.StringID;
 
-    double adjust(double val);
+public class AbstractIntervalLongTimeEffect<T>
+        extends AbstractLongTimeEffect<T> {
+
+    public AbstractIntervalLongTimeEffect(StringID id, EffectType type,
+            PropertyID affectTo, IntervalEffectorInterface<T> effector,
+            int startingTime, int intervalDuration) {
+        super(id, type, affectTo, effector,
+                startingTime, intervalDuration, true);
+    }
+
+    public final IntervalEffectorInterface<T> getIntervalEffector() {
+        return (IntervalEffectorInterface<T>) getEffector();
+    }
 }

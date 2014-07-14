@@ -22,19 +22,9 @@
  * THE SOFTWARE.
  */
 
-package game.engine.monica.core.property.number;
+package game.engine.monica.core.property;
 
-public enum NumberEffectCalcType {
+public interface ParentPropertyInterface<T> extends PropertyAdjustment<T> {
 
-    // a: Default Value.
-    // b: The specified number of the effect.
-    // c: The value will return.
-    ADD_NUM, // c = a + b
-    ADD_PER, // c = a * (1 + b)
-    MUL_NUM, // c = a * b
-    MUL_PER, // c = a * b
-    SUB_NUM, // c = a - b
-    SUB_PER, // c = a * (1 - b)
-    DIV_NUM, // c = a / b
-    DIV_PER, // c = a / b
+    public T getTotalValue();
 }

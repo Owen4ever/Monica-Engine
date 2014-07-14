@@ -24,17 +24,18 @@
 
 package game.engine.monica.core.property.number;
 
+import game.engine.monica.core.property.ParentPropertyInterface;
 import game.engine.monica.core.property.PropertyID;
 
 public abstract class NumberParentProperty extends NumberProperty
-        implements NumberPropertyAdjustment {
+        implements ParentPropertyInterface<Double> {
 
-    public NumberParentProperty(PropertyID id, boolean isPercentVal) {
-        super(id, isPercentVal);
+    public NumberParentProperty(PropertyID id) {
+        this(id, 0, 0);
     }
 
-    public NumberParentProperty(PropertyID id, boolean isPercentVal,
+    public NumberParentProperty(PropertyID id,
             double defaultVal, double offsetVal) {
-        super(id, isPercentVal, defaultVal, offsetVal);
+        super(id, defaultVal, offsetVal);
     }
 }

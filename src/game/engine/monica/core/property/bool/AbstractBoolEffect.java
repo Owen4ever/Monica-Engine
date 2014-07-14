@@ -29,24 +29,11 @@ import game.engine.monica.core.property.EffectType;
 import game.engine.monica.core.property.EffectorInterface;
 import game.engine.monica.core.property.PropertyID;
 import game.engine.monica.util.StringID;
-import game.engine.monica.util.annotation.UnOverridable;
 
 public abstract class AbstractBoolEffect extends AbstractEffect<Boolean> {
 
     protected AbstractBoolEffect(StringID id, EffectType type,
-            PropertyID affectTo, EffectorInterface<Boolean> effector,
-            boolean val) {
+            PropertyID affectTo, EffectorInterface<Boolean> effector) {
         super(id, type, affectTo, effector);
     }
-
-    @Override
-    @UnOverridable
-    public Boolean getValue() {
-        return val;
-    }
-
-    public void setValue(boolean val) {
-        this.val = val;
-    }
-    protected boolean val;
 }

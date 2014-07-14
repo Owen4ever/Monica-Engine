@@ -26,7 +26,5 @@ package game.engine.monica.core.property;
 
 public interface IntervalEffectorInterface<T> extends EffectorInterface<T> {
 
-    T getValue();
-
-    void intervalIncrease();
+    void intervalChange();
 }

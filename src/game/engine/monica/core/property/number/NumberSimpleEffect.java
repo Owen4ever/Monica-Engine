@@ -32,18 +32,17 @@ import game.engine.monica.util.StringID;
 public class NumberSimpleEffect extends AbstractNumberEffect {
 
     protected NumberSimpleEffect(StringID id, PropertyID affectTo,
-            EffectorInterface<Double> effector, double val) {
-        super(id, EffectType.TYPE_NUM_NUMBER, affectTo, effector, val);
+            EffectorInterface<Double> effector) {
+        super(id, EffectType.TYPE_NUM_SIMPLE, affectTo, effector);
     }
 
     @Override
     public NumberSimpleEffect clone() {
-        return new NumberSimpleEffect(id, affectTo, effector, val);
+        return new NumberSimpleEffect(id, affectTo, effector);
     }
 
     public static NumberSimpleEffect newSimpleEffect(StringID id,
-            PropertyID affectTo, NumberEffectCalcType calcType, double val) {
-        return new NumberSimpleEffect(id, affectTo,
-                getNumberEffector(calcType, val), val);
+            PropertyID affectTo, EffectorInterface<Double> effector) {
+        return new NumberSimpleEffect(id, affectTo, effector);
     }
 }
