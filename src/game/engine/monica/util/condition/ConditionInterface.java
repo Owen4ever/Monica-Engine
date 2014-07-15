@@ -22,20 +22,9 @@
  * THE SOFTWARE.
  */
 
-package game.engine.monica.core.element;
+package game.engine.monica.util.condition;
 
-import game.engine.monica.util.StringID;
+public interface ConditionInterface {
 
-public class BasedElement extends AbstractElement {
-
-    private static final long serialVersionUID = 46274354281733422L;
-
-    public BasedElement(StringID id, String name, int turnToEnergy) {
-        super(id, name, turnToEnergy);
-    }
-
-    @Override
-    public final boolean isCombined() {
-        return false;
-    }
+    int count();
 }

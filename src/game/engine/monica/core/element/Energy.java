@@ -24,18 +24,31 @@
 
 package game.engine.monica.core.element;
 
+import game.engine.monica.util.StringID;
+
 public final class Energy {
 
     private static final long serialVersionUID = 46274354375486750L;
 
-    public Energy(String name) {
-        if (name == null || name.isEmpty())
-            throw new NullPointerException("Energy name cannot be null.");
-        this.name = name;
+    public Energy(StringID id, String name) {
+        if (id == null)
+            throw new NullPointerException("The id is null.");
+        this.id = id;
+        setName(name);
+    }
+
+    public final StringID getID() {
+        return id;
     }
 
     public final String getName() {
         return name;
+    }
+
+    public final void setName(String name) {
+        if (name == null || name.isEmpty())
+            throw new NullPointerException("The name is null.");
+        this.name = name;
     }
 
     @Override
@@ -63,5 +76,6 @@ public final class Energy {
     public String toString() {
         return getClass().getName() + " [ Name = " + name + " ]";
     }
-    private final String name;
+    private final StringID id;
+    private String name;
 }

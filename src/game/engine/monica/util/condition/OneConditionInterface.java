@@ -22,15 +22,15 @@
  * THE SOFTWARE.
  */
 
-package game.engine.monica.core.condition;
+package game.engine.monica.util.condition;
 
 @FunctionalInterface
-public interface TwoCondition extends ConditionInterface {
+public interface OneConditionInterface extends ConditionInterface {
 
     @Override
     default int count() {
-        return 2;
+        return 1;
     }
 
-    boolean match(Object c1, Object c2);
+    boolean match(Object obj);
 }

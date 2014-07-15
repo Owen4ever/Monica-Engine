@@ -25,7 +25,8 @@
 package game.engine.monica.core.element;
 
 import game.engine.monica.util.FinalPair;
-import game.engine.monica.core.condition.ConditionInterface;
+import game.engine.monica.util.condition.SingleCondition;
+import game.engine.monica.util.StringID;
 import java.util.HashMap;
 
 public final class ElementEngine {
@@ -36,30 +37,65 @@ public final class ElementEngine {
     public ElementRelation getRelation(AbstractElement e1, AbstractElement e2) {
         if (e1 == null || e2 == null)
             throw new NullPointerException("The element is null.");
-        return elementRelation.get(new FinalPair<>(e1, e2));
+        return elementRelations.get(new FinalPair<>(e1.getID(), e2.getID()));
     }
 
-    public ElementRelation setRelation(AbstractElement e1, AbstractElement e2, ElementRelation r) {
+    public void setRelation(AbstractElement e1, AbstractElement e2, ElementRelation r) {
         if (e1 == null || e2 == null)
             throw new NullPointerException("The element is null.");
         if (r == null)
             throw new NullPointerException("The element relation is null.");
-        return elementRelation.put(new FinalPair<>(e1, e2), r);
+        elementRelations.put(new FinalPair<>(e1.getID(), e2.getID()), r);
     }
 
-    public ConditionInterface getCondition(AbstractElement e1, AbstractElement e2) {
+    public SingleCondition getCondition(AbstractElement e1, AbstractElement e2) {
         if (e1 == null || e2 == null)
-            throw new NullPointerException("The AElement is null.");
-        return conditions.get(new FinalPair<>(e1, e2));
+            throw new NullPointerException("The element is null.");
+        return elementConditions.get(new FinalPair<>(e1.getID(), e2.getID()));
     }
 
-    public ConditionInterface setCondition(AbstractElement e1, AbstractElement e2, ConditionInterface l) {
+    public void setCondition(AbstractElement e1, AbstractElement e2, SingleCondition l) {
         if (e1 == null || e2 == null)
-            throw new NullPointerException("The AElement is null.");
+            throw new NullPointerException("The element is null.");
         if (l == null)
             throw new NullPointerException("The condition is null.");
-        return conditions.put(new FinalPair<>(e1, e2), l);
+        elementConditions.put(new FinalPair<>(e1.getID(), e2.getID()), l);
     }
-    private final HashMap<FinalPair, ElementRelation> elementRelation = new HashMap<>();
-    private final HashMap<FinalPair, ConditionInterface> conditions = new HashMap<>();
+    private final HashMap<FinalPair<StringID, StringID>, ElementRelation> elementRelations
+            = new HashMap<>();
+    private final HashMap<FinalPair<StringID, StringID>, SingleCondition> elementConditions
+            = new HashMap<>();
+
+    public ElementRelation getRelation(ElementSystem e1, ElementSystem e2) {
+        if (e1 == null || e2 == null)
+            throw new NullPointerException("The ElementSystem is null.");
+        return elementRelations.get(new FinalPair<>(e1.getID(), e2.getID()));
+    }
+
+    public void setRelation(ElementSystem e1, ElementSystem e2, SystemRelation r) {
+        if (e1 == null || e2 == null)
+            throw new NullPointerException("The ElementSystem is null.");
+        if (r == null)
+            throw new NullPointerException("The ElementSystem relation is"
+                    + " null.");
+        systemRelations.put(new FinalPair<>(e1.getID(), e2.getID()), r);
+    }
+
+    public SingleCondition getCondition(ElementSystem e1, ElementSystem e2) {
+        if (e1 == null || e2 == null)
+            throw new NullPointerException("The ElementSystem is null.");
+        return elementConditions.get(new FinalPair<>(e1.getID(), e2.getID()));
+    }
+
+    public void setCondition(ElementSystem e1, ElementSystem e2, SingleCondition l) {
+        if (e1 == null || e2 == null)
+            throw new NullPointerException("The ElementSystem is null.");
+        if (l == null)
+            throw new NullPointerException("The condition is null.");
+        systemConditions.put(new FinalPair<>(e1.getID(), e2.getID()), l);
+    }
+    private final HashMap<FinalPair<StringID, StringID>, SystemRelation> systemRelations
+            = new HashMap<>();
+    private final HashMap<FinalPair<StringID, StringID>, SingleCondition> systemConditions
+            = new HashMap<>();
 }

@@ -22,15 +22,35 @@
  * THE SOFTWARE.
  */
 
-package game.engine.monica.core.condition;
+package game.engine.monica.util.condition;
 
-@FunctionalInterface
-public interface ThreeCondition extends ConditionInterface {
+import game.engine.monica.util.StringID;
 
-    @Override
-    default int count() {
-        return 3;
+public final class ProviderType {
+
+    public ProviderType(StringID id) {
+        if (id == null)
+            throw new NullPointerException("The id is null.");
+        this.id = id;
     }
 
-    boolean match(Object o1, Object o2, Object o3);
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null || getClass() != obj.getClass())
+            return false;
+        return id.equals(((ProviderType) obj).id);
+    }
+
+    @Override
+    public int hashCode() {
+        return id.hashCode();
+    }
+
+    @Override
+    public String toString() {
+        return getClass().getName() + id;
+    }
+    private final StringID id;
 }

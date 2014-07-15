@@ -22,17 +22,16 @@
  * THE SOFTWARE.
  */
 
-package game.engine.monica.core.element;
+package game.engine.monica.util.condition;
 
-public class ElementInitializationException extends RuntimeException {
+public class ConditionInitializeException extends RuntimeException {
 
-    private static final long serialVersionUID = -7034657190745766939L;
+    private static final long serialVersionUID = -885848331L;
 
-    public ElementInitializationException() {
-        super();
+    public ConditionInitializeException() {
     }
 
-    public ElementInitializationException(String msg) {
+    public ConditionInitializeException(String msg) {
         super(msg);
     }
 }

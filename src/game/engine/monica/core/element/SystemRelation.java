@@ -22,10 +22,9 @@
  * THE SOFTWARE.
  */
 
-package game.engine.monica.core.condition;
+package game.engine.monica.core.element;
 
-@FunctionalInterface
-public interface ConditionInterface {
+public enum SystemRelation {
 
-    int count();
+    CAN, CANNOT, CONDITION
 }

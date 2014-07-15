@@ -53,4 +53,8 @@ public final class FinalPair<F, L> {
     public final F first;
     public final L last;
     private final int hashCode;
+
+    public static <F, L> FinalPair<F, L> toFinalPair(Pair<F, L> pair) {
+        return new FinalPair<>(pair.first, pair.last);
+    }
 }

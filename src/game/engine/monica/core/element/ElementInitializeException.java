@@ -24,11 +24,15 @@
 
 package game.engine.monica.core.element;
 
-public abstract class ElementCalculator {
+public class ElementInitializeException extends RuntimeException {
 
-    public abstract int calc();
+    private static final long serialVersionUID = -7034657190745766939L;
 
-    public boolean equals(ElementCalculator c) {
-        return this == c;
+    public ElementInitializeException() {
+        super();
+    }
+
+    public ElementInitializeException(String msg) {
+        super(msg);
     }
 }

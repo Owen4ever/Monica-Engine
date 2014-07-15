@@ -24,45 +24,22 @@
 
 package game.engine.monica.core.element;
 
+import game.engine.monica.util.condition.ProviderType;
 import game.engine.monica.util.StringID;
 
-public abstract class AbstractElement {
+public interface ElementProviderType {
 
-    protected AbstractElement(StringID id, String name, int turnToEnergy) {
-        if (id == null)
-            throw new NullPointerException("The id is null.");
-        this.id = id;
-        setName(name);
-        setValueTurnToEnergy(turnToEnergy);
-    }
-
-    public abstract boolean isCombined();
-
-    public final StringID getID() {
-        return id;
-    }
-
-    public final String getName() {
-        return name;
-    }
-
-    public final void setName(String name) {
-        if (name == null || name.isEmpty())
-            throw new NullPointerException("The name of Element is null.");
-        this.name = name;
-    }
-
-    public final int turnToEnergy() {
-        return turnToEnergy;
-    }
-
-    public final void setValueTurnToEnergy(int val) {
-        if (turnToEnergy < 1)
-            throw new ElementInitializeException("The number"
-                    + " which turns to energy smaller than 1.");
-        this.turnToEnergy = val;
-    }
-    private final StringID id;
-    private String name;
-    private int turnToEnergy;
+    /* Constants */
+    ProviderType PTYPE_ELEMENT_TYPE
+            = new ProviderType(new StringID("MonicaEngine$ProviderType$Element_Type"));
+    ProviderType PTYPE_ELEMENT_WEIGHT
+            = new ProviderType(new StringID("MonicaEngine$ProviderType$Element_Weight"));
+    ProviderType PTYPE_ELEMENT_COUNT
+            = new ProviderType(new StringID("MonicaEngine$ProviderType$Element_Count"));
+    ProviderType PTYPE_ELEMENT_ISBASED
+            = new ProviderType(new StringID("MonicaEngine$ProviderType$Element_IsBased"));
+    ProviderType PTYPE_ELEMENT_ISCOMBINED
+            = new ProviderType(new StringID("MonicaEngine$ProviderType$Element_IsCombined"));
+    ProviderType PTYPE_ELEMENT_COMBINEDTYPE
+            = new ProviderType(new StringID("MonicaEngine$ProviderType$Element_CombinedType"));
 }

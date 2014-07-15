@@ -59,6 +59,7 @@ public class NumberProperty extends AbstractProperty<Double> {
         return calcLocker;
     }
 
+    @Override
     @UnOverridable
     protected void getCalcWriteLock() {
         while (true) {
@@ -66,38 +67,18 @@ public class NumberProperty extends AbstractProperty<Double> {
                 if (calcLocker.getWriteHoldCount() != 1)
                     calcLocker.writeLock().unlock();
                 else if (hasAdjustment() == PRO_ADJ_PAR
-                        && ((NumberProperty) ((AbstractProperty) parentProperty))
-                                .calcLocker.isWriteLocked())
+                        && ((NumberProperty) ((AbstractProperty) parentProperty)).calcLocker.isWriteLocked())
                     calcLocker.writeLock().unlock();
                 else
                     return;
         }
     }
 
+    @Override
     @UnOverridable
     protected void unlockCalcWriteLock() {
         isCalc = false;
         calcLocker.writeLock().unlock();
-    }
-
-    public final double getDefaultValue() {
-        return defaultVal;
-    }
-
-    public final void setDefaultValue(double val) {
-        getCalcWriteLock();
-        this.defaultVal = val;
-        unlockCalcWriteLock();
-    }
-
-    public final double getOffsetValue() {
-        return offsetVal;
-    }
-
-    public final void setOffsetValue(double val) {
-        getCalcWriteLock();
-        this.offsetVal = val;
-        unlockCalcWriteLock();
     }
 
     private EffectPointer addAdditionValue(AbstractEffect<Double> e) {
@@ -175,6 +156,7 @@ public class NumberProperty extends AbstractProperty<Double> {
         }
     }
 
+    @Override
     public final void removeEffect(final StringID sid) {
         if (sid == null)
             throw new NullPointerException("The StringID is null.");
@@ -214,6 +196,7 @@ public class NumberProperty extends AbstractProperty<Double> {
         }
     }
 
+    @Override
     public final void removeEffect(EffectPointer pointer) {
         if (pointer == null)
             throw new NullPointerException("The EffectPointer is null.");
@@ -231,19 +214,7 @@ public class NumberProperty extends AbstractProperty<Double> {
         }
     }
 
-    public final PropertyAdjustment<Double> getAdjustment() {
-        switch (hasAdjustment) {
-            case PRO_ADJ_NONE:
-                return null;
-            case PRO_ADJ_ADJ:
-                return adjustment;
-            case PRO_ADJ_PAR:
-                return parentProperty;
-            default:
-                return null;
-        }
-    }
-
+    @Override
     public final void setAdjustment(PropertyAdjustment<Double> a) {
         if (a == null)
             throw new NullPointerException("The adjustment is null.");
@@ -258,6 +229,7 @@ public class NumberProperty extends AbstractProperty<Double> {
         }
     }
 
+    @Override
     public final void setAdjustment(ParentPropertyInterface<Double> p) {
         if (p == null)
             throw new NullPointerException("The ParentProperty is null.");

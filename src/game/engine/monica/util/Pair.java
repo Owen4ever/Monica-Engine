@@ -51,4 +51,8 @@ public final class Pair<F, L> {
     }
     public F first;
     public L last;
+
+    public static <F, L> Pair<F, L> toPair(FinalPair<F, L> finalPair) {
+        return new Pair<>(finalPair.first, finalPair.last);
+    }
 }

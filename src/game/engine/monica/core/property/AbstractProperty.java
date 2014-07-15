@@ -24,6 +24,8 @@
 
 package game.engine.monica.core.property;
 
+import game.engine.monica.util.StringID;
+
 public abstract class AbstractProperty<T>
         implements Comparable<AbstractProperty> {
 
@@ -37,12 +39,63 @@ public abstract class AbstractProperty<T>
         this.offsetVal = offsetVal;
     }
 
+    protected abstract void getCalcWriteLock();
+
+    protected abstract void unlockCalcWriteLock();
+
+    public final PropertyID getType() {
+        return type;
+    }
+
+    public final T getDefaultValue() {
+        return defaultVal;
+    }
+
+    public final void setDefaultValue(T val) {
+        getCalcWriteLock();
+        try {
+            this.defaultVal = val;
+        } finally {
+            unlockCalcWriteLock();
+        }
+    }
+
+    public final T getOffsetValue() {
+        return offsetVal;
+    }
+
+    public final void setOffsetValue(T val) {
+        getCalcWriteLock();
+        try {
+            this.offsetVal = val;
+        } finally {
+            unlockCalcWriteLock();
+        }
+    }
+
     public abstract boolean isFixed();
 
     public abstract EffectPointer addEffect(AbstractEffect<T> effect);
 
+    public abstract void removeEffect(StringID id);
+
+    public abstract void removeEffect(EffectPointer pointer);
+
     public final int hasAdjustment() {
         return hasAdjustment;
+    }
+
+    public final PropertyAdjustment<T> getAdjustment() {
+        switch (hasAdjustment) {
+            case PRO_ADJ_NONE:
+                return null;
+            case PRO_ADJ_ADJ:
+                return adjustment;
+            case PRO_ADJ_PAR:
+                return parentProperty;
+            default:
+                return null;
+        }
     }
 
     public abstract void setAdjustment(PropertyAdjustment<T> adjustment);

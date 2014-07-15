@@ -13,7 +13,6 @@ hs_err_pid*
 /src/game/engine/monica/core/memory/
 /test/
 /build/
-/dist/
 /nbproject/
 /lib/nblibraries.properties
 /lib/CopyLibs/

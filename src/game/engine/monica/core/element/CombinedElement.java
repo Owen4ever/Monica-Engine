@@ -24,9 +24,26 @@
 
 package game.engine.monica.core.element;
 
-public abstract class CombinedElement extends AbstractElement {
+import game.engine.monica.util.FinalPair;
+import game.engine.monica.util.StringID;
+import java.util.Arrays;
 
-    public CombinedElement(String name, int turnToEnergy) {
-        super(name, turnToEnergy);
+public class CombinedElement extends AbstractElement {
+
+    public CombinedElement(StringID id, String name,
+            FinalPair<AbstractElement, Integer>... elementAndCount) {
+        super(id, name, Arrays.asList(elementAndCount).stream()
+                .mapToInt(e -> e.first.turnToEnergy() * e.last).sum());
+        this.elementAndCount = elementAndCount;
     }
+
+    @Override
+    public boolean isCombined() {
+        return true;
+    }
+
+    public FinalPair<AbstractElement, Integer>[] getCombinedElements() {
+        return elementAndCount;
+    }
+    private final FinalPair<AbstractElement, Integer>[] elementAndCount;
 }

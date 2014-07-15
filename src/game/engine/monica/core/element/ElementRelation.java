@@ -26,5 +26,5 @@ package game.engine.monica.core.element;
 
 public enum ElementRelation {
 
-    CAN, CANNOT, SPECIAL
+    CAN, CANNOT, CONDITION
 }

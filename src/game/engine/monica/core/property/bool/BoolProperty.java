@@ -59,6 +59,7 @@ public class BoolProperty extends AbstractProperty<Boolean> {
         return calcLocker;
     }
 
+    @Override
     @UnOverridable
     protected void getCalcWriteLock() {
         while (true) {
@@ -74,30 +75,11 @@ public class BoolProperty extends AbstractProperty<Boolean> {
         }
     }
 
+    @Override
     @UnOverridable
     protected void unlockCalcWriteLock() {
         isCalc = false;
         calcLocker.writeLock().unlock();
-    }
-
-    public final boolean getDefaultValue() {
-        return defaultVal;
-    }
-
-    public final void setDefaultValue(boolean val) {
-        getCalcWriteLock();
-        this.defaultVal = val;
-        unlockCalcWriteLock();
-    }
-
-    public final boolean getOffsetValue() {
-        return offsetVal;
-    }
-
-    public final void setOffsetValue(boolean val) {
-        getCalcWriteLock();
-        this.offsetVal = val;
-        unlockCalcWriteLock();
     }
 
     private EffectPointer addAdditionValue(AbstractEffect<Boolean> e) {
@@ -174,6 +156,7 @@ public class BoolProperty extends AbstractProperty<Boolean> {
         }
     }
 
+    @Override
     public final void removeEffect(final StringID sid) {
         if (sid == null)
             throw new NullPointerException("The StringID is null.");
@@ -212,6 +195,7 @@ public class BoolProperty extends AbstractProperty<Boolean> {
         }
     }
 
+    @Override
     public final void removeEffect(EffectPointer pointer) {
         if (pointer == null)
             throw new NullPointerException("The EffectPointer is null.");
@@ -226,19 +210,6 @@ public class BoolProperty extends AbstractProperty<Boolean> {
             pointer.delete();
         } finally {
             unlockCalcWriteLock();
-        }
-    }
-
-    public final PropertyAdjustment<Boolean> getAdjustment() {
-        switch (hasAdjustment) {
-            case PRO_ADJ_NONE:
-                return null;
-            case PRO_ADJ_ADJ:
-                return adjustment;
-            case PRO_ADJ_PAR:
-                return parentProperty;
-            default:
-                return null;
         }
     }
 

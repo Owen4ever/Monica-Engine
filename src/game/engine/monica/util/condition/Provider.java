@@ -22,15 +22,10 @@
  * THE SOFTWARE.
  */
 
-package game.engine.monica.core.condition;
+package game.engine.monica.util.condition;
 
 @FunctionalInterface
-public interface OneCondition extends ConditionInterface {
+public interface Provider<T> {
 
-    @Override
-    default int count() {
-        return 1;
-    }
-
-    boolean match(Object obj);
+    T get();
 }

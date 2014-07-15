@@ -24,26 +24,40 @@
 
 package game.engine.monica.core.element;
 
-public abstract class AbstractElementSystem {
+import game.engine.monica.util.StringID;
+
+public final class ElementSystem {
 
     private static final long serialVersionUID = 46274354282777902L;
 
-    public AbstractElementSystem(String name, Energy energy, ElementList elements, AbstractElementSystem basedOn) {
-        if (name == null || name.isEmpty())
-            throw new NullPointerException("ElementSystem name is null.");
+    public ElementSystem(StringID id, String name, Energy energy,
+            ElementList elements, ElementSystem basedOn) {
+        if (id == null)
+            throw new NullPointerException("The id is null.");
         if (energy == null)
-            throw new NullPointerException("Energy is null.");
+            throw new NullPointerException("The Energy is null.");
         if (elements == null)
-            throw new NullPointerException("ElementList is null.");
-        this.name = name;
+            throw new NullPointerException("The ElementList is null.");
+        this.id = id;
+        setName(name);
         this.energy = energy;
         this.elements = elements;
         this.hasBasedElementSystem = basedOn != null;
         this.basedOn = basedOn;
     }
 
+    public final StringID getID() {
+        return id;
+    }
+
     public final String getName() {
         return name;
+    }
+
+    public final void setName(String name) {
+        if (name == null || name.isEmpty())
+            throw new NullPointerException("The name is null.");
+        this.name = name;
     }
 
     public final Energy getEnergy() {
@@ -58,26 +72,26 @@ public abstract class AbstractElementSystem {
         return hasBasedElementSystem;
     }
 
-    public final AbstractElementSystem getBasedElementSystem() {
+    public final ElementSystem getBasedElementSystem() {
         return basedOn;
     }
-
-    public abstract boolean canInteract(AbstractElementSystem s);
 
     public final boolean canTurnEnergyToBase() {
         return hasBasedElementSystem;
     }
 
-    public abstract int turnEnergyToBase(int energy);
+    public int turnEnergyToBase(int energy) {
+        return energy;
+    }
 
     @Override
     public boolean equals(Object obj) {
-        if (obj == null || !(obj instanceof AbstractElementSystem))
+        if (obj == null || !(obj instanceof ElementSystem))
             return false;
-        return equals((AbstractElementSystem) obj);
+        return equals((ElementSystem) obj);
     }
 
-    public boolean equals(AbstractElementSystem s) {
+    public boolean equals(ElementSystem s) {
         if (s == null)
             return false;
         return name.equals(s.name)
@@ -103,9 +117,10 @@ public abstract class AbstractElementSystem {
                 + (hasBasedElementSystem ? basedOn.getName() : "Null")
                 + " ]";
     }
-    private final String name;
+    private final StringID id;
+    private String name;
     private final Energy energy;
     private final ElementList elements;
     private final boolean hasBasedElementSystem;
-    private final AbstractElementSystem basedOn;
+    private final ElementSystem basedOn;
 }
