@@ -26,5 +26,5 @@ package game.engine.monica.util.condition;
 
 public interface OtherConditionInterface extends ConditionInterface {
 
-    boolean match(Object[] objs);
+    boolean match(Provider[] ps);
 }

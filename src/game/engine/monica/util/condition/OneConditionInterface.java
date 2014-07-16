@@ -32,5 +32,5 @@ public interface OneConditionInterface extends ConditionInterface {
         return 1;
     }
 
-    boolean match(Object obj);
+    boolean match(Provider p);
 }

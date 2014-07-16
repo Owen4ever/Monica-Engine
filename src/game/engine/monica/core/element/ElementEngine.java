@@ -24,6 +24,7 @@
 
 package game.engine.monica.core.element;
 
+import game.engine.monica.core.engine.CoreEngine;
 import game.engine.monica.util.FinalPair;
 import game.engine.monica.util.condition.SingleCondition;
 import game.engine.monica.util.StringID;
@@ -98,4 +99,68 @@ public final class ElementEngine {
             = new HashMap<>();
     private final HashMap<FinalPair<StringID, StringID>, SingleCondition> systemConditions
             = new HashMap<>();
+
+    public void addElementSystem(ElementSystem system) {
+        if (system == null)
+            throw new NullPointerException("The ElementSystem is null.");
+        if (!systems.containsKey(system.getID()))
+            systems.put(system.getID(), system);
+    }
+
+    public ElementSystem addElementSystem(StringID id, String name, Energy energy,
+            ElementList elements, ElementSystem basedOn) {
+        ElementSystem s = new ElementSystem(id, name, energy, elements, basedOn);
+        addElementSystem(s);
+        return s;
+    }
+
+    public ElementSystem getElementSystem(StringID id) {
+        if (id == null)
+            throw new NullPointerException("The StringID is null.");
+        return systems.get(id);
+    }
+
+    public boolean removeElementSystem(StringID id) {
+        if (id == null)
+            throw new NullPointerException("The StringID is null.");
+        return systems.remove(id) != null;
+    }
+    private final HashMap<StringID, ElementSystem> systems
+            = new HashMap<>(CoreEngine.getDefaultQuantily(), 0.2f);
+
+    public void addElement(AbstractElement element) {
+        if (element == null)
+            throw new NullPointerException("The ElementSystem is null.");
+        if (!elements.containsKey(element.getID()))
+            elements.put(element.getID(), element);
+    }
+
+    public AbstractElement addBasedElement(StringID id, String name,
+            int turnToEnergy) {
+        AbstractElement e = new BasedElement(id, name, turnToEnergy);
+        addElement(e);
+        return e;
+    }
+
+    public AbstractElement addCombinedElement(StringID id, String name,
+            FinalPair<AbstractElement, Integer> elementAndCount) {
+        AbstractElement e = new CombinedElement(id, name, elementAndCount);
+        addElement(e);
+        return e;
+    }
+
+    public AbstractElement getElement(StringID id) {
+        if (id == null)
+            throw new NullPointerException("The StringID is null.");
+        return elements.get(id);
+    }
+
+    public boolean removeElement(StringID id) {
+        if (id == null)
+            throw new NullPointerException("The StringID is null.");
+        return elements.remove(id) != null;
+    }
+    private final HashMap<StringID, AbstractElement> elements
+            = new HashMap<>(CoreEngine.getDefaultQuantily()
+                    * CoreEngine.getDefaultQuantily(), 0.2f);
 }

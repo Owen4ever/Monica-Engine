@@ -22,15 +22,17 @@
  * THE SOFTWARE.
  */
 
-package game.engine.monica.util.condition;
+package game.engine.monica.core.engine;
 
-@FunctionalInterface
-public interface TwoConditionInterface extends ConditionInterface {
+import java.util.function.Function;
 
-    @Override
-    default int count() {
-        return 2;
+public final class Inspector {
+
+    private Inspector() {
     }
 
-    boolean match(Provider p1, Provider p2);
+    public static <BeInspected> boolean inspect(BeInspected i,
+            Function<BeInspected, Boolean> f) {
+        return f.apply(i);
+    }
 }

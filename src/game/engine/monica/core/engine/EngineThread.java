@@ -70,10 +70,11 @@ public class EngineThread extends Thread {
         }
     }
 
-    public static void sleepAndNeedWakeUp(long delay) throws InterruptedException {
-        CoreEngine.engineThreadRouser.addNeedWakeUpThread(Thread.currentThread());
+    public static void sleepAndNeedWakeUp(long delay)
+            throws InterruptedException {
+        CoreEngine.getThreadRouser().addNeedWakeUpThread(Thread.currentThread());
         sleep(delay);
-        CoreEngine.engineThreadRouser.removeWakeUpThread(Thread.currentThread());
+        CoreEngine.getThreadRouser().removeWakeUpThread(Thread.currentThread());
     }
 
     private static int threadCount = 0;
@@ -82,5 +83,6 @@ public class EngineThread extends Thread {
         return threadCount++;
     }
 
-    private static final EngineThreadGroup TG_UNGROUPED = new EngineThreadGroup("Ungrouped");
+    private static final EngineThreadGroup TG_UNGROUPED
+            = new EngineThreadGroup("Ungrouped");
 }

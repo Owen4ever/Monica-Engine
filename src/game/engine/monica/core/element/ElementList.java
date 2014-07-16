@@ -26,17 +26,16 @@ package game.engine.monica.core.element;
 
 public final class ElementList {
 
-    public ElementList(AbstractElement e, AbstractElement... e2) {
+    public ElementList(AbstractElement... e) {
         if (e == null)
             throw new NullPointerException("Element is null.");
-        elements = new AbstractElement[e2.length + 1];
-        if (e2.length != 0)
-            for (int i = 0; i != e2.length; ++i)
-                if (e2[i] == null)
+        elements = new AbstractElement[e.length];
+        if (e.length != 0)
+            for (int i = 0; i != e.length; ++i)
+                if (e[i] == null)
                     throw new NullPointerException("Element is null.");
                 else
-                    elements[i + 1] = e2[i];
-        elements[0] = e;
+                    elements[i] = e[i];
     }
 
     public AbstractElement[] getElements() {

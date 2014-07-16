@@ -26,6 +26,7 @@ package game.engine.monica.core.engine;
 
 import game.engine.monica.core.datetime.DateTime;
 import game.engine.monica.core.datetime.WorldDate;
+import game.engine.monica.core.element.ElementEngine;
 import game.engine.monica.util.OMath;
 import game.engine.monica.util.StringID;
 import game.engine.monica.util.ThreadRouser;
@@ -142,7 +143,10 @@ public final class CoreEngine {
     private static transient long engineRunningTime = 0;
     private static transient long startTimingTime;
 
-    public static final ThreadRouser engineThreadRouser = new ThreadRouser();
+    public static ThreadRouser getThreadRouser() {
+        return engineThreadRouser;
+    }
+    private static final ThreadRouser engineThreadRouser = new ThreadRouser();
 
     public static void runThreadIfStart(Thread t) {
         if (isContinuing())
@@ -458,4 +462,9 @@ public final class CoreEngine {
             = new CopyOnWriteArrayList<>();
     private static final CopyOnWriteArrayList<String> strIds
             = new CopyOnWriteArrayList<>();
+
+    public static ElementEngine getElementEngine() {
+        return elementEngine;
+    }
+    private static final ElementEngine elementEngine = new ElementEngine();
 }

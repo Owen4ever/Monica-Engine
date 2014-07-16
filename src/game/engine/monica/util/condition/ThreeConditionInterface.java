@@ -32,5 +32,5 @@ public interface ThreeConditionInterface extends ConditionInterface {
         return 3;
     }
 
-    boolean match(Object o1, Object o2, Object o3);
+    boolean match(Provider p1, Provider p2, Provider p3);
 }
