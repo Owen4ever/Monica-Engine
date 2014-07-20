@@ -22,26 +22,28 @@
  * THE SOFTWARE.
  */
 
-package engine.monica.core.property.number;
+package engine.monica.core.map;
 
-import engine.monica.core.property.AbstractFixedEffect;
-import engine.monica.core.property.EffectType;
-import engine.monica.core.property.PropertyID;
-import engine.monica.util.StringID;
+import engine.monica.core.engine.CoreEngine;
+import engine.monica.util.LinkedPointer;
+import java.util.HashMap;
 
-public class NumberFixedEffect extends AbstractFixedEffect<Double> {
+public final class WorldFactory {
 
-    protected NumberFixedEffect(StringID id, PropertyID affectTo, double val) {
-        super(id, EffectType.TYPE_NUM_FIXED, affectTo, val);
+    public WorldFactory() {
     }
 
-    @Override
-    public NumberFixedEffect clone() {
-        return new NumberFixedEffect(id, affectTo, getValue());
+    public World createBy(ConfigInterface c) {
+        World w = new World(c);
+        pointer = pointer.linkNew();
+        worlds.put(pointer, w);
+        return w;
     }
 
-    public static NumberFixedEffect newFixedEffect(StringID id,
-            PropertyID affectTo, double val) {
-        return new NumberFixedEffect(id, affectTo, val);
+    public World getWorld(int index) {
+        return worlds.get(new LinkedPointer(index));
     }
+    private final HashMap<LinkedPointer, World> worlds
+            = new HashMap<>(CoreEngine.getDefaultQuantily(), 0.1f);
+    private LinkedPointer pointer = LinkedPointer.first();
 }

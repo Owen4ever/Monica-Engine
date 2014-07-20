@@ -22,26 +22,9 @@
  * THE SOFTWARE.
  */
 
-package engine.monica.core.property.number;
+package engine.monica.core.engine;
 
-import engine.monica.core.property.AbstractFixedEffect;
-import engine.monica.core.property.EffectType;
-import engine.monica.core.property.PropertyID;
-import engine.monica.util.StringID;
+public enum ProcessType {
 
-public class NumberFixedEffect extends AbstractFixedEffect<Double> {
-
-    protected NumberFixedEffect(StringID id, PropertyID affectTo, double val) {
-        super(id, EffectType.TYPE_NUM_FIXED, affectTo, val);
-    }
-
-    @Override
-    public NumberFixedEffect clone() {
-        return new NumberFixedEffect(id, affectTo, getValue());
-    }
-
-    public static NumberFixedEffect newFixedEffect(StringID id,
-            PropertyID affectTo, double val) {
-        return new NumberFixedEffect(id, affectTo, val);
-    }
+    CREATE, DESTROY, COALESCE, AFFECT
 }

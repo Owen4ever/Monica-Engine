@@ -22,11 +22,11 @@
  * THE SOFTWARE.
  */
 
-package engine.monica.core.property;
+package engine.monica.util;
 
-public final class EffectPointer {
+public final class LinkedPointer {
 
-    public EffectPointer(int pointer) {
+    public LinkedPointer(int pointer) {
         this.pointer = pointer;
     }
 
@@ -34,11 +34,11 @@ public final class EffectPointer {
         return pointer;
     }
 
-    public EffectPointer previous() {
+    public LinkedPointer previous() {
         return previous;
     }
 
-    public EffectPointer next() {
+    public LinkedPointer next() {
         return next;
     }
 
@@ -58,8 +58,8 @@ public final class EffectPointer {
             next.decrease();
     }
 
-    public EffectPointer linkNew() {
-        EffectPointer newOne = new EffectPointer(pointer + 1);
+    public LinkedPointer linkNew() {
+        LinkedPointer newOne = new LinkedPointer(pointer + 1);
         this.next = newOne;
         newOne.previous = this;
         return newOne;
@@ -71,7 +71,7 @@ public final class EffectPointer {
             return true;
         if (obj == null || obj.getClass() != getClass())
             return false;
-        EffectPointer p = (EffectPointer) obj;
+        LinkedPointer p = (LinkedPointer) obj;
         return pointer == p.pointer;
     }
 
@@ -85,10 +85,10 @@ public final class EffectPointer {
         return Integer.toString(pointer, 10);
     }
     int pointer;
-    EffectPointer previous = null;
-    EffectPointer next = null;
+    private LinkedPointer previous = null;
+    private LinkedPointer next = null;
 
-    public static EffectPointer newFirstPointer() {
-        return new EffectPointer(-1);
+    public static LinkedPointer first() {
+        return new LinkedPointer(-1);
     }
 }

@@ -29,19 +29,20 @@ import java.util.HashSet;
 
 public final class ElementList {
 
+    @SafeVarargs
     public ElementList(AbstractElement... e) {
         if (e == null)
             throw new NullPointerException("Element is null.");
         elements = new AbstractElement[e.length];
-        HashSet temp = new HashSet(e.length, 0f);
+        HashSet<AbstractElement> temp = new HashSet<>(e.length, 1f);
         if (e.length != 0)
             for (int i = 0; i != e.length; ++i)
                 if (e[i] == null)
                     throw new NullPointerException("Element is null.");
                 else {
-                    if (!temp.add(e))
+                    if (!temp.add(e[i]))
                         throw new AlreadyExistsInContainerException("The element"
-                                + " has already exists in the array.");
+                                + " has already existed in the array.");
                     elements[i] = e[i];
                 }
         temp = null;

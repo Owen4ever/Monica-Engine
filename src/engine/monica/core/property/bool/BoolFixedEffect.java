@@ -24,22 +24,21 @@
 
 package engine.monica.core.property.bool;
 
+import engine.monica.core.property.AbstractFixedEffect;
 import engine.monica.core.property.EffectType;
 import engine.monica.core.property.PropertyID;
 import engine.monica.util.StringID;
 
-public class BoolFixedEffect extends AbstractBoolEffect {
+public class BoolFixedEffect extends AbstractFixedEffect<Boolean> {
 
     protected BoolFixedEffect(StringID id, PropertyID affectTo, boolean val) {
-        super(id, EffectType.TYPE_BOOL_FIXED, affectTo, v -> val);
-        this.val = val;
+        super(id, EffectType.TYPE_BOOL_FIXED, affectTo, val);
     }
 
     @Override
     public BoolFixedEffect clone() {
-        return new BoolFixedEffect(id, affectTo, val);
+        return new BoolFixedEffect(id, affectTo, getValue());
     }
-    private boolean val;
 
     public static BoolFixedEffect newFixedEffect(StringID id,
             PropertyID affectTo, boolean val) {

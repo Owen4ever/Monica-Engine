@@ -30,8 +30,9 @@ public class BasedElement extends AbstractElement {
 
     private static final long serialVersionUID = 46274354281733422L;
 
-    public BasedElement(StringID id, String name, int turnToEnergy) {
-        super(id, name, turnToEnergy);
+    public BasedElement(StringID systemId,
+            StringID id, String name, int turnToEnergy) {
+        super(systemId, id, name, turnToEnergy);
     }
 
     @Override

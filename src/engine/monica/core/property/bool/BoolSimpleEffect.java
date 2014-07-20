@@ -24,12 +24,13 @@
 
 package engine.monica.core.property.bool;
 
+import engine.monica.core.property.AbstractEffect;
 import engine.monica.core.property.EffectType;
 import engine.monica.core.property.EffectorInterface;
 import engine.monica.core.property.PropertyID;
 import engine.monica.util.StringID;
 
-public class BoolSimpleEffect extends AbstractBoolEffect {
+public class BoolSimpleEffect extends AbstractEffect<Boolean> {
 
     protected BoolSimpleEffect(StringID id, PropertyID affectTo,
             EffectorInterface<Boolean> effector) {

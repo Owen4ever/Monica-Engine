@@ -29,15 +29,16 @@ import engine.monica.core.engine.EngineThread;
 import engine.monica.core.engine.EngineThreadGroup;
 import engine.monica.core.property.AbstractBuffEffect;
 import engine.monica.core.property.AbstractEffect;
+import engine.monica.core.property.AbstractFixedEffect;
 import engine.monica.core.property.AbstractIntervalBuffEffect;
 import engine.monica.core.property.AbstractIntervalLongTimeEffect;
 import engine.monica.core.property.AbstractLongTimeEffect;
 import engine.monica.core.property.AbstractProperty;
-import engine.monica.core.property.EffectPointer;
 import engine.monica.core.property.ErrorTypeException;
 import engine.monica.core.property.ParentPropertyInterface;
 import engine.monica.core.property.PropertyAdjustment;
 import engine.monica.core.property.PropertyID;
+import engine.monica.util.LinkedPointer;
 import engine.monica.util.StringID;
 import engine.monica.util.Wrapper;
 import engine.monica.util.annotation.UnOverridable;
@@ -67,8 +68,7 @@ public class BoolProperty extends AbstractProperty<Boolean> {
                 if (calcLocker.getWriteHoldCount() != 1)
                     calcLocker.writeLock().unlock();
                 else if (hasAdjustment() == PRO_ADJ_PAR
-                        && ((BoolProperty) ((AbstractProperty) parentProperty))
-                                .calcLocker.isWriteLocked())
+                        && ((BoolProperty) ((AbstractProperty) parentProperty)).calcLocker.isWriteLocked())
                     calcLocker.writeLock().unlock();
                 else
                     return;
@@ -82,13 +82,13 @@ public class BoolProperty extends AbstractProperty<Boolean> {
         calcLocker.writeLock().unlock();
     }
 
-    private EffectPointer addAdditionValue(AbstractEffect<Boolean> e) {
+    private LinkedPointer addAdditionValue(AbstractEffect<Boolean> e) {
         currentEffectPointer = currentEffectPointer.linkNew();
         effects.put(currentEffectPointer, e);
         return currentEffectPointer;
     }
 
-    private EffectPointer addBuffEffect(AbstractBuffEffect<Boolean> e) {
+    private LinkedPointer addBuffEffect(AbstractBuffEffect<Boolean> e) {
         currentEffectPointer = currentEffectPointer.linkNew();
         effects.put(currentEffectPointer, e);
         BuffRunnable r = new BuffRunnable(currentEffectPointer);
@@ -100,7 +100,7 @@ public class BoolProperty extends AbstractProperty<Boolean> {
         return currentEffectPointer;
     }
 
-    private EffectPointer addLongTimeEffect(AbstractLongTimeEffect<Boolean> e) {
+    private LinkedPointer addLongTimeEffect(AbstractLongTimeEffect<Boolean> e) {
         currentEffectPointer = currentEffectPointer.linkNew();
         effects.put(currentEffectPointer, e);
         LTRunnable r = new LTRunnable(currentEffectPointer);
@@ -116,7 +116,7 @@ public class BoolProperty extends AbstractProperty<Boolean> {
     protected static final EngineThreadGroup TG_PROPERTY_NUM
             = new EngineThreadGroup("BoolProperty Thread Group");
 
-    private void setFixedEffect(BoolFixedEffect e) {
+    private void setFixedEffect(AbstractFixedEffect<Boolean> e) {
         fixedEffect = e;
         isFixed = true;
     }
@@ -127,7 +127,7 @@ public class BoolProperty extends AbstractProperty<Boolean> {
     }
 
     @Override
-    public final EffectPointer addEffect(AbstractEffect<Boolean> e) {
+    public final LinkedPointer addEffect(AbstractEffect<Boolean> e) {
         if (e == null)
             throw new NullPointerException("The effect is null.");
         if (!e.affectTo().equals(type))
@@ -166,7 +166,7 @@ public class BoolProperty extends AbstractProperty<Boolean> {
                 isFixed = false;
             effects.entrySet().parallelStream().forEach(entry -> {
                 if (entry.getValue().getID().equals(sid)) {
-                    EffectPointer p = entry.getKey();
+                    LinkedPointer p = entry.getKey();
                     AbstractEffect<Boolean> e = entry.getValue();
                     effects.remove(p);
                     tempEffects.clear();
@@ -196,7 +196,7 @@ public class BoolProperty extends AbstractProperty<Boolean> {
     }
 
     @Override
-    public final void removeEffect(EffectPointer pointer) {
+    public final void removeEffect(LinkedPointer pointer) {
         if (pointer == null)
             throw new NullPointerException("The EffectPointer is null.");
         getCalcWriteLock();
@@ -335,17 +335,17 @@ public class BoolProperty extends AbstractProperty<Boolean> {
                 .append(", Total value = ").append(getTotalValue())
                 .append(strAdjustment).toString();
     }
-    private final ConcurrentHashMap<EffectPointer, AbstractEffect<Boolean>> effects
+    private final ConcurrentHashMap<LinkedPointer, AbstractEffect<Boolean>> effects
             = new ConcurrentHashMap<>(CoreEngine.getDefaultQuantily(), .5f);
-    private transient final HashMap<EffectPointer, AbstractEffect<Boolean>> tempEffects
+    private transient final HashMap<LinkedPointer, AbstractEffect<Boolean>> tempEffects
             = new HashMap<>(CoreEngine.getDefaultQuantily(), .5f);
-    private final HashMap<EffectPointer, Runnable> bltThreads
+    private final HashMap<LinkedPointer, Runnable> bltThreads
             = new HashMap<>(CoreEngine.getDefaultQuantily(), .2f);
-    private transient final HashMap<EffectPointer, Runnable> tempBltThreads
+    private transient final HashMap<LinkedPointer, Runnable> tempBltThreads
             = new HashMap<>(CoreEngine.getDefaultQuantily(), .2f);
-    protected EffectPointer currentEffectPointer = EffectPointer.newFirstPointer();
+    protected LinkedPointer currentEffectPointer = LinkedPointer.first();
     private boolean isFixed = false;
-    protected BoolFixedEffect fixedEffect;
+    protected AbstractFixedEffect<Boolean> fixedEffect;
     protected transient volatile boolean isCalc = false;
     private final transient ReentrantReadWriteLock calcLocker
             = new ReentrantReadWriteLock();
@@ -354,7 +354,7 @@ public class BoolProperty extends AbstractProperty<Boolean> {
     private final class BuffRunnable
             implements Comparable<BuffRunnable>, Runnable {
 
-        public BuffRunnable(EffectPointer pointer) {
+        public BuffRunnable(LinkedPointer pointer) {
             this.pointer = pointer;
         }
 
@@ -452,7 +452,7 @@ public class BoolProperty extends AbstractProperty<Boolean> {
                         + " a null BoolBuffRunnable.");
             return Integer.compare(pointer.pointer(), r.pointer.pointer());
         }
-        protected EffectPointer pointer;
+        protected LinkedPointer pointer;
         private boolean isInStartingTime;
         private int startingTimeAlready;
         private int alreadyTime = 0;
@@ -462,7 +462,7 @@ public class BoolProperty extends AbstractProperty<Boolean> {
     private final class LTRunnable
             implements Comparable<LTRunnable>, Runnable {
 
-        public LTRunnable(EffectPointer pointer) {
+        public LTRunnable(LinkedPointer pointer) {
             this.pointer = pointer;
         }
 
@@ -518,7 +518,7 @@ public class BoolProperty extends AbstractProperty<Boolean> {
         }
         private boolean isInStartingTime;
         private int startingTimeAlready;
-        protected EffectPointer pointer;
+        protected LinkedPointer pointer;
         private int already = 0;
     }
 }

@@ -28,15 +28,23 @@ import engine.monica.util.StringID;
 
 public abstract class AbstractElement {
 
-    protected AbstractElement(StringID id, String name, int turnToEnergy) {
+    protected AbstractElement(StringID systemId,
+            StringID id, String name, int turnToEnergy) {
+        if (systemId == null)
+            throw new NullPointerException("The ElementSystem id is null.");
         if (id == null)
             throw new NullPointerException("The id is null.");
+        this.systemId = systemId;
         this.id = id;
         setName(name);
         setValueTurnToEnergy(turnToEnergy);
     }
 
     public abstract boolean isCombined();
+
+    public final StringID getSystemID() {
+        return systemId;
+    }
 
     public final StringID getID() {
         return id;
@@ -62,6 +70,7 @@ public abstract class AbstractElement {
                     + " which turns to energy smaller than 1.");
         this.turnToEnergy = val;
     }
+    private final StringID systemId;
     private final StringID id;
     private String name;
     private int turnToEnergy;

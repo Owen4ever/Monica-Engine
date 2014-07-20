@@ -22,18 +22,9 @@
  * THE SOFTWARE.
  */
 
-package engine.monica.core.property.bool;
+package engine.monica.util.condition;
 
-import engine.monica.core.property.AbstractEffect;
-import engine.monica.core.property.EffectType;
-import engine.monica.core.property.EffectorInterface;
-import engine.monica.core.property.PropertyID;
-import engine.monica.util.StringID;
+public interface ProcesserInterface {
 
-public abstract class AbstractBoolEffect extends AbstractEffect<Boolean> {
-
-    protected AbstractBoolEffect(StringID id, EffectType type,
-            PropertyID affectTo, EffectorInterface<Boolean> effector) {
-        super(id, type, affectTo, effector);
-    }
+    boolean process(ProviderType type);
 }

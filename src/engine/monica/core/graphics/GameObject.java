@@ -22,26 +22,42 @@
  * THE SOFTWARE.
  */
 
-package engine.monica.core.property.number;
+package engine.monica.core.graphics;
 
-import engine.monica.core.property.AbstractFixedEffect;
-import engine.monica.core.property.EffectType;
-import engine.monica.core.property.PropertyID;
-import engine.monica.util.StringID;
+import engine.monica.core.map.VisibleLevel;
+import engine.monica.util.VectorInterface;
 
-public class NumberFixedEffect extends AbstractFixedEffect<Double> {
+public interface GameObject {
 
-    protected NumberFixedEffect(StringID id, PropertyID affectTo, double val) {
-        super(id, EffectType.TYPE_NUM_FIXED, affectTo, val);
+    VisibleLevel getVisibleLevel();
+
+    default boolean isVisible() {
+        return getVisibleLevel().isVisible();
     }
 
-    @Override
-    public NumberFixedEffect clone() {
-        return new NumberFixedEffect(id, affectTo, getValue());
+    GameObject getParent();
+
+    void setParent(GameObject obj);
+
+    default boolean hasParent() {
+        return getParent() != null;
     }
 
-    public static NumberFixedEffect newFixedEffect(StringID id,
-            PropertyID affectTo, double val) {
-        return new NumberFixedEffect(id, affectTo, val);
+    default <L extends VectorInterface> L getAbsoluteLocation() {
+        GameObject parent = getParent();
+        return parent == null ? getLocation()
+                : parent.getAbsoluteLocation().add(getLocation());
     }
+
+    <L extends VectorInterface> L getLocation();
+
+    <L extends VectorInterface> void setLocation(L v);
+
+    <S extends VectorInterface> S getSize();
+
+    <S extends VectorInterface> void setSie(S v);
+
+    double getScale();
+
+    void setScale(double d);
 }

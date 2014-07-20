@@ -22,26 +22,47 @@
  * THE SOFTWARE.
  */
 
-package engine.monica.core.property.number;
+package engine.monica.core.map;
 
-import engine.monica.core.property.AbstractFixedEffect;
-import engine.monica.core.property.EffectType;
-import engine.monica.core.property.PropertyID;
 import engine.monica.util.StringID;
+import java.util.Set;
 
-public class NumberFixedEffect extends AbstractFixedEffect<Double> {
+public final class World implements ConfigInterface {
 
-    protected NumberFixedEffect(StringID id, PropertyID affectTo, double val) {
-        super(id, EffectType.TYPE_NUM_FIXED, affectTo, val);
+    public World(ConfigInterface c) {
+        if (c == null)
+            throw new NullPointerException("The world config is null.");
+        config = c;
     }
 
     @Override
-    public NumberFixedEffect clone() {
-        return new NumberFixedEffect(id, affectTo, getValue());
+    public <T> void set(StringID key, T value) {
+        config.set(key, value);
     }
 
-    public static NumberFixedEffect newFixedEffect(StringID id,
-            PropertyID affectTo, double val) {
-        return new NumberFixedEffect(id, affectTo, val);
+    @Override
+    public <T> T get(StringID key) {
+        return config.get(key);
     }
+
+    @Override
+    public boolean containKey(StringID id) {
+        return config.containKey(id);
+    }
+
+    @Override
+    public boolean remove(StringID key) {
+        return config.remove(key);
+    }
+
+    @Override
+    public void clearConfig() {
+        config.clearConfig();
+    }
+
+    @Override
+    public Set<StringID> keySet() {
+        return config.keySet();
+    }
+    private final ConfigInterface config;
 }

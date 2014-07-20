@@ -24,12 +24,13 @@
 
 package engine.monica.core.property.number;
 
+import engine.monica.core.property.AbstractEffect;
 import engine.monica.core.property.EffectType;
 import engine.monica.core.property.EffectorInterface;
 import engine.monica.core.property.PropertyID;
 import engine.monica.util.StringID;
 
-public class NumberSimpleEffect extends AbstractNumberEffect {
+public class NumberSimpleEffect extends AbstractEffect<Double> {
 
     protected NumberSimpleEffect(StringID id, PropertyID affectTo,
             EffectorInterface<Double> effector) {

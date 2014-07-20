@@ -22,18 +22,11 @@
  * THE SOFTWARE.
  */
 
-package engine.monica.core.property.number;
+package engine.monica.util;
 
-import engine.monica.core.property.AbstractEffect;
-import engine.monica.core.property.EffectType;
-import engine.monica.core.property.EffectorInterface;
-import engine.monica.core.property.PropertyID;
-import engine.monica.util.StringID;
+public interface VectorInterface {
 
-public abstract class AbstractNumberEffect extends AbstractEffect<Double> {
+    <V extends VectorInterface> V add(V v);
 
-    protected AbstractNumberEffect(StringID id, EffectType type,
-            PropertyID affectTo, EffectorInterface<Double> effector) {
-        super(id, type, affectTo, effector);
-    }
+    <V extends VectorInterface> V substract(V v);
 }

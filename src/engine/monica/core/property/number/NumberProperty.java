@@ -29,15 +29,16 @@ import engine.monica.core.engine.EngineThread;
 import engine.monica.core.engine.EngineThreadGroup;
 import engine.monica.core.property.AbstractBuffEffect;
 import engine.monica.core.property.AbstractEffect;
+import engine.monica.core.property.AbstractFixedEffect;
 import engine.monica.core.property.AbstractIntervalBuffEffect;
 import engine.monica.core.property.AbstractIntervalLongTimeEffect;
 import engine.monica.core.property.AbstractLongTimeEffect;
 import engine.monica.core.property.AbstractProperty;
-import engine.monica.core.property.EffectPointer;
 import engine.monica.core.property.ErrorTypeException;
 import engine.monica.core.property.ParentPropertyInterface;
 import engine.monica.core.property.PropertyAdjustment;
 import engine.monica.core.property.PropertyID;
+import engine.monica.util.LinkedPointer;
 import engine.monica.util.StringID;
 import engine.monica.util.Wrapper;
 import engine.monica.util.annotation.UnOverridable;
@@ -81,13 +82,13 @@ public class NumberProperty extends AbstractProperty<Double> {
         calcLocker.writeLock().unlock();
     }
 
-    private EffectPointer addAdditionValue(AbstractEffect<Double> e) {
+    private LinkedPointer addAdditionValue(AbstractEffect<Double> e) {
         currentEffectPointer = currentEffectPointer.linkNew();
         effects.put(currentEffectPointer, e);
         return currentEffectPointer;
     }
 
-    private EffectPointer addBuffEffect(AbstractBuffEffect<Double> e) {
+    private LinkedPointer addBuffEffect(AbstractBuffEffect<Double> e) {
         currentEffectPointer = currentEffectPointer.linkNew();
         effects.put(currentEffectPointer, e);
         BuffRunnable r = new BuffRunnable(currentEffectPointer);
@@ -99,7 +100,7 @@ public class NumberProperty extends AbstractProperty<Double> {
         return currentEffectPointer;
     }
 
-    private EffectPointer addLongTimeEffect(AbstractLongTimeEffect<Double> e) {
+    private LinkedPointer addLongTimeEffect(AbstractLongTimeEffect<Double> e) {
         currentEffectPointer = currentEffectPointer.linkNew();
         effects.put(currentEffectPointer, e);
         LTRunnable r = new LTRunnable(currentEffectPointer);
@@ -115,7 +116,7 @@ public class NumberProperty extends AbstractProperty<Double> {
     protected static final EngineThreadGroup TG_PROPERTY_NUM
             = new EngineThreadGroup("NumberProperty Thread Group");
 
-    private void setFixedEffect(NumberFixedEffect e) {
+    private void setFixedEffect(AbstractFixedEffect<Double> e) {
         fixedEffect = e;
         isFixed = true;
     }
@@ -126,7 +127,7 @@ public class NumberProperty extends AbstractProperty<Double> {
     }
 
     @Override
-    public final EffectPointer addEffect(AbstractEffect<Double> e) {
+    public final LinkedPointer addEffect(AbstractEffect<Double> e) {
         if (e == null)
             throw new NullPointerException("The effect is null.");
         if (!e.affectTo().equals(type))
@@ -166,7 +167,7 @@ public class NumberProperty extends AbstractProperty<Double> {
                 isFixed = false;
             effects.entrySet().parallelStream().forEach(entry -> {
                 if (entry.getValue().getID().equals(sid)) {
-                    EffectPointer p = entry.getKey();
+                    LinkedPointer p = entry.getKey();
                     AbstractEffect<Double> e = entry.getValue();
                     effects.remove(p);
                     tempEffects.clear();
@@ -197,7 +198,7 @@ public class NumberProperty extends AbstractProperty<Double> {
     }
 
     @Override
-    public final void removeEffect(EffectPointer pointer) {
+    public final void removeEffect(LinkedPointer pointer) {
         if (pointer == null)
             throw new NullPointerException("The EffectPointer is null.");
         getCalcWriteLock();
@@ -272,21 +273,21 @@ public class NumberProperty extends AbstractProperty<Double> {
                 Wrapper<Double> tval = new Wrapper<>(defaultVal + offsetVal);
                 switch (hasAdjustment) {
                     case -1:
-                        effects.forEach((EffectPointer p,
+                        effects.forEach((LinkedPointer p,
                                 AbstractEffect<Double> e) -> {
                                     tval.pack = e.affect(tval.pack);
                                 });
                         totalVal = tval.pack;
                         break;
                     case 0:
-                        effects.forEach((EffectPointer p,
+                        effects.forEach((LinkedPointer p,
                                 AbstractEffect<Double> e) -> {
                                     tval.pack = adjustment
                                     .adjust(e.affect(tval.pack));
                                 });
                         break;
                     case 1:
-                        effects.forEach((EffectPointer p,
+                        effects.forEach((LinkedPointer p,
                                 AbstractEffect<Double> e) -> {
                                     parentProperty.getTotalValue();
                                     tval.pack = parentProperty
@@ -339,17 +340,17 @@ public class NumberProperty extends AbstractProperty<Double> {
                 .append(", Total value = ").append(getTotalValue())
                 .append(strAdjustment).toString();
     }
-    private final ConcurrentHashMap<EffectPointer, AbstractEffect<Double>> effects
+    private final ConcurrentHashMap<LinkedPointer, AbstractEffect<Double>> effects
             = new ConcurrentHashMap<>(CoreEngine.getDefaultQuantily(), .5f);
-    private transient final HashMap<EffectPointer, AbstractEffect<Double>> tempEffects
+    private transient final HashMap<LinkedPointer, AbstractEffect<Double>> tempEffects
             = new HashMap<>(CoreEngine.getDefaultQuantily(), .5f);
-    private final HashMap<EffectPointer, Runnable> bltThreads
+    private final HashMap<LinkedPointer, Runnable> bltThreads
             = new HashMap<>(CoreEngine.getDefaultQuantily(), .2f);
-    private transient final HashMap<EffectPointer, Runnable> tempBltThreads
+    private transient final HashMap<LinkedPointer, Runnable> tempBltThreads
             = new HashMap<>(CoreEngine.getDefaultQuantily(), .2f);
-    protected EffectPointer currentEffectPointer = EffectPointer.newFirstPointer();
+    protected LinkedPointer currentEffectPointer = LinkedPointer.first();
     private boolean isFixed = false;
-    protected NumberFixedEffect fixedEffect;
+    protected AbstractFixedEffect<Double> fixedEffect;
     protected transient volatile boolean isCalc = false;
     private final transient ReentrantReadWriteLock calcLocker
             = new ReentrantReadWriteLock();
@@ -358,7 +359,7 @@ public class NumberProperty extends AbstractProperty<Double> {
     private final class BuffRunnable
             implements Comparable<BuffRunnable>, Runnable {
 
-        public BuffRunnable(EffectPointer pointer) {
+        public BuffRunnable(LinkedPointer pointer) {
             this.pointer = pointer;
         }
 
@@ -456,7 +457,7 @@ public class NumberProperty extends AbstractProperty<Double> {
                         + " a null NumberBuffRunnable.");
             return Integer.compare(pointer.pointer(), r.pointer.pointer());
         }
-        protected EffectPointer pointer;
+        protected LinkedPointer pointer;
         private boolean isInStartingTime;
         private int startingTimeAlready;
         private int alreadyTime = 0;
@@ -466,7 +467,7 @@ public class NumberProperty extends AbstractProperty<Double> {
     private final class LTRunnable
             implements Comparable<LTRunnable>, Runnable {
 
-        public LTRunnable(EffectPointer pointer) {
+        public LTRunnable(LinkedPointer pointer) {
             this.pointer = pointer;
         }
 
@@ -522,7 +523,7 @@ public class NumberProperty extends AbstractProperty<Double> {
         }
         private boolean isInStartingTime;
         private int startingTimeAlready;
-        protected EffectPointer pointer;
+        protected LinkedPointer pointer;
         private int already = 0;
     }
 }

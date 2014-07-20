@@ -26,18 +26,18 @@ package engine.monica.util;
 
 public class Type<T> {
 
-    public Type(T k) {
-        key = k;
+    public Type(T t) {
+        type = t;
     }
 
-    public final T set(T k) {
-        T t = key;
-        key = k;
-        return t;
+    public final T set(T t) {
+        T tt = type;
+        type = t;
+        return tt;
     }
 
     public final T get() {
-        return key;
+        return type;
     }
 
     @Override
@@ -46,14 +46,14 @@ public class Type<T> {
             return false;
         @SuppressWarnings("unchecked")
         Type<T> t = (Type<T>) obj;
-        if (key == null)
-            return t.key == null;
-        return key.equals(t.key);
+        if (type == null)
+            return t.type == null;
+        return type.equals(t.type);
     }
 
     @Override
     public int hashCode() {
-        return (key == null ? -1024 : key.hashCode());
+        return (type == null ? -1024 : type.hashCode());
     }
-    private T key;
+    private T type;
 }

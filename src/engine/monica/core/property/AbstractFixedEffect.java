@@ -22,26 +22,26 @@
  * THE SOFTWARE.
  */
 
-package engine.monica.core.property.number;
+package engine.monica.core.property;
 
-import engine.monica.core.property.AbstractFixedEffect;
-import engine.monica.core.property.EffectType;
-import engine.monica.core.property.PropertyID;
 import engine.monica.util.StringID;
+import engine.monica.util.Wrapper;
 
-public class NumberFixedEffect extends AbstractFixedEffect<Double> {
+public abstract class AbstractFixedEffect<T> extends AbstractEffect<T> {
 
-    protected NumberFixedEffect(StringID id, PropertyID affectTo, double val) {
-        super(id, EffectType.TYPE_NUM_FIXED, affectTo, val);
+    public AbstractFixedEffect(StringID id, EffectType type,
+            PropertyID affectTo, T val) {
+        super(id, type, affectTo, v -> null);
+        this.val = new Wrapper<>(val);
+        setEffector(v -> this.val.pack);
     }
 
-    @Override
-    public NumberFixedEffect clone() {
-        return new NumberFixedEffect(id, affectTo, getValue());
+    public T getValue() {
+        return val.pack;
     }
 
-    public static NumberFixedEffect newFixedEffect(StringID id,
-            PropertyID affectTo, double val) {
-        return new NumberFixedEffect(id, affectTo, val);
+    public void setValue(T t) {
+        val.pack = t;
     }
+    private final Wrapper<T> val;
 }

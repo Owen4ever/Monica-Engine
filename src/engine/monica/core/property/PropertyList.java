@@ -25,6 +25,7 @@
 package engine.monica.core.property;
 
 import engine.monica.core.engine.CoreEngine;
+import engine.monica.util.LinkedPointer;
 import engine.monica.util.StringID;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -56,7 +57,8 @@ public final class PropertyList {
         return properties.get(id);
     }
 
-    public EffectPointer addEffect(PropertyID id, AbstractEffect e) {
+    @SuppressWarnings("unchecked")
+    public LinkedPointer addEffect(PropertyID id, AbstractEffect e) {
         return properties.get(id).addEffect(e);
     }
 
@@ -64,7 +66,7 @@ public final class PropertyList {
         properties.get(id).removeEffect(effectId);
     }
 
-    public void removeEffect(PropertyID id, EffectPointer pointer) {
+    public void removeEffect(PropertyID id, LinkedPointer pointer) {
         properties.get(id).removeEffect(pointer);
     }
 

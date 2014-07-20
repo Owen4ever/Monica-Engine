@@ -24,6 +24,7 @@
 
 package engine.monica.core.property;
 
+import engine.monica.util.LinkedPointer;
 import engine.monica.util.StringID;
 
 public abstract class AbstractProperty<T>
@@ -75,11 +76,11 @@ public abstract class AbstractProperty<T>
 
     public abstract boolean isFixed();
 
-    public abstract EffectPointer addEffect(AbstractEffect<T> effect);
+    public abstract LinkedPointer addEffect(AbstractEffect<T> effect);
 
     public abstract void removeEffect(StringID id);
 
-    public abstract void removeEffect(EffectPointer pointer);
+    public abstract void removeEffect(LinkedPointer pointer);
 
     public final int hasAdjustment() {
         return hasAdjustment;

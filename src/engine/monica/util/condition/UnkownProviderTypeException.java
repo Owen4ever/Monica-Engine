@@ -22,26 +22,16 @@
  * THE SOFTWARE.
  */
 
-package engine.monica.core.property.number;
+package engine.monica.util.condition;
 
-import engine.monica.core.property.AbstractFixedEffect;
-import engine.monica.core.property.EffectType;
-import engine.monica.core.property.PropertyID;
-import engine.monica.util.StringID;
+public class UnkownProviderTypeException extends RuntimeException {
 
-public class NumberFixedEffect extends AbstractFixedEffect<Double> {
+    private static final long serialVersionUID = 968734952833L;
 
-    protected NumberFixedEffect(StringID id, PropertyID affectTo, double val) {
-        super(id, EffectType.TYPE_NUM_FIXED, affectTo, val);
+    public UnkownProviderTypeException() {
     }
 
-    @Override
-    public NumberFixedEffect clone() {
-        return new NumberFixedEffect(id, affectTo, getValue());
-    }
-
-    public static NumberFixedEffect newFixedEffect(StringID id,
-            PropertyID affectTo, double val) {
-        return new NumberFixedEffect(id, affectTo, val);
+    public UnkownProviderTypeException(String msg) {
+        super(msg);
     }
 }

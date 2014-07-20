@@ -22,26 +22,26 @@
  * THE SOFTWARE.
  */
 
-package engine.monica.core.property.number;
+package engine.monica.core.map;
 
-import engine.monica.core.property.AbstractFixedEffect;
-import engine.monica.core.property.EffectType;
-import engine.monica.core.property.PropertyID;
 import engine.monica.util.StringID;
+import java.util.Set;
 
-public class NumberFixedEffect extends AbstractFixedEffect<Double> {
+public interface ConfigInterface {
 
-    protected NumberFixedEffect(StringID id, PropertyID affectTo, double val) {
-        super(id, EffectType.TYPE_NUM_FIXED, affectTo, val);
+    <T> void set(StringID key, T value);
+
+    <T> T get(StringID key);
+
+    boolean remove(StringID key);
+
+    default boolean containKey(StringID key) {
+        return get(key) != null;
     }
 
-    @Override
-    public NumberFixedEffect clone() {
-        return new NumberFixedEffect(id, affectTo, getValue());
-    }
+    Set<StringID> keySet();
 
-    public static NumberFixedEffect newFixedEffect(StringID id,
-            PropertyID affectTo, double val) {
-        return new NumberFixedEffect(id, affectTo, val);
+    default void clearConfig() {
+        keySet().stream().forEach(id -> remove(id));
     }
 }

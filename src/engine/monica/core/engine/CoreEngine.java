@@ -27,10 +27,16 @@ package engine.monica.core.engine;
 import engine.monica.core.datetime.DateTime;
 import engine.monica.core.datetime.WorldDate;
 import engine.monica.core.element.ElementEngine;
+import engine.monica.core.map.WorldFactory;
 import engine.monica.util.OMath;
 import engine.monica.util.StringID;
 import engine.monica.util.ThreadRouser;
+import engine.monica.util.Wrapper;
+import engine.monica.util.condition.ProcesserInterface;
+import engine.monica.util.condition.ProviderType;
+import engine.monica.util.condition.UnkownProviderTypeException;
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -451,7 +457,7 @@ public final class CoreEngine {
 
     public static StringID getStringID(String sid) {
         if (sid == null || sid.isEmpty())
-            throw new NullPointerException("The string id is null.");
+            throw new NullPointerException("The sid is null.");
         int index = strIds.indexOf(sid);
         if (index >= 0)
             return ids.get(index);
@@ -467,4 +473,29 @@ public final class CoreEngine {
         return elementEngine;
     }
     private static final ElementEngine elementEngine = new ElementEngine();
+
+    public static WorldFactory getWorldFactory() {
+        return worldFactory;
+    }
+    private static final WorldFactory worldFactory = new WorldFactory();
+
+    public static void addProviderTypeProcesser(ProcesserInterface p) {
+        if (p == null)
+            throw new NullPointerException("The processer is null.");
+        ptypeProcessers.add(p);
+    }
+
+    public static void processProviderType(ProviderType type) {
+        Wrapper<Boolean> w = new Wrapper<>(true);
+        ptypeProcessers.forEach(p -> {
+            if (w.pack) {
+                p.process(type);
+                w.pack = false;
+            }
+        });
+        if (w.pack)
+            throw new UnkownProviderTypeException(type.toString());
+    }
+    private static final ArrayList<ProcesserInterface> ptypeProcessers
+            = new ArrayList<>(8);
 }

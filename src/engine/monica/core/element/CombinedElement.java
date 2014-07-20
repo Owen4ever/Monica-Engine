@@ -30,9 +30,10 @@ import java.util.Arrays;
 
 public class CombinedElement extends AbstractElement {
 
-    public CombinedElement(StringID id, String name,
+    @SafeVarargs
+    public CombinedElement(StringID systemId, StringID id, String name,
             FinalPair<AbstractElement, Integer>... elementAndCount) {
-        super(id, name, Arrays.asList(elementAndCount).stream()
+        super(systemId, id, name, Arrays.asList(elementAndCount).stream()
                 .mapToInt(e -> e.first.turnToEnergy() * e.last).sum());
         this.elementAndCount = elementAndCount;
     }
