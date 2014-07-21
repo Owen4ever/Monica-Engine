@@ -16,28 +16,15 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
-package engine.monica.core.map;
+package engine.monica.core.element;
 
-import engine.monica.core.engine.CoreEngine;
-import engine.monica.util.LinkedPointer;
-import java.util.HashMap;
+import engine.monica.core.map.Area;
+import engine.monica.core.map.Map;
+import engine.monica.util.FinalPair;
 
-public final class WorldFactory {
+public interface ConflictProcesserInterface {
 
-    public WorldFactory() {
-    }
-
-    public World createBy(WorldConfigInterface c) {
-        World w = new World(c);
-        pointer = pointer.linkNew();
-        worlds.put(pointer, w);
-        return w;
-    }
-
-    public World getWorld(int index) {
-        return worlds.get(new LinkedPointer(index));
-    }
-    private final HashMap<LinkedPointer, World> worlds
-            = new HashMap<>(CoreEngine.getDefaultQuantily(), 0.1f);
-    private LinkedPointer pointer = LinkedPointer.first();
+    int conflict(FinalPair<AbstractElement, Integer> p1,
+            FinalPair<AbstractElement, Integer> p2, int elementCount,
+            Map m, Area a);
 }

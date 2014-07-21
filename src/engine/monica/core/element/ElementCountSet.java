@@ -19,61 +19,65 @@
 package engine.monica.core.element;
 
 import engine.monica.util.AlreadyExistsInContainerException;
+import engine.monica.util.FinalPair;
+import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 
-public final class ElementList {
+public final class ElementCountSet {
 
     @SafeVarargs
-    public ElementList(AbstractElement... e) {
-        if (e == null)
+    @SuppressWarnings("unchecked")
+    public ElementCountSet(FinalPair<AbstractElement, Integer>... p) {
+        if (p == null)
             throw new NullPointerException("Element is null.");
-        elements = new AbstractElement[e.length];
-        HashSet<AbstractElement> temp = new HashSet<>(e.length, 1f);
-        if (e.length != 0)
-            for (int i = 0; i != e.length; ++i)
-                if (e[i] == null)
+        FinalPair<AbstractElement, Integer>[] ae = new FinalPair[p.length];
+        HashSet<AbstractElement> temp = new HashSet<>(p.length, 1f);
+        if (p.length != 0)
+            for (int i = 0; i != p.length; ++i)
+                if (p[i] == null)
                     throw new NullPointerException("Element is null.");
                 else {
-                    if (!temp.add(e[i]))
+                    if (!temp.add(p[i].first))
                         throw new AlreadyExistsInContainerException("The element"
                                 + " has already existed in the array.");
-                    elements[i] = e[i];
+                    ae[i] = p[i];
                 }
-        temp = null;
+        elements = Arrays.asList(ae);
     }
 
-    public AbstractElement[] getElements() {
+    public List<FinalPair<AbstractElement, Integer>> getElementsAndCount() {
         return elements;
     }
 
     public int size() {
-        return elements.length;
+        return elements.size();
     }
 
     @Override
     public boolean equals(Object obj) {
         if (obj == null || !(obj instanceof ElementList))
             return false;
-        return equals((ElementList) obj);
+        return equals((ElementCountSet) obj);
     }
 
-    public boolean equals(ElementList list) {
-        if (list == null)
+    public boolean equals(ElementCountSet set) {
+        if (set == null)
             return false;
-        if (size() != list.size())
+        if (size() != set.size())
             return false;
         for (int i = 0; i != size(); ++i)
-            if (elements[i] != list.elements[i])
+            if (elements.hashCode() == set.hashCode())
                 return false;
         return true;
     }
 
     @Override
     public int hashCode() {
-        int eh = elements[0].hashCode();
+        int eh = elements.hashCode();
         for (int i = 1; i != size(); ++i) {
             eh *= i;
-            eh += elements[i].hashCode();
+            eh += elements.get(i).hashCode();
         }
         return 74 + eh;
     }
@@ -81,10 +85,11 @@ public final class ElementList {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder(6 * size()).append("[ ");
-        for (AbstractElement e : elements)
-            sb.append(e.getName()).append(", ");
+        for (FinalPair<AbstractElement, Integer> p : elements)
+            sb.append(p.first.getName())
+                    .append("(").append(p.last).append(")").append(", ");
         sb.replace(sb.length() - 2, sb.length(), " ]");
         return sb.toString();
     }
-    private final AbstractElement[] elements;
+    private final List<FinalPair<AbstractElement, Integer>> elements;
 }

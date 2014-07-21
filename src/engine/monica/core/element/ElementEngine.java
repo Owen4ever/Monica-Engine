@@ -1,33 +1,32 @@
 /*
- * The MIT License
+ * Copyright (C) 2014 Owen
  *
- * Copyright 2014 Owen.
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
  *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
  *
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
- * THE SOFTWARE.
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
 package engine.monica.core.element;
 
 import engine.monica.core.engine.CoreEngine;
+import engine.monica.core.map.Area;
+import engine.monica.core.map.Map;
 import engine.monica.util.FinalPair;
-import engine.monica.util.condition.SingleCondition;
+import engine.monica.util.condition.Condition;
 import engine.monica.util.StringID;
+import engine.monica.util.condition.Provider;
+import engine.monica.util.condition.ProviderType;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
@@ -122,19 +121,19 @@ public final class ElementEngine {
         });
     }
 
-    public SingleCondition getElementCondition(StringID e1, StringID e2) {
+    public Condition getElementCondition(StringID e1, StringID e2) {
         if (e1 == null || e2 == null)
             throw new NullPointerException("The sid is null.");
         return elementConditions.get(new FinalPair<>(e1, e2));
     }
 
-    public SingleCondition getElementCondition(AbstractElement e1, AbstractElement e2) {
+    public Condition getElementCondition(AbstractElement e1, AbstractElement e2) {
         if (e1 == null || e2 == null)
             throw new NullPointerException("The element is null.");
         return elementConditions.get(new FinalPair<>(e1.getID(), e2.getID()));
     }
 
-    public void setElementCondition(AbstractElement e1, AbstractElement e2, SingleCondition c) {
+    public void setElementCondition(AbstractElement e1, AbstractElement e2, Condition c) {
         if (e1 == null || e2 == null)
             throw new NullPointerException("The element is null.");
         if (c == null)
@@ -164,23 +163,25 @@ public final class ElementEngine {
         if (c == null)
             throw new NullPointerException("The conflict is null.");
         ret(lock, () -> {
-            elementConflicts.put(new FinalPair<>(e1.getID(), e2.getID()), c);
+            FinalPair<StringID, StringID> p = new FinalPair<>(e1.getID(), e2.getID());
+            elementConflicts.put(p, c);
+            elementConflictProcessers.put(p, (p1, p2, count, m, a) -> count << 1);
         });
     }
 
-    public SingleCondition getElementConflictCondition(StringID e1, StringID e2) {
+    public Condition getElementConflictCondition(StringID e1, StringID e2) {
         if (e1 == null || e2 == null)
             throw new NullPointerException("The sid is null.");
         return elementConditions.get(new FinalPair<>(e1, e2));
     }
 
-    public SingleCondition getElementConflictCondition(AbstractElement e1, AbstractElement e2) {
+    public Condition getElementConflictCondition(AbstractElement e1, AbstractElement e2) {
         if (e1 == null || e2 == null)
             throw new NullPointerException("The element is null.");
         return elementConditions.get(new FinalPair<>(e1.getID(), e2.getID()));
     }
 
-    public void setElementConflictCondition(AbstractElement e1, AbstractElement e2, SingleCondition c) {
+    public void setElementConflictCondition(AbstractElement e1, AbstractElement e2, Condition c) {
         if (e1 == null || e2 == null)
             throw new NullPointerException("The element is null.");
         if (c == null)
@@ -189,10 +190,33 @@ public final class ElementEngine {
             elementConflictConditions.put(new FinalPair<>(e1.getID(), e2.getID()), c);
         });
     }
+
+    public ConflictProcesserInterface getElementConflictProcesser(StringID e1, StringID e2) {
+        if (e1 == null || e2 == null)
+            throw new NullPointerException("The sid is null.");
+        return elementConflictProcessers.get(new FinalPair<>(e1, e2));
+    }
+
+    public ConflictProcesserInterface getElementConflictProcesser(AbstractElement e1, AbstractElement e2) {
+        if (e1 == null || e2 == null)
+            throw new NullPointerException("The element is null.");
+        return elementConflictProcessers.get(new FinalPair<>(e1.getID(), e2.getID()));
+    }
+
+    public void setElementConflictProcesser(AbstractElement e1, AbstractElement e2, ConflictProcesserInterface p) {
+        if (e1 == null || e2 == null)
+            throw new NullPointerException("The element is null.");
+        if (p == null)
+            throw new NullPointerException("The condition is null.");
+        ret(lock, () -> {
+            elementConflictProcessers.put(new FinalPair<>(e1.getID(), e2.getID()), p);
+        });
+    }
     private final HashMap<FinalPair<StringID, StringID>, ElementRelation> elementRelations = new HashMap<>();
-    private final HashMap<FinalPair<StringID, StringID>, SingleCondition> elementConditions = new HashMap<>();
+    private final HashMap<FinalPair<StringID, StringID>, Condition> elementConditions = new HashMap<>();
     private final HashMap<FinalPair<StringID, StringID>, ElementConflict> elementConflicts = new HashMap<>();
-    private final HashMap<FinalPair<StringID, StringID>, SingleCondition> elementConflictConditions = new HashMap<>();
+    private final HashMap<FinalPair<StringID, StringID>, Condition> elementConflictConditions = new HashMap<>();
+    private final HashMap<FinalPair<StringID, StringID>, ConflictProcesserInterface> elementConflictProcessers = new HashMap<>();
 
     public SystemRelation getSystemRelation(StringID e1, StringID e2) {
         if (e1 == null || e2 == null)
@@ -220,19 +244,19 @@ public final class ElementEngine {
         });
     }
 
-    public SingleCondition getSystemCondition(StringID e1, StringID e2) {
+    public Condition getSystemCondition(StringID e1, StringID e2) {
         if (e1 == null || e2 == null)
             throw new NullPointerException("The sid is null.");
         return systemConditions.get(new FinalPair<>(e1, e2));
     }
 
-    public SingleCondition getCondition(ElementSystem e1, ElementSystem e2) {
+    public Condition getCondition(ElementSystem e1, ElementSystem e2) {
         if (e1 == null || e2 == null)
             throw new NullPointerException("The ElementSystem is null.");
         return elementConditions.get(new FinalPair<>(e1.getID(), e2.getID()));
     }
 
-    public void setCondition(ElementSystem e1, ElementSystem e2, SingleCondition l) {
+    public void setCondition(ElementSystem e1, ElementSystem e2, Condition l) {
         if (e1 == null || e2 == null)
             throw new NullPointerException("The ElementSystem is null.");
         if (l == null)
@@ -242,7 +266,7 @@ public final class ElementEngine {
         });
     }
     private final HashMap<FinalPair<StringID, StringID>, SystemRelation> systemRelations = new HashMap<>();
-    private final HashMap<FinalPair<StringID, StringID>, SingleCondition> systemConditions = new HashMap<>();
+    private final HashMap<FinalPair<StringID, StringID>, Condition> systemConditions = new HashMap<>();
 
     public void addElementSystem(ElementSystem system) {
         if (system == null)
@@ -254,8 +278,13 @@ public final class ElementEngine {
     }
 
     public ElementSystem addElementSystem(StringID id, String name, Energy energy,
-            ElementList elements, ElementSystem basedOn) {
-        ElementSystem s = new ElementSystem(id, name, energy, elements, basedOn);
+            ElementList elements) {
+        return addElementSystem(id, name, energy, elements, null, null);
+    }
+
+    public ElementSystem addElementSystem(StringID id, String name, Energy energy,
+            ElementList elements, ElementSystem basedOn, ConvertorInterface<Integer> c) {
+        ElementSystem s = new ElementSystem(id, name, energy, elements, basedOn, c);
         addElementSystem(s);
         return s;
     }
@@ -274,6 +303,80 @@ public final class ElementEngine {
     private final HashMap<StringID, ElementSystem> systems
             = new HashMap<>(CoreEngine.getDefaultQuantily(), 0.2f);
 
+    @SuppressWarnings("unchecked")
+    public ElementCountSet calc(ElementCountSet set1,
+            ElementCountSet set2, Map map, Area area) {
+        ArrayList<FinalPair<AbstractElement, Integer>> tempSet = new ArrayList<>();
+        set1.getElementsAndCount().parallelStream().forEach(p1 -> {
+            set2.getElementsAndCount().parallelStream().filter(p2 -> {
+                switch (getElementRelation(p1.first, p2.first)) {
+                    case CAN:
+                        return true;
+                    case CANNOT:
+                        return false;
+                    case CONDITION:
+                        return elementConditionPassed(this, p1.first, p2.first);
+                    default:
+                        return false;
+                }
+            }).forEach(p3 -> {
+                switch (getElementConflict(p1.first, p3.first)) {
+                    case CANNOT:
+                        int c1 = p1.last - p3.last;
+                        if (c1 > 0)
+                            tempSet.add(new FinalPair<>(p1.first, c1));
+                        else if (c1 < 0)
+                            tempSet.add(new FinalPair<>(p3.first, -c1));
+                        break;
+                    case CAN:
+                        int c2 = p1.last - p3.last;
+                        if (c2 > 0) {
+                            c2 = getElementConflictProcesser(p1.first, p3.first)
+                                    .conflict(p1, p3, c2, map, area);
+                            tempSet.add(new FinalPair<>(p1.first, c2));
+                        } else if (c2 < 0) {
+                            c2 = -c2;
+                            c2 = getElementConflictProcesser(p1.first, p3.first)
+                                    .conflict(p1, p3, c2, map, area);
+                            tempSet.add(new FinalPair<>(p3.first, c2));
+                        }
+                        break;
+                    case CONDITION:
+                        int c3 = p1.last - p3.last;
+                        if (elementConditionPassed(this, p1.first, p3.first)) {
+                            if (c3 > 0) {
+                                c3 = getElementConflictProcesser(p1.first, p3.first)
+                                        .conflict(p1, p3, c3, map, area);
+                                tempSet.add(new FinalPair<>(p1.first, c3));
+                            } else if (c3 < 0) {
+                                c3 = -c3;
+                                c3 = getElementConflictProcesser(p1.first, p3.first)
+                                        .conflict(p1, p3, c3, map, area);
+                                tempSet.add(new FinalPair<>(p3.first, c3));
+                            }
+                        } else {
+                            if (c3 > 0)
+                                tempSet.add(new FinalPair<>(p1.first, c3));
+                            else if (c3 < 0)
+                                tempSet.add(new FinalPair<>(p3.first, -c3));
+                        }
+                        break;
+                }
+            });
+        });
+        return new ElementCountSet(tempSet.toArray(new FinalPair[tempSet.size()]));
+    }
+
+    private static boolean elementConditionPassed(ElementEngine e,
+            AbstractElement e1, AbstractElement e2) {
+        Condition c = e.getElementCondition(e1, e2);
+        ArrayList<Provider> list = new ArrayList<>(c.count());
+        ProviderType[] types = c.getConditionTypes();
+        for (ProviderType type : types)
+            list.addAll(CoreEngine.processProviderType(type));
+        return c.match(list.toArray(new Provider[list.size()]));
+    }
+
     private static void getWriteLock(ReentrantReadWriteLock lock) {
         do {
             if (!lock.isWriteLocked() && lock.writeLock().tryLock())
@@ -287,7 +390,7 @@ public final class ElementEngine {
             = new ReentrantReadWriteLock();
 
     @FunctionalInterface
-    private static interface VReturn {
+    private static interface VoidReturn {
 
         void func();
     }
@@ -301,7 +404,7 @@ public final class ElementEngine {
         }
     }
 
-    private static void ret(ReentrantReadWriteLock lock, VReturn r) {
+    private static void ret(ReentrantReadWriteLock lock, VoidReturn r) {
         getWriteLock(lock);
         try {
             r.func();

@@ -16,28 +16,19 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
-package engine.monica.core.map;
+package engine.monica.core.graphics;
 
-import engine.monica.core.engine.CoreEngine;
-import engine.monica.util.LinkedPointer;
-import java.util.HashMap;
+public interface CanvasInterface {
 
-public final class WorldFactory {
+    int getX();
 
-    public WorldFactory() {
-    }
+    int getY();
 
-    public World createBy(WorldConfigInterface c) {
-        World w = new World(c);
-        pointer = pointer.linkNew();
-        worlds.put(pointer, w);
-        return w;
-    }
+    void setLocation(int x, int y);
 
-    public World getWorld(int index) {
-        return worlds.get(new LinkedPointer(index));
-    }
-    private final HashMap<LinkedPointer, World> worlds
-            = new HashMap<>(CoreEngine.getDefaultQuantily(), 0.1f);
-    private LinkedPointer pointer = LinkedPointer.first();
+    int getWidth();
+
+    int getHeight();
+
+    void setSize(int w, int h);
 }

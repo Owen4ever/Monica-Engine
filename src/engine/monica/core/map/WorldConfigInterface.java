@@ -18,26 +18,24 @@
 
 package engine.monica.core.map;
 
-import engine.monica.core.engine.CoreEngine;
-import engine.monica.util.LinkedPointer;
-import java.util.HashMap;
+import engine.monica.util.StringID;
+import java.util.Set;
 
-public final class WorldFactory {
+public interface WorldConfigInterface {
 
-    public WorldFactory() {
+    <T> void set(StringID key, T value);
+
+    <T> T get(StringID key);
+
+    boolean remove(StringID key);
+
+    default boolean containKey(StringID key) {
+        return get(key) != null;
     }
 
-    public World createBy(WorldConfigInterface c) {
-        World w = new World(c);
-        pointer = pointer.linkNew();
-        worlds.put(pointer, w);
-        return w;
-    }
+    Set<StringID> keySet();
 
-    public World getWorld(int index) {
-        return worlds.get(new LinkedPointer(index));
+    default void clearConfig() {
+        keySet().stream().forEach(id -> remove(id));
     }
-    private final HashMap<LinkedPointer, World> worlds
-            = new HashMap<>(CoreEngine.getDefaultQuantily(), 0.1f);
-    private LinkedPointer pointer = LinkedPointer.first();
 }

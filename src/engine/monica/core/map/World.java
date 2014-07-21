@@ -1,35 +1,33 @@
 /*
- * The MIT License
+ * Copyright (C) 2014 Owen
  *
- * Copyright 2014 Owen.
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
  *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
  *
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
- * THE SOFTWARE.
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
 package engine.monica.core.map;
 
+import engine.monica.core.datetime.DateTime;
+import engine.monica.core.datetime.WorldDate;
+import engine.monica.core.element.ElementEngine;
 import engine.monica.util.StringID;
+import java.math.BigInteger;
 import java.util.Set;
 
-public final class World implements ConfigInterface {
+public final class World implements WorldConfigInterface {
 
-    public World(ConfigInterface c) {
+    public World(WorldConfigInterface c) {
         if (c == null)
             throw new NullPointerException("The world config is null.");
         config = c;
@@ -64,5 +62,148 @@ public final class World implements ConfigInterface {
     public Set<StringID> keySet() {
         return config.keySet();
     }
-    private final ConfigInterface config;
+    private final WorldConfigInterface config;
+
+    public boolean isStart() {
+        return isStart;
+    }
+
+    public void start() {
+        if (isStart)
+            throw new WorldException("The world has already started.");
+        if (date == null)
+            throw new WorldException("Cannot start the game until WorldDate sets up.");
+        date.ready();
+        isStart = true;
+        isContinuing = true;
+        date.start();
+    }
+
+    public boolean isContinuing() {
+        return isContinuing;
+    }
+
+    public void stop() {
+        if (!isStart)
+            throw new WorldException("The game engine has not started yet.");
+        isStart = false;
+        isContinuing = false;
+        date.stop();
+    }
+
+    public void setContinue() {
+        if (!isStart())
+            throw new WorldException("The game engine has not started yet.");
+        if (isContinuing)
+            throw new WorldException("The game engine has already started.");
+        date.ready();
+        isContinuing = true;
+        date.start();
+    }
+
+    public void setPause() {
+        if (!isStart())
+            throw new WorldException("The game engine has not started yet.");
+        if (!isContinuing)
+            throw new WorldException("The game engine has already"
+                    + " set to continue.");
+        isContinuing = false;
+        date.stop();
+    }
+    private transient boolean isStart = false;
+    private transient boolean isContinuing = false;
+
+    public void setWorldDate(DateTime dateTime) {
+        if (isStart())
+            throw new WorldException("The world has already started.");
+        date = new WorldDate(dateTime);
+    }
+
+    public int getCurrentYear() {
+        return date.getYear();
+    }
+
+    public int getCurrentMonth() {
+        return date.getMonth();
+    }
+
+    public int getCurrentDay() {
+        return date.getDay();
+    }
+
+    public int getCurrentHour() {
+        return date.getHour();
+    }
+
+    public int getCurrentMinute() {
+        return date.getMinute();
+    }
+
+    public int getCurrentSecond() {
+        return date.getSecond();
+    }
+
+    public int getCurrentMilliSecond() {
+        return date.getMilliSecond();
+    }
+
+    public DateTime getCurrentDateTime() {
+        return date.getCurrentDateTime();
+    }
+
+    public void setLoopMonth(int mon) {
+        if (isStart())
+            throw new WorldException("The world has already started.");
+        date.setLoopMonth(mon);
+    }
+
+    public void setLoopDay(int day) {
+        if (isStart())
+            throw new WorldException("The world has already started.");
+        date.setLoopDay(day);
+    }
+
+    public void setLoopHour(int hour) {
+        if (isStart())
+            throw new WorldException("The world has already started.");
+        date.setLoopHour(hour);
+    }
+
+    public void setLoopMinute(int min) {
+        if (isStart())
+            throw new WorldException("The world has already started.");
+        date.setLoopMinute(min);
+    }
+
+    public void setLoopSecond(int sec) {
+        if (isStart())
+            throw new WorldException("The world has already started.");
+        date.setLoopSecond(sec);
+    }
+
+    public void setLoopMilliSecond(int msec) {
+        if (isStart())
+            throw new WorldException("The world has already started.");
+        date.setLoopMilliSecond(msec);
+    }
+
+    public BigInteger dateTimeToInteger() {
+        if (!isStart())
+            throw new WorldException("The world has not started yet.");
+        return date.getCurrentDateTime().toInteger(date);
+    }
+    private volatile WorldDate date;
+
+    public ElementEngine getElementEngine() {
+        return elementEngine;
+    }
+
+    public void setElementEngine(ElementEngine e) {
+        if (isStart())
+            throw new WorldException("The world has already started.");
+        if (e == null)
+            throw new NullPointerException("The ElementEngine is null.");
+        elementEngine = e;
+    }
+    private ElementEngine elementEngine = new ElementEngine();
 }

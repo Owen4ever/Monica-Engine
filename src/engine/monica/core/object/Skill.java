@@ -16,28 +16,7 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
-package engine.monica.core.map;
+package engine.monica.core.object;
 
-import engine.monica.core.engine.CoreEngine;
-import engine.monica.util.LinkedPointer;
-import java.util.HashMap;
-
-public final class WorldFactory {
-
-    public WorldFactory() {
-    }
-
-    public World createBy(WorldConfigInterface c) {
-        World w = new World(c);
-        pointer = pointer.linkNew();
-        worlds.put(pointer, w);
-        return w;
-    }
-
-    public World getWorld(int index) {
-        return worlds.get(new LinkedPointer(index));
-    }
-    private final HashMap<LinkedPointer, World> worlds
-            = new HashMap<>(CoreEngine.getDefaultQuantily(), 0.1f);
-    private LinkedPointer pointer = LinkedPointer.first();
+public final class Skill {
 }

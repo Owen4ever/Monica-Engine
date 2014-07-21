@@ -18,26 +18,15 @@
 
 package engine.monica.core.map;
 
-import engine.monica.core.engine.CoreEngine;
-import engine.monica.util.LinkedPointer;
-import java.util.HashMap;
+public class WorldException extends RuntimeException {
 
-public final class WorldFactory {
+    private static final long serialVersionUID = 9854952L;
 
-    public WorldFactory() {
+    public WorldException() {
+        super();
     }
 
-    public World createBy(WorldConfigInterface c) {
-        World w = new World(c);
-        pointer = pointer.linkNew();
-        worlds.put(pointer, w);
-        return w;
+    public WorldException(String msg) {
+        super(msg);
     }
-
-    public World getWorld(int index) {
-        return worlds.get(new LinkedPointer(index));
-    }
-    private final HashMap<LinkedPointer, World> worlds
-            = new HashMap<>(CoreEngine.getDefaultQuantily(), 0.1f);
-    private LinkedPointer pointer = LinkedPointer.first();
 }

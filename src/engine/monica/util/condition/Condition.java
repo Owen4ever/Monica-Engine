@@ -1,25 +1,19 @@
 /*
- * The MIT License
+ * Copyright (C) 2014 Owen
  *
- * Copyright 2014 Owen.
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
  *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
  *
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
- * THE SOFTWARE.
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
 package engine.monica.util.condition;
@@ -28,7 +22,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.stream.Stream;
 
-public abstract class SingleCondition {
+public abstract class Condition {
 
     public abstract int count();
 
@@ -36,14 +30,14 @@ public abstract class SingleCondition {
 
     public abstract boolean match(Provider... ps);
 
-    public static SingleCondition newSingleCondition(ConditionInterface condition,
+    public static Condition newSingleCondition(ConditionInterface condition,
             ProviderType... types) {
         if (condition.count() != types.length)
             throw new ConditionInitializeException("The count of"
                     + " conditions does not equal to"
                     + " the length of condition types.");
         if (condition.count() == 1)
-            return new SingleCondition() {
+            return new Condition() {
                 @Override
                 public int count() {
                     return 1;
@@ -60,7 +54,7 @@ public abstract class SingleCondition {
                 }
             };
         else if (condition.count() == 2)
-            return new SingleCondition() {
+            return new Condition() {
                 @Override
                 public int count() {
                     return 2;
@@ -77,7 +71,7 @@ public abstract class SingleCondition {
                 }
             };
         else if (condition.count() == 3)
-            return new SingleCondition() {
+            return new Condition() {
                 @Override
                 public int count() {
                     return 3;
@@ -94,7 +88,7 @@ public abstract class SingleCondition {
                 }
             };
         else
-            return new SingleCondition() {
+            return new Condition() {
                 @Override
                 public int count() {
                     return condition.count();
@@ -112,12 +106,12 @@ public abstract class SingleCondition {
             };
     }
 
-    public static SingleCondition combineConditions(SingleCondition... cs) {
-        final Stream<SingleCondition> stream
+    public static Condition combineConditions(Condition... cs) {
+        final Stream<Condition> stream
                 = Arrays.asList(cs).stream();
         final ArrayList<ProviderType> typeList = stream
                 .reduce(new ArrayList<ProviderType>(), null, null);
-        return new SingleCondition() {
+        return new Condition() {
             @Override
             public int count() {
                 return count;
@@ -163,10 +157,10 @@ public abstract class SingleCondition {
                 return true;
             }
             private final int count = stream
-                    .mapToInt(SingleCondition::count).sum();
+                    .mapToInt(Condition::count).sum();
             private final ProviderType[] types
                     = typeList.toArray(new ProviderType[typeList.size()]);
-            private final SingleCondition[] conditions = cs;
+            private final Condition[] conditions = cs;
         };
     }
 }

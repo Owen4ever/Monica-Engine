@@ -18,26 +18,12 @@
 
 package engine.monica.core.map;
 
-import engine.monica.core.engine.CoreEngine;
-import engine.monica.util.LinkedPointer;
-import java.util.HashMap;
+import engine.monica.core.graphics.CanvasInterface;
+import engine.monica.core.graphics.GraphicInterface;
 
-public final class WorldFactory {
+public interface ObserverInterface {
 
-    public WorldFactory() {
-    }
+    Map getMap();
 
-    public World createBy(WorldConfigInterface c) {
-        World w = new World(c);
-        pointer = pointer.linkNew();
-        worlds.put(pointer, w);
-        return w;
-    }
-
-    public World getWorld(int index) {
-        return worlds.get(new LinkedPointer(index));
-    }
-    private final HashMap<LinkedPointer, World> worlds
-            = new HashMap<>(CoreEngine.getDefaultQuantily(), 0.1f);
-    private LinkedPointer pointer = LinkedPointer.first();
+    void draw(CanvasInterface c, GraphicInterface g);
 }
