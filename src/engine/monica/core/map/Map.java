@@ -22,7 +22,7 @@ import engine.monica.core.graphics.GameObject;
 import engine.monica.util.VectorInterface;
 import java.util.List;
 
-public interface Map {
+public interface Map extends ConfigInterface {
 
     World getWorld();
 

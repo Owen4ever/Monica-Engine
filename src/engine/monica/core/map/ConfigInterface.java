@@ -21,7 +21,7 @@ package engine.monica.core.map;
 import engine.monica.util.StringID;
 import java.util.Set;
 
-public interface WorldConfigInterface {
+public interface ConfigInterface {
 
     <T> void set(StringID key, T value);
 

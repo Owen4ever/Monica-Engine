@@ -25,9 +25,9 @@ import engine.monica.util.StringID;
 import java.math.BigInteger;
 import java.util.Set;
 
-public final class World implements WorldConfigInterface {
+public final class World implements ConfigInterface {
 
-    public World(WorldConfigInterface c) {
+    public World(ConfigInterface c) {
         if (c == null)
             throw new NullPointerException("The world config is null.");
         config = c;
@@ -62,7 +62,7 @@ public final class World implements WorldConfigInterface {
     public Set<StringID> keySet() {
         return config.keySet();
     }
-    private final WorldConfigInterface config;
+    private final ConfigInterface config;
 
     public boolean isStart() {
         return isStart;

@@ -84,7 +84,7 @@ public final class ElementSystem {
     }
 
     public int turnEnergyToBase(int energy) {
-        return energy;
+        return convertor.convert(energy);
     }
 
     @Override
@@ -126,5 +126,5 @@ public final class ElementSystem {
     private final ElementList elements;
     private final boolean hasBasedElementSystem;
     private final ElementSystem basedOn;
-    private ConvertorInterface convertor;
+    private ConvertorInterface<Integer> convertor;
 }

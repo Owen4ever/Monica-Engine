@@ -27,7 +27,7 @@ public final class WorldFactory {
     public WorldFactory() {
     }
 
-    public World createBy(WorldConfigInterface c) {
+    public World createBy(ConfigInterface c) {
         World w = new World(c);
         pointer = pointer.linkNew();
         worlds.put(pointer, w);

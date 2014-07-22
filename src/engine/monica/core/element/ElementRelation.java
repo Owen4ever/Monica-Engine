@@ -20,5 +20,5 @@ package engine.monica.core.element;
 
 public enum ElementRelation {
 
-    CAN, CANNOT, CONDITION
+    CAN, CANNOT, SYSTEM_CAN, CONDITION, SYSTEM_CONDITION
 }

@@ -42,6 +42,7 @@ public final class ElementConcentration {
         }
         vals.put(e, new ConcentrationValue(concentration));
         count++;
+        total = -1d;
         lock.writeLock().unlock();
     }
 
@@ -60,6 +61,7 @@ public final class ElementConcentration {
         }
         vals.get(e).setVal(concentration);
         count++;
+        total = -1d;
         lock.writeLock().unlock();
     }
 
@@ -72,12 +74,15 @@ public final class ElementConcentration {
     }
 
     public double getTotal() {
-        return vals.values()
-                .stream().mapToDouble(ConcentrationValue::getVal).sum();
+        if (total < 0d)
+            total = vals.values()
+                    .stream().mapToDouble(ConcentrationValue::getVal).sum();
+        return total;
     }
     private int count = 0;
     private final ConcurrentHashMap<AbstractElement, ConcentrationValue> vals
             = new ConcurrentHashMap<>();
+    private transient double total = -1d;
     private transient final ReentrantReadWriteLock lock
             = new ReentrantReadWriteLock();
 
