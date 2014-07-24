@@ -20,7 +20,7 @@ package engine.monica.core.element;
 
 import engine.monica.util.AlreadyExistsInContainerException;
 import engine.monica.util.FinalPair;
-import java.util.Arrays;
+import engine.monica.util.SimpleArrayList;
 import java.util.HashSet;
 import java.util.List;
 
@@ -43,7 +43,7 @@ public final class ElementCountSet {
                                 + " has already existed in the array.");
                     ae[i] = p[i];
                 }
-        elements = Arrays.asList(ae);
+        elements = new SimpleArrayList<>(ae);
     }
 
     public List<FinalPair<AbstractElement, Integer>> getElementsAndCount() {

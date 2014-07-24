@@ -18,8 +18,8 @@
 
 package engine.monica.util.condition;
 
+import engine.monica.util.SimpleArrayList;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.stream.Stream;
 
 public abstract class Condition {
@@ -108,7 +108,7 @@ public abstract class Condition {
 
     public static Condition combineConditions(Condition... cs) {
         final Stream<Condition> stream
-                = Arrays.asList(cs).stream();
+                = new SimpleArrayList<>(cs).stream();
         final ArrayList<ProviderType> typeList = stream
                 .reduce(new ArrayList<ProviderType>(), null, null);
         return new Condition() {

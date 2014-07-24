@@ -24,7 +24,7 @@ import engine.monica.util.FinalPair;
 
 public interface ConflictProcesserInterface {
 
-    int conflict(FinalPair<AbstractElement, Integer> p1,
-            FinalPair<AbstractElement, Integer> p2, int elementCount,
-            Map m, Area a);
+    FinalPair<FinalPair<AbstractElement, Integer>, FinalPair<AbstractElement, Integer>>
+            conflict(FinalPair<AbstractElement, Integer> p1,
+                    FinalPair<AbstractElement, Integer> p2, Map m, Area a);
 }

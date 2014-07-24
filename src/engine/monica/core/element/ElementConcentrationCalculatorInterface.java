@@ -18,7 +18,14 @@
 
 package engine.monica.core.element;
 
-public enum ElementRelation {
+import engine.monica.core.map.Area;
+import engine.monica.core.map.Map;
+import engine.monica.util.FinalPair;
 
-    CAN, CANNOT, COMBINED_CAN, SYSTEM_CAN, CONDITION, SYSTEM_CONDITION
+@FunctionalInterface
+public interface ElementConcentrationCalculatorInterface {
+
+    FinalPair<AbstractElement, Integer>
+            concentrate(FinalPair<AbstractElement, Integer> p,
+                    Map map, Area area);
 }

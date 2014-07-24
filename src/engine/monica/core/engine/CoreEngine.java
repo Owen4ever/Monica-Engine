@@ -21,6 +21,7 @@ package engine.monica.core.engine;
 import engine.monica.core.map.World;
 import engine.monica.core.map.WorldFactory;
 import engine.monica.util.OMath;
+import engine.monica.util.SimpleArrayList;
 import engine.monica.util.StringID;
 import engine.monica.util.ThreadRouser;
 import engine.monica.util.Wrapper;
@@ -29,7 +30,6 @@ import engine.monica.util.condition.Provider;
 import engine.monica.util.condition.ProviderType;
 import engine.monica.util.condition.UnkownProviderTypeException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -407,7 +407,7 @@ public final class CoreEngine {
             if (w.pack) {
                 Provider[] objs = p.process(type);
                 if (objs != null) {
-                    list.addAll(Arrays.asList(objs));
+                    list.addAll(new SimpleArrayList<>(objs));
                     w.pack = false;
                 }
             }

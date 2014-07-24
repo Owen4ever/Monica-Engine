@@ -22,6 +22,7 @@ import engine.monica.core.engine.CoreEngine;
 import engine.monica.core.map.Area;
 import engine.monica.core.map.Map;
 import engine.monica.util.FinalPair;
+import engine.monica.util.SimpleArrayList;
 import engine.monica.util.condition.Condition;
 import engine.monica.util.StringID;
 import engine.monica.util.Wrapper;
@@ -39,7 +40,7 @@ public final class ElementEngine {
     public void addElement(AbstractElement element) {
         if (element == null)
             throw new NullPointerException("The ElementSystem is null.");
-        ret(lock, () -> {
+        ret(defaultEngineLock, () -> {
             if (!elements.containsKey(element.getID())) {
                 elements.values().parallelStream().forEach(e -> {
                     FinalPair<StringID, StringID> key
@@ -88,7 +89,7 @@ public final class ElementEngine {
     public boolean removeElement(StringID id) {
         if (id == null)
             throw new NullPointerException("The StringID is null.");
-        return ret(lock, () -> elements.remove(id) != null);
+        return ret(defaultEngineLock, () -> elements.remove(id) != null);
     }
     private final HashMap<StringID, AbstractElement> elements
             = new HashMap<>(CoreEngine.getDefaultQuantily()
@@ -114,8 +115,52 @@ public final class ElementEngine {
             throw new NullPointerException("The element is null.");
         if (r == null)
             throw new NullPointerException("The element relation is null.");
-        ret(lock, () -> {
+        ret(defaultEngineLock, () -> {
             elementRelations.put(new FinalPair<>(e1.getID(), e2.getID()), r);
+        });
+    }
+
+    public ElementCalculatorInterface getElementCalculator(StringID e1, StringID e2) {
+        if (e1 == null || e2 == null)
+            throw new NullPointerException("The sid is null.");
+        return elementCalcs.get(new FinalPair<>(e1, e2));
+    }
+
+    public ElementCalculatorInterface getElementCalculator(AbstractElement e1, AbstractElement e2) {
+        if (e1 == null || e2 == null)
+            throw new NullPointerException("The element is null.");
+        return elementCalcs.get(new FinalPair<>(e1.getID(), e2.getID()));
+    }
+
+    public void setElementCalculator(AbstractElement e1, AbstractElement e2, ElementCalculatorInterface c) {
+        if (e1 == null || e2 == null)
+            throw new NullPointerException("The element is null.");
+        if (c == null)
+            throw new NullPointerException("The condition is null.");
+        ret(defaultEngineLock, () -> {
+            elementCalcs.put(new FinalPair<>(e1.getID(), e2.getID()), c);
+        });
+    }
+
+    public ElementConcentrationCalculatorInterface getElementConcentrationCalculator(StringID e) {
+        if (e == null)
+            throw new NullPointerException("The sid is null.");
+        return elementConcentrationCalcs.get(e);
+    }
+
+    public ElementConcentrationCalculatorInterface getElementConcentrationCalculator(AbstractElement e) {
+        if (e == null)
+            throw new NullPointerException("The element is null.");
+        return elementConcentrationCalcs.get(e.getID());
+    }
+
+    public void setElementConcentrationCalculator(AbstractElement e, ElementConcentrationCalculatorInterface c) {
+        if (e == null)
+            throw new NullPointerException("The element is null.");
+        if (c == null)
+            throw new NullPointerException("The condition is null.");
+        ret(defaultEngineLock, () -> {
+            elementConcentrationCalcs.put(e.getID(), c);
         });
     }
 
@@ -136,7 +181,7 @@ public final class ElementEngine {
             throw new NullPointerException("The element is null.");
         if (c == null)
             throw new NullPointerException("The condition is null.");
-        ret(lock, () -> {
+        ret(defaultEngineLock, () -> {
             elementConditions.put(new FinalPair<>(e1.getID(), e2.getID()), c);
         });
     }
@@ -160,10 +205,12 @@ public final class ElementEngine {
             throw new NullPointerException("The element is null.");
         if (c == null)
             throw new NullPointerException("The conflict is null.");
-        ret(lock, () -> {
+        ret(defaultEngineLock, () -> {
             FinalPair<StringID, StringID> p = new FinalPair<>(e1.getID(), e2.getID());
             elementConflicts.put(p, c);
-            elementConflictProcessers.put(p, (p1, p2, count, m, a) -> count << 1);
+            elementConflictProcessers.put(p, (p1, p2, m, a)
+                    -> new FinalPair<>(new FinalPair<>(p1.first, p1.last * 2),
+                            new FinalPair<>(p2.first, p2.last * 2)));
         });
     }
 
@@ -184,7 +231,7 @@ public final class ElementEngine {
             throw new NullPointerException("The element is null.");
         if (c == null)
             throw new NullPointerException("The condition is null.");
-        ret(lock, () -> {
+        ret(defaultEngineLock, () -> {
             elementConflictConditions.put(new FinalPair<>(e1.getID(), e2.getID()), c);
         });
     }
@@ -206,11 +253,13 @@ public final class ElementEngine {
             throw new NullPointerException("The element is null.");
         if (p == null)
             throw new NullPointerException("The condition is null.");
-        ret(lock, () -> {
+        ret(defaultEngineLock, () -> {
             elementConflictProcessers.put(new FinalPair<>(e1.getID(), e2.getID()), p);
         });
     }
     private final HashMap<FinalPair<StringID, StringID>, ElementRelation> elementRelations = new HashMap<>();
+    private final HashMap<StringID, ElementConcentrationCalculatorInterface> elementConcentrationCalcs = new HashMap<>();
+    private final HashMap<FinalPair<StringID, StringID>, ElementCalculatorInterface> elementCalcs = new HashMap<>();
     private final HashMap<FinalPair<StringID, StringID>, Condition> elementConditions = new HashMap<>();
     private final HashMap<FinalPair<StringID, StringID>, ElementConflict> elementConflicts = new HashMap<>();
     private final HashMap<FinalPair<StringID, StringID>, Condition> elementConflictConditions = new HashMap<>();
@@ -237,7 +286,7 @@ public final class ElementEngine {
         if (r == null)
             throw new NullPointerException("The ElementSystem relation is"
                     + " null.");
-        ret(lock, () -> {
+        ret(defaultEngineLock, () -> {
             systemRelations.put(new FinalPair<>(e1.getID(), e2.getID()), r);
         });
     }
@@ -259,7 +308,7 @@ public final class ElementEngine {
             throw new NullPointerException("The ElementSystem is null.");
         if (l == null)
             throw new NullPointerException("The condition is null.");
-        ret(lock, () -> {
+        ret(defaultEngineLock, () -> {
             systemConditions.put(new FinalPair<>(e1.getID(), e2.getID()), l);
         });
     }
@@ -267,7 +316,7 @@ public final class ElementEngine {
     public void addElementSystem(ElementSystem system) {
         if (system == null)
             throw new NullPointerException("The ElementSystem is null.");
-        ret(lock, () -> {
+        ret(defaultEngineLock, () -> {
             if (!systems.containsKey(system.getID())) {
                 systems.put(system.getID(), system);
                 systems.values().parallelStream().forEach(s -> {
@@ -312,227 +361,25 @@ public final class ElementEngine {
     public boolean removeElementSystem(StringID id) {
         if (id == null)
             throw new NullPointerException("The StringID is null.");
-        return ret(lock, () -> systems.remove(id) != null);
+        return ret(defaultEngineLock, () -> systems.remove(id) != null);
     }
     private final HashMap<StringID, ElementSystem> systems = new HashMap<>(CoreEngine.getDefaultQuantily(), 0.2f);
     private final HashMap<FinalPair<StringID, StringID>, SystemRelation> systemRelations = new HashMap<>();
     private final HashMap<FinalPair<StringID, StringID>, Condition> systemConditions = new HashMap<>();
 
-    /*private FinalPair<AbstractElement, Integer>
-            calc_concentration(FinalPair<AbstractElement, Integer> p,
-                    Map map, Area area) {
-        return p; // TODO:
-    }
-
-    private ArrayList<Pair<AbstractElement, Integer>>
-            calc_sys(ArrayList<Pair<AbstractElement, Integer>> list,
-                    FinalPair<AbstractElement, Integer> p1,
-                    FinalPair<AbstractElement, Integer> p2,
-                    Map map, Area area) {
-        if (calc_sys_0(list,
-                getElementSystem(p1.first.getSystemID()),
-                getElementSystem(p2.first.getSystemID())))
-            calc0(list, p1, p2, map, area);
-        return list;
-    }
-
-    private boolean calc_sys_0(ArrayList<Pair<AbstractElement, Integer>> list,
-            ElementSystem s1, ElementSystem s2) {
-        switch (getSystemRelation(s1, s2)) {
-            case CAN:
-                break;
-            case BASE_CAN:
-                return calc_sys_0(list, s1.getBasedElementSystem(), s2.getBasedElementSystem());
-            case CONDITION:
-                if (systemConditionPassed(this, s1, s2))
-                    return true;
-        }
-        return false;
-    }
-
-    private ArrayList<Pair<AbstractElement, Integer>>
-            calc0(ArrayList<Pair<AbstractElement, Integer>> list,
-                    FinalPair<AbstractElement, Integer> p1,
-                    FinalPair<AbstractElement, Integer> p2,
-                    Map map, Area area) {
-        switch (getElementConflict(p1.first, p2.first)) {
-            case CANNOT:
-                boolean com1 = p1.first.isCombined();
-                boolean com2 = p2.first.isCombined();
-                if (com1 & com2)
-                    return calc_combined2(list, p1, p2, map, area);
-                else if (com1)
-                    return calc_combined1(list, p1, p2, map, area);
-                else if (com2)
-                    return calc_combined1(list, p2, p1, map, area);
-                else
-                    return calc_default(list, p1, p2, map, area);
-            case CAN:
-                int c2 = p1.last - p2.last;
-                if (c2 > 0) {
-                    c2 = getElementConflictProcesser(p1.first, p2.first)
-                            .conflict(p1, p2, c2, map, area);
-                    list.add(new Pair<>(p1.first, c2));
-                } else if (c2 < 0) {
-                    c2 = -c2;
-                    c2 = getElementConflictProcesser(p1.first, p2.first)
-                            .conflict(p1, p2, c2, map, area);
-                    list.add(new Pair<>(p2.first, c2));
-                }
-                break;
-            case CONDITION:
-                if (elementConditionPassed(this, p1.first, p2.first))
-                    return calc_conflict(list, p1, p2, map, area);
-                else
-                    return calc_default(list, p1, p2, map, area);
-        }
-        return list;
-    }
-
-    private ArrayList<Pair<AbstractElement, Integer>>
-            calc_conflict(ArrayList<Pair<AbstractElement, Integer>> list,
-                    FinalPair<AbstractElement, Integer> p1,
-                    FinalPair<AbstractElement, Integer> p2,
-                    Map map, Area area) {
-        int c1 = p1.last - p2.last;
-        if (c1 > 0) {
-            c1 = getElementConflictProcesser(p1.first, p2.first)
-                    .conflict(p1, p2, c1, map, area);
-            list.add(new Pair<>(p1.first, c1));
-        } else if (c1 < 0) {
-            c1 = -c1;
-            c1 = getElementConflictProcesser(p1.first, p2.first)
-                    .conflict(p2, p1, c1, map, area);
-            list.add(new Pair<>(p2.first, -c1));
-        }
-        return list;
-    }
-
-    private ArrayList<Pair<AbstractElement, Integer>>
-            calc_default(ArrayList<Pair<AbstractElement, Integer>> list,
-                    FinalPair<AbstractElement, Integer> p1,
-                    FinalPair<AbstractElement, Integer> p2,
-                    Map map, Area area) {
-        int c = p1.last - p2.last;
-        if (c > 0)
-            list.add(new Pair<>(p1.first, c));
-        else if (c < 0)
-            list.add(new Pair<>(p2.first, -c));
-        return list;
-    }
-
-    private ArrayList<Pair<AbstractElement, Integer>>
-            calc_combined1(ArrayList<Pair<AbstractElement, Integer>> list,
-                    FinalPair<AbstractElement, Integer> p1,
-                    FinalPair<AbstractElement, Integer> p2,
-                    Map map, Area area) {
-        Arrays.asList(((CombinedElement) p1.first).getCombinedElements()).parallelStream().forEach(p -> {
-            switch (getElementRelation(p.first, p2.first)) {
-                case CAN:
-                    calc0(list, p, p2, map, area);
-                    break;
-                case CANNOT:
-                    break;
-                case SYSTEM_CAN:
-                    calc_sys(list, p1, p2, map, area);
-                    break;
-                case CONDITION:
-                    if (elementConditionPassed(this, p1.first, p2.first))
-                        calc0(list, p1, p2, map, area);
-                    break;
-            }
-        });
-        return list;
-    }
-
-    private ArrayList<Pair<AbstractElement, Integer>>
-            calc_combined2(ArrayList<Pair<AbstractElement, Integer>> list,
-                    FinalPair<AbstractElement, Integer> p1,
-                    FinalPair<AbstractElement, Integer> p2,
-                    Map map, Area area) {
-        Arrays.asList(((CombinedElement) p1.first).getCombinedElements())
-                .parallelStream().forEach(p3 -> {
-                    Arrays.asList(((CombinedElement) p2.first).getCombinedElements())
-                    .parallelStream().forEach(p4 -> {
-                        calc_(list, p3, p4, map, area);
-                    });
-                });
-        return list;
-    }
-
-    private ArrayList<Pair<AbstractElement, Integer>>
-            calc_(ArrayList<Pair<AbstractElement, Integer>> list,
-                    FinalPair<AbstractElement, Integer> p1,
-                    FinalPair<AbstractElement, Integer> p2,
-                    Map map, Area area) {
-        switch (getElementRelation(p1.first, p2.first)) {
-            case CAN:
-                calc0(list, calc_concentration(p1, map, area),
-                        calc_concentration(p2, map, area), map, area);
-                break;
-            case SYSTEM_CAN:
-                calc_sys(list, calc_concentration(p1, map, area),
-                        calc_concentration(p2, map, area), map, area);
-                break;
-            case CANNOT:
-                break;
-            case CONDITION:
-                if (elementConditionPassed(this, p1.first, p2.first))
-                    calc0(list, calc_concentration(p1, map, area),
-                            calc_concentration(p2, map, area), map, area);
-                break;
-            case SYSTEM_CONDITION:
-                if (!systemConditionPassed(this,
-                        getElementSystem(p1.first.getSystemID()),
-                        getElementSystem(p2.first.getSystemID())))
-                    calc0(list, calc_concentration(p1, map, area),
-                            calc_concentration(p2, map, area), map, area);
-                break;
-            default:
-                break;
-        }
-        return list;
-    }
-
     @SuppressWarnings("unchecked")
-    public ElementCountSet calc(ElementCountSet set1,
-            ElementCountSet set2, Map map, Area area) {
-        ArrayList<Pair<AbstractElement, Integer>> list = new ArrayList<>();
-        set1.getElementsAndCount().parallelStream().forEach(p1 -> {
-            set2.getElementsAndCount().parallelStream().forEach(p2 -> {
-                calc_(list, p1, p2, map, area);
-            });
-        });
-        ArrayList<FinalPair<AbstractElement, Integer>> tempList = new ArrayList<>(list.size());
-        list.parallelStream().collect(() -> new ArrayList<Pair<AbstractElement, Integer>>(),
-                (l, p) -> {
-                    Wrapper<Boolean> dontContain = new Wrapper<>(true);
-                    l.parallelStream()
-                    .filter(tpair -> tpair.first.getID().equals(p.first.getID()))
-                    .forEach(tempPair -> {
-                        tempPair.last += p.last;
-                        dontContain.pack = false;
-                    });
-                    if (dontContain.pack) {
-                        l.add(p);
-                    }
-                }, (ll1, ll2) -> {
-                    ll1.addAll(ll2);
-                }).forEach(p -> {
-                    tempList.add(FinalPair.toFinalPair(p));
-                });
-        return new ElementCountSet(tempList.toArray(new FinalPair[tempList.size()]));
-    }*/
-
     public ElementCountSet calc(ElementCountSet set1, ElementCountSet set2,
             Map map, Area area) {
         HashMap<AbstractElement, Wrapper<Integer>> hashMap = new HashMap<>();
-
         set1.getElementsAndCount().parallelStream().forEach(p1 -> {
             set2.getElementsAndCount().parallelStream().forEach(p2 -> {
+                calc0(hashMap, p1, p2, map, area);
             });
         });
-
+        new ArrayList<>(hashMap.keySet()).forEach(e -> {
+            if (hashMap.get(e).pack < 1)
+                hashMap.remove(e);
+        });
         FinalPair<AbstractElement, Integer>[] pairs = new FinalPair[hashMap.size()];
         Wrapper<Integer> count = new Wrapper<>(0);
         hashMap.forEach((e, w) -> {
@@ -542,15 +389,30 @@ public final class ElementEngine {
         return new ElementCountSet(pairs);
     }
 
-    private HashMap<AbstractElement, Wrapper<Integer>>
-            calc0(HashMap<AbstractElement, Wrapper<Integer>> hashMap,
-                    FinalPair<AbstractElement, Integer> p1,
-                    FinalPair<AbstractElement, Integer> p2,
-                    Map map, Area area) {
+    private void calc0(HashMap<AbstractElement, Wrapper<Integer>> hashMap,
+            FinalPair<AbstractElement, Integer> p1,
+            FinalPair<AbstractElement, Integer> p2,
+            Map map, Area area) {
+        p1 = calc_concentrate(p1, map, area);
+        p2 = calc_concentrate(p2, map, area);
         switch (getElementRelation(p1.first, p2.first)) {
             case CANNOT:
                 break;
             case CAN:
+                if (calc_canConflict(p1, p2, map, area))
+                    calc_conflict_default(hashMap, p1, p2, map, area);
+                else
+                    calc_default(hashMap, p1, p2, map, area);
+                break;
+            case COMBINED_CAN:
+                boolean combined1 = p1.first.isCombined();
+                boolean combined2 = p2.first.isCombined();
+                if (combined1 && combined2)
+                    calc_combined2(hashMap, p1, p2, map, area);
+                else if (combined1)
+                    calc_combined1(hashMap, p1, p2, map, area);
+                else if (combined2)
+                    calc_combined1(hashMap, p1, p2, map, area);
                 break;
             case SYSTEM_CAN:
                 break;
@@ -561,24 +423,106 @@ public final class ElementEngine {
             default:
                 break;
         }
-        return hashMap;
+    }
+
+    private boolean calc_canConflict(FinalPair<AbstractElement, Integer> p1,
+            FinalPair<AbstractElement, Integer> p2, Map map, Area area) {
+        switch (getElementConflict(p1.first, p2.first)) {
+            case CANNOT:
+                return false;
+            case CAN:
+                return true;
+            case CONDITION:
+                if (elementConditionPassed(this, p1.first, p2.first))
+                    return true;
+                return false;
+            default:
+                return false;
+        }
     }
 
     private FinalPair<AbstractElement, Integer>
-            calc_concentration(FinalPair<AbstractElement, Integer> p,
+            calc_concentrate(FinalPair<AbstractElement, Integer> p,
                     Map map, Area area) {
-        if (area.getElementConcentration().getConcentration(p.first)
-                > area.getElementConcentration().getTotal() * 0.75d)
-            return new FinalPair<>(p.first, (int) (p.last * 1.5d) + 1);
-        return p;
+        return getElementConcentrationCalculator(p.first.getID()).concentrate(p, map, area);
     }
 
-    private HashMap<AbstractElement, Wrapper<Integer>>
-            calc_checkConflict(HashMap<AbstractElement, Wrapper<Integer>> hashMap,
-                    FinalPair<AbstractElement, Integer> p1,
-                    FinalPair<AbstractElement, Integer> p2,
-                    Map map, Area area) {
-        return hashMap;
+    private static void calc_check(HashMap<AbstractElement, Wrapper<Integer>> hashMap,
+            FinalPair<AbstractElement, Integer> p) {
+        Wrapper<Integer> w = hashMap.get(p.first);
+        if (w == null) {
+            w = new Wrapper<>(p.last);
+            hashMap.put(p.first, w);
+        } else
+            w.pack += p.last;
+    }
+
+    private void calc_default(HashMap<AbstractElement, Wrapper<Integer>> hashMap,
+            FinalPair<AbstractElement, Integer> p1,
+            FinalPair<AbstractElement, Integer> p2,
+            Map map, Area area) {
+        FinalPair<AbstractElement, Integer>[] ps
+                = getElementCalculator(p1.first, p2.first).calc(p1, p2, map, area);
+        if (ps != null && ps.length > 0) {
+            for (FinalPair<AbstractElement, Integer> p : ps)
+                calc_check(hashMap, p);
+        }
+    }
+
+    /**
+     * @param p1 The pair with CombinedElement and Integer.
+     * @param p2 The pair with AbstractElement (not CombinedElement) and
+     * Integer.
+     */
+    private void calc_combined1(HashMap<AbstractElement, Wrapper<Integer>> hashMap,
+            FinalPair<AbstractElement, Integer> p1,
+            FinalPair<AbstractElement, Integer> p2,
+            Map map, Area area) {
+        new SimpleArrayList<>(((CombinedElement) p1.first).getCombinedElements())
+                .forEach(pair -> {
+                    FinalPair<AbstractElement, Integer> tpair
+                    = new FinalPair<>(pair.first, pair.last * p1.last);
+                    calc0(hashMap, tpair, p2, map, area);
+                });
+    }
+
+    /**
+     * @param p1 The pair with CombinedElement and Integer.
+     * @param p2 The pair with CombinedElement and Integer.
+     */
+    private void calc_combined2(HashMap<AbstractElement, Wrapper<Integer>> hashMap,
+            FinalPair<AbstractElement, Integer> p1,
+            FinalPair<AbstractElement, Integer> p2,
+            Map map, Area area) {
+        SimpleArrayList<FinalPair<AbstractElement, Integer>> l1
+                = new SimpleArrayList<>(((CombinedElement) p1.first).getCombinedElements());
+        SimpleArrayList<FinalPair<AbstractElement, Integer>> l2
+                = new SimpleArrayList<>(((CombinedElement) p2.first).getCombinedElements());
+        l1.forEach(pair1 -> {
+            FinalPair<AbstractElement, Integer> tp1
+                    = new FinalPair<>(pair1.first, pair1.last * p1.last);
+            l2.forEach(pair2 -> {
+                FinalPair<AbstractElement, Integer> tp2
+                        = new FinalPair<>(pair2.first, pair2.last * p2.last);
+                calc0(hashMap, tp1, tp2, map, area);
+            });
+        });
+    }
+
+    private void calc_conflict_default(HashMap<AbstractElement, Wrapper<Integer>> hashMap,
+            FinalPair<AbstractElement, Integer> p1,
+            FinalPair<AbstractElement, Integer> p2,
+            Map map, Area area) {
+        FinalPair<FinalPair<AbstractElement, Integer>, FinalPair<AbstractElement, Integer>> tempPs
+                = getElementConflictProcesser(p1.first, p2.first).conflict(p1, p2, map, area);
+        p1 = tempPs.first;
+        p2 = tempPs.last;
+        FinalPair<AbstractElement, Integer>[] ps
+                = getElementCalculator(p1.first, p2.first).calc(p1, p2, map, area);
+        if (ps != null && ps.length > 0) {
+            for (FinalPair<AbstractElement, Integer> p : ps)
+                calc_check(hashMap, p);
+        }
     }
 
     private static boolean elementConditionPassed(ElementEngine e,
@@ -608,7 +552,7 @@ public final class ElementEngine {
                     break;
         } while (true);
     }
-    private final transient ReentrantReadWriteLock lock
+    private final transient ReentrantReadWriteLock defaultEngineLock
             = new ReentrantReadWriteLock();
 
     @FunctionalInterface

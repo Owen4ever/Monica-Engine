@@ -18,7 +18,22 @@
 
 package engine.monica.core.element;
 
-public enum ElementRelation {
+import engine.monica.core.map.Area;
+import engine.monica.core.map.Map;
+import engine.monica.util.FinalPair;
 
-    CAN, CANNOT, COMBINED_CAN, SYSTEM_CAN, CONDITION, SYSTEM_CONDITION
+@FunctionalInterface
+public interface ElementCalculatorInterface {
+
+    default FinalPair<AbstractElement, Integer>[]
+            calc(FinalPair<AbstractElement, Integer> p1,
+                    FinalPair<AbstractElement, Integer> p2,
+                    Map map, Area area) {
+        return calc(p1, p2, map, area, false);
+    }
+
+    FinalPair<AbstractElement, Integer>[]
+            calc(FinalPair<AbstractElement, Integer> p1,
+                    FinalPair<AbstractElement, Integer> p2,
+                    Map map, Area area, boolean isConflicted);
 }
