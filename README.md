@@ -1,4 +1,4 @@
 Monica-Engine
 =============
 
-A game logic engine.
+A logic game engine.
