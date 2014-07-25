@@ -31,7 +31,7 @@ public abstract class AbstractElement {
         this.systemId = systemId;
         this.id = id;
         setName(name);
-        setValueTurnToEnergy(turnToEnergy);
+        setValueToEnergy(turnToEnergy);
     }
 
     public abstract boolean isCombined();
@@ -55,17 +55,41 @@ public abstract class AbstractElement {
     }
 
     public final int toEnergy() {
-        return turnToEnergy;
+        return toEnergy;
     }
 
-    public final void setValueTurnToEnergy(int val) {
+    public final void setValueToEnergy(int val) {
         if (val < 1)
             throw new ElementInitializeException("The number"
                     + " which turns to energy smaller than 1.");
-        this.turnToEnergy = val;
+        this.toEnergy = val;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null || obj.getClass() != getClass())
+            return false;
+        AbstractElement e = (AbstractElement) obj;
+        return id.equals(e.id) && systemId.equals(e.systemId);
+    }
+
+    @Override
+    public int hashCode() {
+        return systemId.hashCode() + id.hashCode();
+    }
+
+    @Override
+    public String toString() {
+        return getClass().getName()
+                + " [ Name = " + name
+                + ", ID = " + id
+                + ", SystemID = " + systemId
+                + ", To Energy = " + toEnergy + " ]";
     }
     private final StringID systemId;
     private final StringID id;
     private String name;
-    private int turnToEnergy;
+    private int toEnergy;
 }

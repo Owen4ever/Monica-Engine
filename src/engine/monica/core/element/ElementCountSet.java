@@ -35,9 +35,9 @@ public final class ElementCountSet {
         HashSet<AbstractElement> temp = new HashSet<>(p.length, 1f);
         if (p.length != 0)
             for (int i = 0; i != p.length; ++i)
-                if (p[i] == null)
+                if (p[i] == null) {
                     throw new NullPointerException("Element is null.");
-                else {
+                } else {
                     if (!temp.add(p[i].first))
                         throw new AlreadyExistsInContainerException("The element"
                                 + " has already existed in the array.");
@@ -85,9 +85,10 @@ public final class ElementCountSet {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder(6 * size()).append("[ ");
-        for (FinalPair<AbstractElement, Integer> p : elements)
+        elements.stream().forEach((p) -> {
             sb.append(p.first.getName())
                     .append("(").append(p.last).append(")").append(", ");
+        });
         sb.replace(sb.length() - 2, sb.length(), " ]");
         return sb.toString();
     }

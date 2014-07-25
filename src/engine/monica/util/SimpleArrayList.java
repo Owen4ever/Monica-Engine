@@ -41,10 +41,10 @@ public final class SimpleArrayList<E> extends AbstractList<E>
     }
 
     @SuppressWarnings("unchecked")
-    public SimpleArrayList(Collection<E> c) {
+    public SimpleArrayList(Collection<E> c, Class<?> clazz) {
         if (c.isEmpty())
             throw new NullPointerException();
-        array = c.toArray((E[]) Array.newInstance(c.toArray()[0].getClass(), c.size()));
+        array = c.toArray((E[]) Array.newInstance(clazz, c.size()));
     }
 
     @Override

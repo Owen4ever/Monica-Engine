@@ -22,6 +22,7 @@ import engine.monica.core.engine.CoreEngine;
 import engine.monica.core.map.Area;
 import engine.monica.core.map.Map;
 import engine.monica.util.FinalPair;
+import engine.monica.util.NonOrderedFinalPair;
 import engine.monica.util.SimpleArrayList;
 import engine.monica.util.condition.Condition;
 import engine.monica.util.StringID;
@@ -29,6 +30,7 @@ import engine.monica.util.Wrapper;
 import engine.monica.util.condition.Provider;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public final class ElementEngine {
@@ -42,8 +44,8 @@ public final class ElementEngine {
         ret(defaultEngineLock, () -> {
             if (!elements.containsKey(element.getID())) {
                 elements.values().parallelStream().forEach(e -> {
-                    FinalPair<StringID, StringID> key
-                            = new FinalPair<>(e.getID(), element.getID());
+                    NonOrderedFinalPair<StringID, StringID> key
+                            = new NonOrderedFinalPair<>(e.getID(), element.getID());
                     switch (getSystemRelation(e.getSystemID(),
                             element.getSystemID())) {
                         case CANNOT:
@@ -55,11 +57,41 @@ public final class ElementEngine {
                             elementRelations.put(key, ElementRelation.SYSTEM_CAN);
                             break;
                     }
+                    elementConflicts.put(key, ElementConflict.CANNOT);
                 });
                 elements.put(element.getID(), element);
+                elementConcentrationCalcs.put(element.getID(), EE_DEFAULT_CONCENTRATION_CALC);
+                NonOrderedFinalPair<StringID, StringID> self = new NonOrderedFinalPair<>(element.getID(), element.getID());
+                elementRelations.put(self, ElementRelation.CAN);
+                elementCalcs.put(self, EE_DEFAULT_ELEMENT_CALC);
             }
         });
     }
+    private static final ElementConcentrationCalculatorInterface EE_DEFAULT_CONCENTRATION_CALC
+            = (p, map, area) -> {
+                double da = area.getElementConcentration().getConcentration(p.first);
+                double t = area.getElementConcentration().getTotal();
+                double per = da / t;
+                if (per >= .8)
+                    return new FinalPair<>(p.first, p.last << 1);
+                else if (per >= .68)
+                    return new FinalPair<>(p.first, (p.last * 3) >> 1);
+                else if (per >= .56)
+                    return new FinalPair<>(p.first, (p.last * 10) >> 3);
+                else
+                    return p;
+            };
+    @SuppressWarnings("unchecked")
+    private static final ElementCalculatorInterface EE_DEFAULT_ELEMENT_CALC
+            = (p1, p2, map, area, c) -> {
+                int i = p1.last - p2.last;
+                if (i > 0)
+                    return new FinalPair[]{new FinalPair<>(p1.first, i), new FinalPair<>(p2.first, -p2.last)};
+                else if (i < 0)
+                    return new FinalPair[]{new FinalPair<>(p2.first, i), new FinalPair<>(p1.first, -p1.last)};
+                else
+                    return null;
+            };
 
     public AbstractElement addBasedElement(StringID systemId,
             StringID id, String name, int turnToEnergy) {
@@ -91,13 +123,13 @@ public final class ElementEngine {
     }
 
     public SimpleArrayList<AbstractElement> getElements() {
-        return new SimpleArrayList<>(elements.values());
+        return new SimpleArrayList<>(elements.values(), AbstractElement.class);
     }
 
     public ElementRelation getElementRelation(StringID e1, StringID e2) {
         if (e1 == null || e2 == null)
             throw new NullPointerException("The sid is null.");
-        return elementRelations.getOrDefault(new FinalPair<>(e1, e2),
+        return elementRelations.getOrDefault(new NonOrderedFinalPair<>(e1, e2),
                 ElementRelation.CANNOT);
     }
 
@@ -105,7 +137,7 @@ public final class ElementEngine {
         if (e1 == null || e2 == null)
             throw new NullPointerException("The element is null.");
         return elementRelations
-                .getOrDefault(new FinalPair<>(e1.getID(), e2.getID()),
+                .getOrDefault(new NonOrderedFinalPair<>(e1.getID(), e2.getID()),
                         ElementRelation.CANNOT);
     }
 
@@ -115,20 +147,20 @@ public final class ElementEngine {
         if (r == null)
             throw new NullPointerException("The element relation is null.");
         ret(defaultEngineLock, () -> {
-            elementRelations.put(new FinalPair<>(e1.getID(), e2.getID()), r);
+            elementRelations.put(new NonOrderedFinalPair<>(e1.getID(), e2.getID()), r);
         });
     }
 
     public ElementCalculatorInterface getElementCalculator(StringID e1, StringID e2) {
         if (e1 == null || e2 == null)
             throw new NullPointerException("The sid is null.");
-        return elementCalcs.get(new FinalPair<>(e1, e2));
+        return elementCalcs.get(new NonOrderedFinalPair<>(e1, e2));
     }
 
     public ElementCalculatorInterface getElementCalculator(AbstractElement e1, AbstractElement e2) {
         if (e1 == null || e2 == null)
             throw new NullPointerException("The element is null.");
-        return elementCalcs.get(new FinalPair<>(e1.getID(), e2.getID()));
+        return elementCalcs.get(new NonOrderedFinalPair<>(e1.getID(), e2.getID()));
     }
 
     public void setElementCalculator(AbstractElement e1, AbstractElement e2, ElementCalculatorInterface c) {
@@ -137,7 +169,7 @@ public final class ElementEngine {
         if (c == null)
             throw new NullPointerException("The condition is null.");
         ret(defaultEngineLock, () -> {
-            elementCalcs.put(new FinalPair<>(e1.getID(), e2.getID()), c);
+            elementCalcs.put(new NonOrderedFinalPair<>(e1.getID(), e2.getID()), c);
         });
     }
 
@@ -166,13 +198,13 @@ public final class ElementEngine {
     public Condition getElementCondition(StringID e1, StringID e2) {
         if (e1 == null || e2 == null)
             throw new NullPointerException("The sid is null.");
-        return elementConditions.get(new FinalPair<>(e1, e2));
+        return elementConditions.get(new NonOrderedFinalPair<>(e1, e2));
     }
 
     public Condition getElementCondition(AbstractElement e1, AbstractElement e2) {
         if (e1 == null || e2 == null)
             throw new NullPointerException("The element is null.");
-        return elementConditions.get(new FinalPair<>(e1.getID(), e2.getID()));
+        return elementConditions.get(new NonOrderedFinalPair<>(e1.getID(), e2.getID()));
     }
 
     public void setElementCondition(AbstractElement e1, AbstractElement e2, Condition c) {
@@ -181,21 +213,21 @@ public final class ElementEngine {
         if (c == null)
             throw new NullPointerException("The condition is null.");
         ret(defaultEngineLock, () -> {
-            elementConditions.put(new FinalPair<>(e1.getID(), e2.getID()), c);
+            elementConditions.put(new NonOrderedFinalPair<>(e1.getID(), e2.getID()), c);
         });
     }
 
     public ElementConflict getElementConflict(StringID e1, StringID e2) {
         if (e1 == null || e2 == null)
             throw new NullPointerException("The sid is null.");
-        return elementConflicts.getOrDefault(new FinalPair<>(e1, e2),
+        return elementConflicts.getOrDefault(new NonOrderedFinalPair<>(e1, e2),
                 ElementConflict.CANNOT);
     }
 
     public ElementConflict getElementConflict(AbstractElement e1, AbstractElement e2) {
         if (e1 == null || e2 == null)
             throw new NullPointerException("The element is null.");
-        return elementConflicts.getOrDefault(new FinalPair<>(e1.getID(), e2.getID()),
+        return elementConflicts.getOrDefault(new NonOrderedFinalPair<>(e1.getID(), e2.getID()),
                 ElementConflict.CANNOT);
     }
 
@@ -205,7 +237,7 @@ public final class ElementEngine {
         if (c == null)
             throw new NullPointerException("The conflict is null.");
         ret(defaultEngineLock, () -> {
-            FinalPair<StringID, StringID> p = new FinalPair<>(e1.getID(), e2.getID());
+            NonOrderedFinalPair<StringID, StringID> p = new NonOrderedFinalPair<>(e1.getID(), e2.getID());
             elementConflicts.put(p, c);
             elementConflictProcessers.put(p, (p1, p2, m, a)
                     -> new FinalPair<>(new FinalPair<>(p1.first, p1.last * 2),
@@ -216,13 +248,13 @@ public final class ElementEngine {
     public Condition getElementConflictCondition(StringID e1, StringID e2) {
         if (e1 == null || e2 == null)
             throw new NullPointerException("The sid is null.");
-        return elementConditions.get(new FinalPair<>(e1, e2));
+        return elementConditions.get(new NonOrderedFinalPair<>(e1, e2));
     }
 
     public Condition getElementConflictCondition(AbstractElement e1, AbstractElement e2) {
         if (e1 == null || e2 == null)
             throw new NullPointerException("The element is null.");
-        return elementConditions.get(new FinalPair<>(e1.getID(), e2.getID()));
+        return elementConditions.get(new NonOrderedFinalPair<>(e1.getID(), e2.getID()));
     }
 
     public void setElementConflictCondition(AbstractElement e1, AbstractElement e2, Condition c) {
@@ -231,20 +263,20 @@ public final class ElementEngine {
         if (c == null)
             throw new NullPointerException("The condition is null.");
         ret(defaultEngineLock, () -> {
-            elementConflictConditions.put(new FinalPair<>(e1.getID(), e2.getID()), c);
+            elementConflictConditions.put(new NonOrderedFinalPair<>(e1.getID(), e2.getID()), c);
         });
     }
 
     public ConflictProcesserInterface getElementConflictProcesser(StringID e1, StringID e2) {
         if (e1 == null || e2 == null)
             throw new NullPointerException("The sid is null.");
-        return elementConflictProcessers.get(new FinalPair<>(e1, e2));
+        return elementConflictProcessers.get(new NonOrderedFinalPair<>(e1, e2));
     }
 
     public ConflictProcesserInterface getElementConflictProcesser(AbstractElement e1, AbstractElement e2) {
         if (e1 == null || e2 == null)
             throw new NullPointerException("The element is null.");
-        return elementConflictProcessers.get(new FinalPair<>(e1.getID(), e2.getID()));
+        return elementConflictProcessers.get(new NonOrderedFinalPair<>(e1.getID(), e2.getID()));
     }
 
     public void setElementConflictProcesser(AbstractElement e1, AbstractElement e2, ConflictProcesserInterface p) {
@@ -253,18 +285,18 @@ public final class ElementEngine {
         if (p == null)
             throw new NullPointerException("The condition is null.");
         ret(defaultEngineLock, () -> {
-            elementConflictProcessers.put(new FinalPair<>(e1.getID(), e2.getID()), p);
+            elementConflictProcessers.put(new NonOrderedFinalPair<>(e1.getID(), e2.getID()), p);
         });
     }
     private final HashMap<StringID, AbstractElement> elements
             = new HashMap<>(CoreEngine.getDefaultQuantily() * CoreEngine.getDefaultQuantily(), 0.2f);
-    private final HashMap<FinalPair<StringID, StringID>, ElementRelation> elementRelations = new HashMap<>();
+    private final HashMap<NonOrderedFinalPair<StringID, StringID>, ElementRelation> elementRelations = new HashMap<>();
     private final HashMap<StringID, ElementConcentrationCalculatorInterface> elementConcentrationCalcs = new HashMap<>();
-    private final HashMap<FinalPair<StringID, StringID>, ElementCalculatorInterface> elementCalcs = new HashMap<>();
-    private final HashMap<FinalPair<StringID, StringID>, Condition> elementConditions = new HashMap<>();
-    private final HashMap<FinalPair<StringID, StringID>, ElementConflict> elementConflicts = new HashMap<>();
-    private final HashMap<FinalPair<StringID, StringID>, Condition> elementConflictConditions = new HashMap<>();
-    private final HashMap<FinalPair<StringID, StringID>, ConflictProcesserInterface> elementConflictProcessers = new HashMap<>();
+    private final HashMap<NonOrderedFinalPair<StringID, StringID>, ElementCalculatorInterface> elementCalcs = new HashMap<>();
+    private final HashMap<NonOrderedFinalPair<StringID, StringID>, Condition> elementConditions = new HashMap<>();
+    private final HashMap<NonOrderedFinalPair<StringID, StringID>, ElementConflict> elementConflicts = new HashMap<>();
+    private final HashMap<NonOrderedFinalPair<StringID, StringID>, Condition> elementConflictConditions = new HashMap<>();
+    private final HashMap<NonOrderedFinalPair<StringID, StringID>, ConflictProcesserInterface> elementConflictProcessers = new HashMap<>();
 
     public void addElementSystem(ElementSystem system) {
         if (system == null)
@@ -273,7 +305,7 @@ public final class ElementEngine {
             if (!systems.containsKey(system.getID())) {
                 systems.put(system.getID(), system);
                 systems.values().parallelStream().forEach(s -> {
-                    FinalPair<StringID, StringID> p = new FinalPair<>(s.getID(), system.getID());
+                    NonOrderedFinalPair<StringID, StringID> p = new NonOrderedFinalPair<>(s.getID(), system.getID());
                     if (s.hasBasedElementSystem() && system.hasBasedElementSystem()) {
                         switch (getSystemRelation(s.getBasedElementSystem(), system.getBasedElementSystem())) {
                             case CAN:
@@ -318,13 +350,13 @@ public final class ElementEngine {
     }
 
     public SimpleArrayList<ElementSystem> getSystems() {
-        return new SimpleArrayList<>(systems.values());
+        return new SimpleArrayList<>(systems.values(), ElementSystem.class);
     }
 
     public SystemRelation getSystemRelation(StringID e1, StringID e2) {
         if (e1 == null || e2 == null)
             throw new NullPointerException("The sid is null.");
-        return systemRelations.getOrDefault(new FinalPair<>(e1, e2),
+        return systemRelations.getOrDefault(new NonOrderedFinalPair<>(e1, e2),
                 SystemRelation.CANNOT);
     }
 
@@ -332,7 +364,7 @@ public final class ElementEngine {
         if (e1 == null || e2 == null)
             throw new NullPointerException("The ElementSystem is null.");
         return systemRelations
-                .getOrDefault(new FinalPair<>(e1.getID(), e2.getID()),
+                .getOrDefault(new NonOrderedFinalPair<>(e1.getID(), e2.getID()),
                         SystemRelation.CANNOT);
     }
 
@@ -343,20 +375,20 @@ public final class ElementEngine {
             throw new NullPointerException("The ElementSystem relation is"
                     + " null.");
         ret(defaultEngineLock, () -> {
-            systemRelations.put(new FinalPair<>(e1.getID(), e2.getID()), r);
+            systemRelations.put(new NonOrderedFinalPair<>(e1.getID(), e2.getID()), r);
         });
     }
 
     public Condition getSystemCondition(StringID e1, StringID e2) {
         if (e1 == null || e2 == null)
             throw new NullPointerException("The sid is null.");
-        return systemConditions.get(new FinalPair<>(e1, e2));
+        return systemConditions.get(new NonOrderedFinalPair<>(e1, e2));
     }
 
     public Condition getSystemCondition(ElementSystem e1, ElementSystem e2) {
         if (e1 == null || e2 == null)
             throw new NullPointerException("The ElementSystem is null.");
-        return elementConditions.get(new FinalPair<>(e1.getID(), e2.getID()));
+        return elementConditions.get(new NonOrderedFinalPair<>(e1.getID(), e2.getID()));
     }
 
     public void setSystemCondition(ElementSystem e1, ElementSystem e2, Condition l) {
@@ -365,17 +397,17 @@ public final class ElementEngine {
         if (l == null)
             throw new NullPointerException("The condition is null.");
         ret(defaultEngineLock, () -> {
-            systemConditions.put(new FinalPair<>(e1.getID(), e2.getID()), l);
+            systemConditions.put(new NonOrderedFinalPair<>(e1.getID(), e2.getID()), l);
         });
     }
     private final HashMap<StringID, ElementSystem> systems = new HashMap<>(CoreEngine.getDefaultQuantily(), 0.2f);
-    private final HashMap<FinalPair<StringID, StringID>, SystemRelation> systemRelations = new HashMap<>();
-    private final HashMap<FinalPair<StringID, StringID>, Condition> systemConditions = new HashMap<>();
+    private final HashMap<NonOrderedFinalPair<StringID, StringID>, SystemRelation> systemRelations = new HashMap<>();
+    private final HashMap<NonOrderedFinalPair<StringID, StringID>, Condition> systemConditions = new HashMap<>();
 
     @SuppressWarnings("unchecked")
     public ElementCountSet calc(ElementCountSet set1, ElementCountSet set2,
             Map map, Area area) {
-        HashMap<AbstractElement, Wrapper<Integer>> hashMap = new HashMap<>();
+        ConcurrentHashMap<AbstractElement, Wrapper<Integer>> hashMap = new ConcurrentHashMap<>();
         set1.getElementsAndCount().parallelStream().forEach(p1 -> {
             set2.getElementsAndCount().parallelStream().forEach(p2 -> {
                 calc0(hashMap, p1, p2, map, area);
@@ -394,7 +426,7 @@ public final class ElementEngine {
         return new ElementCountSet(pairs);
     }
 
-    private void calc0(HashMap<AbstractElement, Wrapper<Integer>> hashMap,
+    private void calc0(ConcurrentHashMap<AbstractElement, Wrapper<Integer>> hashMap,
             FinalPair<AbstractElement, Integer> p1,
             FinalPair<AbstractElement, Integer> p2,
             Map map, Area area) {
@@ -456,7 +488,7 @@ public final class ElementEngine {
         return getElementConcentrationCalculator(p.first.getID()).concentrate(p, map, area);
     }
 
-    private static void calc_check(HashMap<AbstractElement, Wrapper<Integer>> hashMap,
+    private static void calc_check(ConcurrentHashMap<AbstractElement, Wrapper<Integer>> hashMap,
             FinalPair<AbstractElement, Integer> p) {
         Wrapper<Integer> w = hashMap.get(p.first);
         if (w == null) {
@@ -466,7 +498,14 @@ public final class ElementEngine {
             w.pack += p.last;
     }
 
-    private void calc_default(HashMap<AbstractElement, Wrapper<Integer>> hashMap,
+    private static void calc_check_exist(ConcurrentHashMap<AbstractElement, Wrapper<Integer>> hashMap,
+            FinalPair<AbstractElement, Integer> p) {
+        Wrapper<Integer> w = hashMap.get(p.first);
+        if (w != null)
+            w.pack += p.last;
+    }
+
+    private void calc_default(ConcurrentHashMap<AbstractElement, Wrapper<Integer>> hashMap,
             FinalPair<AbstractElement, Integer> p1,
             FinalPair<AbstractElement, Integer> p2,
             Map map, Area area) {
@@ -483,7 +522,7 @@ public final class ElementEngine {
      * @param p2 The pair with AbstractElement (not CombinedElement) and
      * Integer.
      */
-    private void calc_combined1(HashMap<AbstractElement, Wrapper<Integer>> hashMap,
+    private void calc_combined1(ConcurrentHashMap<AbstractElement, Wrapper<Integer>> hashMap,
             FinalPair<AbstractElement, Integer> p1,
             FinalPair<AbstractElement, Integer> p2,
             Map map, Area area) {
@@ -499,7 +538,7 @@ public final class ElementEngine {
      * @param p1 The pair with CombinedElement and Integer.
      * @param p2 The pair with CombinedElement and Integer.
      */
-    private void calc_combined2(HashMap<AbstractElement, Wrapper<Integer>> hashMap,
+    private void calc_combined2(ConcurrentHashMap<AbstractElement, Wrapper<Integer>> hashMap,
             FinalPair<AbstractElement, Integer> p1,
             FinalPair<AbstractElement, Integer> p2,
             Map map, Area area) {
@@ -518,7 +557,7 @@ public final class ElementEngine {
         });
     }
 
-    private void calc_conflict(HashMap<AbstractElement, Wrapper<Integer>> hashMap,
+    private void calc_conflict(ConcurrentHashMap<AbstractElement, Wrapper<Integer>> hashMap,
             FinalPair<AbstractElement, Integer> p1,
             FinalPair<AbstractElement, Integer> p2,
             Map map, Area area) {
@@ -527,14 +566,14 @@ public final class ElementEngine {
         p1 = tempPs.first;
         p2 = tempPs.last;
         FinalPair<AbstractElement, Integer>[] ps
-                = getElementCalculator(p1.first, p2.first).calc(p1, p2, map, area);
+                = getElementCalculator(p1.first, p2.first).calc(p1, p2, map, area, true);
         if (ps != null && ps.length > 0) {
             for (FinalPair<AbstractElement, Integer> p : ps)
                 calc_check(hashMap, p);
         }
     }
 
-    private void calc_system(HashMap<AbstractElement, Wrapper<Integer>> hashMap,
+    private void calc_system(ConcurrentHashMap<AbstractElement, Wrapper<Integer>> hashMap,
             FinalPair<AbstractElement, Integer> p1,
             FinalPair<AbstractElement, Integer> p2,
             Map map, Area area) {
@@ -554,20 +593,23 @@ public final class ElementEngine {
         }
     }
 
-    private void calc_system_default(HashMap<AbstractElement, Wrapper<Integer>> hashMap,
+    private void calc_system_default(ConcurrentHashMap<AbstractElement, Wrapper<Integer>> hashMap,
             FinalPair<AbstractElement, Integer> p1,
             FinalPair<AbstractElement, Integer> p2,
             Map map, Area area) {
         int i1 = p1.first.toEnergy() * p1.last;
         int i2 = p2.first.toEnergy() * p2.last;
         int i = i1 - i2;
-        if (i > 0)
-            calc_check(hashMap, new FinalPair<>(p1.first, -i / p1.first.toEnergy()));
-        else if (i < 0)
+        if (i > 0) {
+            calc_check_exist(hashMap, new FinalPair<>(p1.first, -p1.last));
+            calc_check(hashMap, new FinalPair<>(p1.first, i / p1.first.toEnergy()));
+        } else if (i < 0) {
+            calc_check_exist(hashMap, new FinalPair<>(p2.first, -p2.last));
             calc_check(hashMap, new FinalPair<>(p2.first, -i / p2.first.toEnergy()));
+        }
     }
 
-    private void calc_system_base(HashMap<AbstractElement, Wrapper<Integer>> hashMap,
+    private void calc_system_base(ConcurrentHashMap<AbstractElement, Wrapper<Integer>> hashMap,
             FinalPair<AbstractElement, Integer> p1,
             FinalPair<AbstractElement, Integer> p2,
             Map map, Area area) {
@@ -577,7 +619,7 @@ public final class ElementEngine {
                 map, area);
     }
 
-    private void calc_system_base0(HashMap<AbstractElement, Wrapper<Integer>> hashMap,
+    private void calc_system_base0(ConcurrentHashMap<AbstractElement, Wrapper<Integer>> hashMap,
             FinalPair<AbstractElement, Integer> p1,
             ElementSystem s1,
             FinalPair<AbstractElement, Integer> p2,
@@ -602,17 +644,20 @@ public final class ElementEngine {
         }
     }
 
-    private void calc_system_base_default(HashMap<AbstractElement, Wrapper<Integer>> hashMap,
+    private void calc_system_base_default(ConcurrentHashMap<AbstractElement, Wrapper<Integer>> hashMap,
             FinalPair<AbstractElement, Integer> p1,
             ElementSystem s1,
             FinalPair<AbstractElement, Integer> p2,
             ElementSystem s2,
             Map map, Area area) {
         int i = calc_system_base_toEnergy(p1, s1) - calc_system_base_toEnergy(p2, s2);
-        if (i > 0)
-            calc_check(hashMap, new FinalPair<>(p1.first, -i / p1.first.toEnergy()));
-        else if (i < 0)
+        if (i > 0) {
+            calc_check_exist(hashMap, new FinalPair<>(p1.first, -p1.last));
+            calc_check(hashMap, new FinalPair<>(p1.first, i / p1.first.toEnergy()));
+        } else if (i < 0) {
+            calc_check_exist(hashMap, new FinalPair<>(p2.first, -p2.last));
             calc_check(hashMap, new FinalPair<>(p2.first, -i / p2.first.toEnergy()));
+        }
     }
 
     private int calc_system_base_toEnergy(FinalPair<AbstractElement, Integer> p, ElementSystem s) {

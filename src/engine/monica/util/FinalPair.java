@@ -44,11 +44,22 @@ public final class FinalPair<F, L> {
     public int hashCode() {
         return hashCode;
     }
+
+    @Override
+    public String toString() {
+        return getClass().getName()
+                + " [ First = " + first
+                + ", Last = " + last + " ]";
+    }
     public final F first;
     public final L last;
     private final int hashCode;
 
-    public static <F, L> FinalPair<F, L> toFinalPair(Pair<F, L> pair) {
-        return new FinalPair<>(pair.first, pair.last);
+    public static <F, L> FinalPair<F, L> to(Pair<F, L> p) {
+        return new FinalPair<>(p.first, p.last);
+    }
+
+    public static <F, L> FinalPair<F, L> to(NonOrderedFinalPair<F, L> p) {
+        return new FinalPair<>(p.first, p.last);
     }
 }
