@@ -54,7 +54,7 @@ public abstract class AbstractElement {
         this.name = name;
     }
 
-    public final int turnToEnergy() {
+    public final int toEnergy() {
         return turnToEnergy;
     }
 

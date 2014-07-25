@@ -28,7 +28,7 @@ public class CombinedElement extends AbstractElement {
     public CombinedElement(StringID systemId, StringID id, String name,
             FinalPair<AbstractElement, Integer>... elementAndCount) {
         super(systemId, id, name, new SimpleArrayList<>(elementAndCount).stream()
-                .mapToInt(e -> e.first.turnToEnergy() * e.last).sum());
+                .mapToInt(e -> e.first.toEnergy() * e.last).sum());
         this.elementAndCount = elementAndCount;
     }
 

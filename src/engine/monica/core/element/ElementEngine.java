@@ -27,7 +27,6 @@ import engine.monica.util.condition.Condition;
 import engine.monica.util.StringID;
 import engine.monica.util.Wrapper;
 import engine.monica.util.condition.Provider;
-import engine.monica.util.condition.ProviderType;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -47,14 +46,13 @@ public final class ElementEngine {
                             = new FinalPair<>(e.getID(), element.getID());
                     switch (getSystemRelation(e.getSystemID(),
                             element.getSystemID())) {
-                        case CAN:
-                            elementRelations.put(key, ElementRelation.SYSTEM_CAN);
-                            break;
                         case CANNOT:
                             elementRelations.put(key, ElementRelation.CANNOT);
                             break;
+                        case CAN:
+                        case BASE_CAN:
                         case CONDITION:
-                            elementRelations.put(key, ElementRelation.SYSTEM_CONDITION);
+                            elementRelations.put(key, ElementRelation.SYSTEM_CAN);
                             break;
                     }
                 });
@@ -330,7 +328,7 @@ public final class ElementEngine {
                             case CANNOT:
                                 break;
                             case CONDITION:
-                                systemRelations.put(p, SystemRelation.BASE_CONDITION);
+                                systemRelations.put(p, SystemRelation.BASE_CAN);
                                 break;
                         }
                     } else
@@ -352,7 +350,7 @@ public final class ElementEngine {
         return s;
     }
 
-    public ElementSystem getElementSystem(StringID id) {
+    public ElementSystem getSystem(StringID id) {
         if (id == null)
             throw new NullPointerException("The StringID is null.");
         return systems.get(id);
@@ -400,7 +398,7 @@ public final class ElementEngine {
                 break;
             case CAN:
                 if (calc_canConflict(p1, p2, map, area))
-                    calc_conflict_default(hashMap, p1, p2, map, area);
+                    calc_conflict(hashMap, p1, p2, map, area);
                 else
                     calc_default(hashMap, p1, p2, map, area);
                 break;
@@ -415,10 +413,14 @@ public final class ElementEngine {
                     calc_combined1(hashMap, p1, p2, map, area);
                 break;
             case SYSTEM_CAN:
+                calc_system(hashMap, p1, p2, map, area);
                 break;
             case CONDITION:
-                break;
-            case SYSTEM_CONDITION:
+                if (elementConditionPassed(this, p1.first, p2.first))
+                    if (calc_canConflict(p1, p2, map, area))
+                        calc_conflict(hashMap, p1, p2, map, area);
+                    else
+                        calc_default(hashMap, p1, p2, map, area);
                 break;
             default:
                 break;
@@ -509,7 +511,7 @@ public final class ElementEngine {
         });
     }
 
-    private void calc_conflict_default(HashMap<AbstractElement, Wrapper<Integer>> hashMap,
+    private void calc_conflict(HashMap<AbstractElement, Wrapper<Integer>> hashMap,
             FinalPair<AbstractElement, Integer> p1,
             FinalPair<AbstractElement, Integer> p2,
             Map map, Area area) {
@@ -525,21 +527,111 @@ public final class ElementEngine {
         }
     }
 
+    private void calc_system(HashMap<AbstractElement, Wrapper<Integer>> hashMap,
+            FinalPair<AbstractElement, Integer> p1,
+            FinalPair<AbstractElement, Integer> p2,
+            Map map, Area area) {
+        switch (getSystemRelation(p1.first.getSystemID(), p2.first.getSystemID())) {
+            case CAN:
+                calc_system_default(hashMap, p1, p2, map, area);
+                break;
+            case BASE_CAN:
+                calc_system_base(hashMap, p1, p2, map, area);
+                break;
+            case CONDITION:
+                if (systemConditionPassed(this, p1.first.getSystemID(), p2.first.getSystemID()))
+                    calc_system_default(hashMap, p1, p2, map, area);
+                break;
+            default:
+                break;
+        }
+    }
+
+    private void calc_system_default(HashMap<AbstractElement, Wrapper<Integer>> hashMap,
+            FinalPair<AbstractElement, Integer> p1,
+            FinalPair<AbstractElement, Integer> p2,
+            Map map, Area area) {
+        int i1 = p1.first.toEnergy() * p1.last;
+        int i2 = p2.first.toEnergy() * p2.last;
+        int i = i1 - i2;
+        if (i > 0)
+            calc_check(hashMap, new FinalPair<>(p1.first, -i / p1.first.toEnergy()));
+        else if (i < 0)
+            calc_check(hashMap, new FinalPair<>(p2.first, -i / p2.first.toEnergy()));
+    }
+
+    private void calc_system_base(HashMap<AbstractElement, Wrapper<Integer>> hashMap,
+            FinalPair<AbstractElement, Integer> p1,
+            FinalPair<AbstractElement, Integer> p2,
+            Map map, Area area) {
+        calc_system_base0(hashMap,
+                p1, getSystem(p1.first.getSystemID()),
+                p2, getSystem(p2.first.getSystemID()),
+                map, area);
+    }
+
+    private void calc_system_base0(HashMap<AbstractElement, Wrapper<Integer>> hashMap,
+            FinalPair<AbstractElement, Integer> p1,
+            ElementSystem s1,
+            FinalPair<AbstractElement, Integer> p2,
+            ElementSystem s2,
+            Map map, Area area) {
+        switch (getSystemRelation(p1.first.getSystemID(), p2.first.getSystemID())) {
+            case CAN:
+                calc_system_base_default(hashMap, p1, s1, p2, s2, map, area);
+                break;
+            case BASE_CAN:
+                calc_system_base0(hashMap,
+                        p1, s1.getBasedElementSystem(),
+                        p2, s2.getBasedElementSystem(),
+                        map, area);
+                break;
+            case CONDITION:
+                if (systemConditionPassed(this, p1.first.getSystemID(), p2.first.getSystemID()))
+                    calc_system_base_default(hashMap, p1, s1, p2, s2, map, area);
+                break;
+            default:
+                break;
+        }
+    }
+
+    private void calc_system_base_default(HashMap<AbstractElement, Wrapper<Integer>> hashMap,
+            FinalPair<AbstractElement, Integer> p1,
+            ElementSystem s1,
+            FinalPair<AbstractElement, Integer> p2,
+            ElementSystem s2,
+            Map map, Area area) {
+        int i = calc_system_base_toEnergy(p1, s1) - calc_system_base_toEnergy(p2, s2);
+        if (i > 0)
+            calc_check(hashMap, new FinalPair<>(p1.first, -i / p1.first.toEnergy()));
+        else if (i < 0)
+            calc_check(hashMap, new FinalPair<>(p2.first, -i / p2.first.toEnergy()));
+    }
+
+    private int calc_system_base_toEnergy(FinalPair<AbstractElement, Integer> p, ElementSystem s) {
+        int result = p.last * p.first.toEnergy();
+        ElementSystem e = getSystem(p.first.getSystemID());
+        while (!e.equals(s))
+            if (e.hasBasedElementSystem())
+                result = e.turnEnergyToBase(result);
+        return result;
+    }
+
     private static boolean elementConditionPassed(ElementEngine e,
             AbstractElement e1, AbstractElement e2) {
         return conditionPassed(e.getElementCondition(e1, e2));
     }
 
     private static boolean systemConditionPassed(ElementEngine e,
-            ElementSystem s1, ElementSystem s2) {
+            StringID s1, StringID s2) {
         return conditionPassed(e.getSystemCondition(s1, s2));
     }
 
     private static boolean conditionPassed(Condition c) {
         ArrayList<Provider> list = new ArrayList<>(c.count());
-        ProviderType[] types = c.getConditionTypes();
-        for (ProviderType type : types)
-            list.addAll(CoreEngine.processProviderType(type));
+        new SimpleArrayList<>(c.getConditionTypes()).forEach(pt -> {
+            list.addAll(CoreEngine.processProviderType(pt));
+        });
         return c.match(list.toArray(new Provider[list.size()]));
     }
 
