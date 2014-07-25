@@ -89,9 +89,10 @@ public final class ElementEngine {
             throw new NullPointerException("The StringID is null.");
         return ret(defaultEngineLock, () -> elements.remove(id) != null);
     }
-    private final HashMap<StringID, AbstractElement> elements
-            = new HashMap<>(CoreEngine.getDefaultQuantily()
-                    * CoreEngine.getDefaultQuantily(), 0.2f);
+
+    public SimpleArrayList<AbstractElement> getElements() {
+        return new SimpleArrayList<>(elements.values());
+    }
 
     public ElementRelation getElementRelation(StringID e1, StringID e2) {
         if (e1 == null || e2 == null)
@@ -255,6 +256,8 @@ public final class ElementEngine {
             elementConflictProcessers.put(new FinalPair<>(e1.getID(), e2.getID()), p);
         });
     }
+    private final HashMap<StringID, AbstractElement> elements
+            = new HashMap<>(CoreEngine.getDefaultQuantily() * CoreEngine.getDefaultQuantily(), 0.2f);
     private final HashMap<FinalPair<StringID, StringID>, ElementRelation> elementRelations = new HashMap<>();
     private final HashMap<StringID, ElementConcentrationCalculatorInterface> elementConcentrationCalcs = new HashMap<>();
     private final HashMap<FinalPair<StringID, StringID>, ElementCalculatorInterface> elementCalcs = new HashMap<>();
@@ -262,54 +265,6 @@ public final class ElementEngine {
     private final HashMap<FinalPair<StringID, StringID>, ElementConflict> elementConflicts = new HashMap<>();
     private final HashMap<FinalPair<StringID, StringID>, Condition> elementConflictConditions = new HashMap<>();
     private final HashMap<FinalPair<StringID, StringID>, ConflictProcesserInterface> elementConflictProcessers = new HashMap<>();
-
-    public SystemRelation getSystemRelation(StringID e1, StringID e2) {
-        if (e1 == null || e2 == null)
-            throw new NullPointerException("The sid is null.");
-        return systemRelations.getOrDefault(new FinalPair<>(e1, e2),
-                SystemRelation.CANNOT);
-    }
-
-    public SystemRelation getSystemRelation(ElementSystem e1, ElementSystem e2) {
-        if (e1 == null || e2 == null)
-            throw new NullPointerException("The ElementSystem is null.");
-        return systemRelations
-                .getOrDefault(new FinalPair<>(e1.getID(), e2.getID()),
-                        SystemRelation.CANNOT);
-    }
-
-    public void setSystemRelation(ElementSystem e1, ElementSystem e2, SystemRelation r) {
-        if (e1 == null || e2 == null)
-            throw new NullPointerException("The ElementSystem is null.");
-        if (r == null)
-            throw new NullPointerException("The ElementSystem relation is"
-                    + " null.");
-        ret(defaultEngineLock, () -> {
-            systemRelations.put(new FinalPair<>(e1.getID(), e2.getID()), r);
-        });
-    }
-
-    public Condition getSystemCondition(StringID e1, StringID e2) {
-        if (e1 == null || e2 == null)
-            throw new NullPointerException("The sid is null.");
-        return systemConditions.get(new FinalPair<>(e1, e2));
-    }
-
-    public Condition getSystemCondition(ElementSystem e1, ElementSystem e2) {
-        if (e1 == null || e2 == null)
-            throw new NullPointerException("The ElementSystem is null.");
-        return elementConditions.get(new FinalPair<>(e1.getID(), e2.getID()));
-    }
-
-    public void setSystemCondition(ElementSystem e1, ElementSystem e2, Condition l) {
-        if (e1 == null || e2 == null)
-            throw new NullPointerException("The ElementSystem is null.");
-        if (l == null)
-            throw new NullPointerException("The condition is null.");
-        ret(defaultEngineLock, () -> {
-            systemConditions.put(new FinalPair<>(e1.getID(), e2.getID()), l);
-        });
-    }
 
     public void addElementSystem(ElementSystem system) {
         if (system == null)
@@ -360,6 +315,58 @@ public final class ElementEngine {
         if (id == null)
             throw new NullPointerException("The StringID is null.");
         return ret(defaultEngineLock, () -> systems.remove(id) != null);
+    }
+
+    public SimpleArrayList<ElementSystem> getSystems() {
+        return new SimpleArrayList<>(systems.values());
+    }
+
+    public SystemRelation getSystemRelation(StringID e1, StringID e2) {
+        if (e1 == null || e2 == null)
+            throw new NullPointerException("The sid is null.");
+        return systemRelations.getOrDefault(new FinalPair<>(e1, e2),
+                SystemRelation.CANNOT);
+    }
+
+    public SystemRelation getSystemRelation(ElementSystem e1, ElementSystem e2) {
+        if (e1 == null || e2 == null)
+            throw new NullPointerException("The ElementSystem is null.");
+        return systemRelations
+                .getOrDefault(new FinalPair<>(e1.getID(), e2.getID()),
+                        SystemRelation.CANNOT);
+    }
+
+    public void setSystemRelation(ElementSystem e1, ElementSystem e2, SystemRelation r) {
+        if (e1 == null || e2 == null)
+            throw new NullPointerException("The ElementSystem is null.");
+        if (r == null)
+            throw new NullPointerException("The ElementSystem relation is"
+                    + " null.");
+        ret(defaultEngineLock, () -> {
+            systemRelations.put(new FinalPair<>(e1.getID(), e2.getID()), r);
+        });
+    }
+
+    public Condition getSystemCondition(StringID e1, StringID e2) {
+        if (e1 == null || e2 == null)
+            throw new NullPointerException("The sid is null.");
+        return systemConditions.get(new FinalPair<>(e1, e2));
+    }
+
+    public Condition getSystemCondition(ElementSystem e1, ElementSystem e2) {
+        if (e1 == null || e2 == null)
+            throw new NullPointerException("The ElementSystem is null.");
+        return elementConditions.get(new FinalPair<>(e1.getID(), e2.getID()));
+    }
+
+    public void setSystemCondition(ElementSystem e1, ElementSystem e2, Condition l) {
+        if (e1 == null || e2 == null)
+            throw new NullPointerException("The ElementSystem is null.");
+        if (l == null)
+            throw new NullPointerException("The condition is null.");
+        ret(defaultEngineLock, () -> {
+            systemConditions.put(new FinalPair<>(e1.getID(), e2.getID()), l);
+        });
     }
     private final HashMap<StringID, ElementSystem> systems = new HashMap<>(CoreEngine.getDefaultQuantily(), 0.2f);
     private final HashMap<FinalPair<StringID, StringID>, SystemRelation> systemRelations = new HashMap<>();

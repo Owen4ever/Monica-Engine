@@ -19,8 +19,10 @@
 package engine.monica.util;
 
 import java.io.Serializable;
+import java.lang.reflect.Array;
 import java.util.AbstractList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.RandomAccess;
 import java.util.Spliterator;
 import java.util.Spliterators;
@@ -36,6 +38,13 @@ public final class SimpleArrayList<E> extends AbstractList<E>
 
     public SimpleArrayList(E[] array) {
         this.array = array;
+    }
+
+    @SuppressWarnings("unchecked")
+    public SimpleArrayList(Collection<E> c) {
+        if (c.isEmpty())
+            throw new NullPointerException();
+        array = c.toArray((E[]) Array.newInstance(c.toArray()[0].getClass(), c.size()));
     }
 
     @Override
