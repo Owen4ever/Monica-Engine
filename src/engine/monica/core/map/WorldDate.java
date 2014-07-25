@@ -16,7 +16,7 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
-package engine.monica.core.datetime;
+package engine.monica.core.map;
 
 import engine.monica.core.engine.CoreEngine;
 import engine.monica.core.engine.EngineThread;

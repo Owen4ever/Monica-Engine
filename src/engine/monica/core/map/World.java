@@ -18,8 +18,6 @@
 
 package engine.monica.core.map;
 
-import engine.monica.core.datetime.DateTime;
-import engine.monica.core.datetime.WorldDate;
 import engine.monica.core.element.ElementEngine;
 import engine.monica.util.StringID;
 import java.math.BigInteger;
