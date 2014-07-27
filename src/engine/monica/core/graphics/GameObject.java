@@ -40,6 +40,12 @@ public interface GameObject {
         return getParent() != null;
     }
 
+    GameObject[] getChilds();
+
+    void addChild(GameObject obj);
+
+    boolean removeChild(GameObject obj);
+
     default <L extends VectorInterface> L getAbsoluteLocation() {
         GameObject parent = getParent();
         return parent == null ? getLocation()

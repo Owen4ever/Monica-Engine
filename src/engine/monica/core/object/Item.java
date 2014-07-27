@@ -18,5 +18,8 @@
 
 package engine.monica.core.object;
 
-public final class Skill {
+public class Item {
+
+    public Item(ItemKind kind) {
+    }
 }

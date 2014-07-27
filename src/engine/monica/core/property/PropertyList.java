@@ -35,6 +35,12 @@ public final class PropertyList {
                 properties.put(p.getType(), p);
     }
 
+    public void addAll(PropertyList list) {
+        if (list == null)
+            throw new NullPointerException("The PropertyList is null.");
+        properties.putAll(list.properties);
+    }
+
     public void addProperty(AbstractProperty p) {
         if (p == null)
             throw new NullPointerException("The property is null.");

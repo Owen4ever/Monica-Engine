@@ -41,7 +41,7 @@ public final class ElementEngine {
     public void addElement(AbstractElement element) {
         if (element == null)
             throw new NullPointerException("The ElementSystem is null.");
-        ret(defaultEngineLock, () -> {
+        RET(defaultEngineLock, () -> {
             if (!elements.containsKey(element.getID())) {
                 elements.values().parallelStream().forEach(e -> {
                     NonOrderedFinalPair<StringID, StringID> key
@@ -119,7 +119,7 @@ public final class ElementEngine {
     public boolean removeElement(StringID id) {
         if (id == null)
             throw new NullPointerException("The StringID is null.");
-        return ret(defaultEngineLock, () -> elements.remove(id) != null);
+        return RET(defaultEngineLock, () -> elements.remove(id) != null);
     }
 
     public SimpleArrayList<AbstractElement> getElements() {
@@ -146,7 +146,7 @@ public final class ElementEngine {
             throw new NullPointerException("The element is null.");
         if (r == null)
             throw new NullPointerException("The element relation is null.");
-        ret(defaultEngineLock, () -> {
+        RET(defaultEngineLock, () -> {
             elementRelations.put(new NonOrderedFinalPair<>(e1.getID(), e2.getID()), r);
         });
     }
@@ -168,7 +168,7 @@ public final class ElementEngine {
             throw new NullPointerException("The element is null.");
         if (c == null)
             throw new NullPointerException("The condition is null.");
-        ret(defaultEngineLock, () -> {
+        RET(defaultEngineLock, () -> {
             elementCalcs.put(new NonOrderedFinalPair<>(e1.getID(), e2.getID()), c);
         });
     }
@@ -190,7 +190,7 @@ public final class ElementEngine {
             throw new NullPointerException("The element is null.");
         if (c == null)
             throw new NullPointerException("The condition is null.");
-        ret(defaultEngineLock, () -> {
+        RET(defaultEngineLock, () -> {
             elementConcentrationCalcs.put(e.getID(), c);
         });
     }
@@ -212,7 +212,7 @@ public final class ElementEngine {
             throw new NullPointerException("The element is null.");
         if (c == null)
             throw new NullPointerException("The condition is null.");
-        ret(defaultEngineLock, () -> {
+        RET(defaultEngineLock, () -> {
             elementConditions.put(new NonOrderedFinalPair<>(e1.getID(), e2.getID()), c);
         });
     }
@@ -236,7 +236,7 @@ public final class ElementEngine {
             throw new NullPointerException("The element is null.");
         if (c == null)
             throw new NullPointerException("The conflict is null.");
-        ret(defaultEngineLock, () -> {
+        RET(defaultEngineLock, () -> {
             NonOrderedFinalPair<StringID, StringID> p = new NonOrderedFinalPair<>(e1.getID(), e2.getID());
             elementConflicts.put(p, c);
             elementConflictProcessers.put(p, (p1, p2, m, a)
@@ -262,7 +262,7 @@ public final class ElementEngine {
             throw new NullPointerException("The element is null.");
         if (c == null)
             throw new NullPointerException("The condition is null.");
-        ret(defaultEngineLock, () -> {
+        RET(defaultEngineLock, () -> {
             elementConflictConditions.put(new NonOrderedFinalPair<>(e1.getID(), e2.getID()), c);
         });
     }
@@ -284,7 +284,7 @@ public final class ElementEngine {
             throw new NullPointerException("The element is null.");
         if (p == null)
             throw new NullPointerException("The condition is null.");
-        ret(defaultEngineLock, () -> {
+        RET(defaultEngineLock, () -> {
             elementConflictProcessers.put(new NonOrderedFinalPair<>(e1.getID(), e2.getID()), p);
         });
     }
@@ -301,7 +301,7 @@ public final class ElementEngine {
     public void addElementSystem(ElementSystem system) {
         if (system == null)
             throw new NullPointerException("The ElementSystem is null.");
-        ret(defaultEngineLock, () -> {
+        RET(defaultEngineLock, () -> {
             if (!systems.containsKey(system.getID())) {
                 systems.put(system.getID(), system);
                 systems.values().parallelStream().forEach(s -> {
@@ -346,7 +346,7 @@ public final class ElementEngine {
     public boolean removeElementSystem(StringID id) {
         if (id == null)
             throw new NullPointerException("The StringID is null.");
-        return ret(defaultEngineLock, () -> systems.remove(id) != null);
+        return RET(defaultEngineLock, () -> systems.remove(id) != null);
     }
 
     public SimpleArrayList<ElementSystem> getSystems() {
@@ -374,7 +374,7 @@ public final class ElementEngine {
         if (r == null)
             throw new NullPointerException("The ElementSystem relation is"
                     + " null.");
-        ret(defaultEngineLock, () -> {
+        RET(defaultEngineLock, () -> {
             systemRelations.put(new NonOrderedFinalPair<>(e1.getID(), e2.getID()), r);
         });
     }
@@ -396,7 +396,7 @@ public final class ElementEngine {
             throw new NullPointerException("The ElementSystem is null.");
         if (l == null)
             throw new NullPointerException("The condition is null.");
-        ret(defaultEngineLock, () -> {
+        RET(defaultEngineLock, () -> {
             systemConditions.put(new NonOrderedFinalPair<>(e1.getID(), e2.getID()), l);
         });
     }
@@ -711,7 +711,7 @@ public final class ElementEngine {
         T func();
     }
 
-    private static <T> T ret(ReentrantReadWriteLock lock, TReturn<T> t) {
+    private static <T> T RET(ReentrantReadWriteLock lock, TReturn<T> t) {
         getWriteLock(lock);
         try {
             return t.func();
@@ -720,7 +720,7 @@ public final class ElementEngine {
         }
     }
 
-    private static void ret(ReentrantReadWriteLock lock, VoidReturn r) {
+    private static void RET(ReentrantReadWriteLock lock, VoidReturn r) {
         getWriteLock(lock);
         try {
             r.func();
