@@ -21,24 +21,35 @@ package engine.monica.core.object;
 import engine.monica.core.graphics.GameObject;
 import engine.monica.core.map.Area;
 import engine.monica.core.map.Map;
-import engine.monica.core.property.PropertyList;
 import engine.monica.util.FinalPair;
+import java.util.HashMap;
 
-public interface Item {
+public final class ItemActionList {
 
-    GameObject getGameObject();
-
-    ItemKind getItemKind();
-
-    Name getName();
-
-    PropertyList getProperties();
-
-    ItemActionList getItemActions();
-
-    default FinalPair<Boolean, String> action(String name,
-            Role owner, Role user, GameObject usingObject,
-            Map map, Area area) {
-        return getItemActions().action(name, owner, user, usingObject, this, map, area);
+    public ItemActionList() {
     }
+
+    public ItemActionList add(String name, ItemActionInterface action) {
+        if (!actions.containsKey(name))
+            actions.put(name, action);
+        return this;
+    }
+
+    public void remove(String name) {
+        actions.remove(name);
+    }
+
+    public FinalPair<Boolean, String> action(String name,
+            Role owner, Role user, GameObject usingObject,
+            Item beUsingItem, Map map, Area area) {
+        if (name == null || name.isEmpty())
+            return DEFAULT_PAIR;
+        return actions.getOrDefault(name, DEFAULT)
+                .action(owner, user, usingObject, beUsingItem, map, area);
+    }
+    private final HashMap<String, ItemActionInterface> actions = new HashMap<>(4, 0.1f);
+
+    private static final FinalPair<Boolean, String> DEFAULT_PAIR
+            = new FinalPair<>(false, "Do not has this action.");
+    private static final ItemActionInterface DEFAULT = (o, u, uo, buo, m, a) -> DEFAULT_PAIR;
 }
