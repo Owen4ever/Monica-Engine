@@ -58,7 +58,7 @@ public interface GameObject {
 
     <S extends VectorInterface> S getSize();
 
-    <S extends VectorInterface> void setSie(S v);
+    <S extends VectorInterface> void setSize(S v);
 
     double getScale();
 
