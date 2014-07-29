@@ -18,29 +18,8 @@
 
 package engine.monica.core.object;
 
-import engine.monica.core.graphics.GameObject;
-import engine.monica.core.map.Area;
-import engine.monica.core.map.Map;
-import engine.monica.core.property.PropertyList;
-import engine.monica.util.FinalPair;
+public interface CombinedMaterial extends Material {
 
-public interface Item {
-
-    GameObject getGameObject();
-
-    ItemKind getItemKind();
-
-    Name getName();
-
-    PropertyList getProperties();
-
-    ItemActionList getItemActions();
-
+    @Override
     Material[] getMaterials();
-
-    default FinalPair<FinalPair<Boolean, String>, GameObject[]> action(String name,
-            Role owner, Role user, GameObject usingObject,
-            Map map, Area area) {
-        return getItemActions().action(name, owner, user, usingObject, this, map, area);
-    }
 }

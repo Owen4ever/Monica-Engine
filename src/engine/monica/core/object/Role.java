@@ -23,4 +23,8 @@ import engine.monica.core.graphics.GameObject;
 public interface Role {
 
     GameObject getGameObject();
+
+    Name getName();
+
+    Career[] getCareers();
 }

@@ -18,29 +18,14 @@
 
 package engine.monica.core.object;
 
-import engine.monica.core.graphics.GameObject;
-import engine.monica.core.map.Area;
-import engine.monica.core.map.Map;
-import engine.monica.core.property.PropertyList;
-import engine.monica.util.FinalPair;
+import engine.monica.util.StringID;
 
-public interface Item {
+public final class Career {
 
-    GameObject getGameObject();
-
-    ItemKind getItemKind();
-
-    Name getName();
-
-    PropertyList getProperties();
-
-    ItemActionList getItemActions();
-
-    Material[] getMaterials();
-
-    default FinalPair<FinalPair<Boolean, String>, GameObject[]> action(String name,
-            Role owner, Role user, GameObject usingObject,
-            Map map, Area area) {
-        return getItemActions().action(name, owner, user, usingObject, this, map, area);
+    public Career(StringID id) {
+        if (id == null)
+            throw new NullPointerException("The id is null.");
+        this.id = id;
     }
+    private final StringID id;
 }

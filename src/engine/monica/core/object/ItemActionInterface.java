@@ -26,6 +26,7 @@ import engine.monica.util.FinalPair;
 @FunctionalInterface
 public interface ItemActionInterface {
 
-    FinalPair<Boolean, String> action(Role owner, Role user, GameObject usingObject,
-            Item beUsingItem, Map map, Area area);
+    FinalPair<FinalPair<Boolean, String>, GameObject[]>
+            action(Role owner, Role user, GameObject usingObject,
+                    Item beUsingItem, Map map, Area area);
 }
