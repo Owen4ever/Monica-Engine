@@ -23,10 +23,11 @@ import engine.monica.core.map.Area;
 import engine.monica.core.map.Map;
 import engine.monica.core.property.PropertyList;
 import engine.monica.util.FinalPair;
+import engine.monica.util.VectorInterface;
 
-public interface Item {
+public interface Item<V extends VectorInterface> {
 
-    GameObject getGameObject();
+    GameObject<V>[] getGameObjects();
 
     ItemKind getItemKind();
 

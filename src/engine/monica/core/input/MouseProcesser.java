@@ -16,16 +16,17 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
-package engine.monica.core.object;
+package engine.monica.core.input;
 
-import engine.monica.core.graphics.GameObject;
-import engine.monica.util.VectorInterface;
+public interface MouseProcesser extends InputProesser {
 
-public interface Role<V extends VectorInterface> {
+    public void mouseClicked(MouseEvent e);
 
-    GameObject<V>[] getGameObjects();
+    public void mousePressed(MouseEvent e);
 
-    Name getName();
+    public void mouseReleased(MouseEvent e);
 
-    Career[] getCareers();
+    public void mouseEntered(MouseEvent e);
+
+    public void mouseExited(MouseEvent e);
 }

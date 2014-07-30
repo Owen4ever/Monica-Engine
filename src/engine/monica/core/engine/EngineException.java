@@ -20,11 +20,13 @@ package engine.monica.core.engine;
 
 public class EngineException extends RuntimeException {
 
+    private static final long serialVersionUID = 542345456551L;
+
     public EngineException() {
-        super("Set a value to engine's property failed.");
+        super();
     }
 
-    public EngineException(String reason) {
-        super("Set a value to engine's property failed. Reason: " + reason);
+    public EngineException(String msg) {
+        super(msg);
     }
 }

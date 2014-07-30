@@ -18,6 +18,7 @@
 
 package engine.monica.util.condition;
 
+@FunctionalInterface
 public interface ProcesserInterface {
 
     Provider[] process(ProviderType type);

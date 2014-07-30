@@ -20,8 +20,9 @@ package engine.monica.core.object;
 
 import engine.monica.core.graphics.GameObject;
 import engine.monica.util.StringID;
+import engine.monica.util.VectorInterface;
 
-public interface SkillInterface {
+public interface SkillInterface<V extends VectorInterface> {
 
     String getName();
 
@@ -29,7 +30,7 @@ public interface SkillInterface {
 
     StringID getID();
 
-    GameObject[] getReleaseObjects();
+    GameObject<V>[] getReleaseObjects();
 
     ReleaseType getReleaseType();
 

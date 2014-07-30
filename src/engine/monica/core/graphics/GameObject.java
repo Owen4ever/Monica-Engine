@@ -22,7 +22,7 @@ import engine.monica.core.map.Map;
 import engine.monica.core.map.VisibleLevel;
 import engine.monica.util.VectorInterface;
 
-public interface GameObject {
+public interface GameObject<V extends VectorInterface> {
 
     Map getMap();
 
@@ -46,19 +46,19 @@ public interface GameObject {
 
     boolean removeChild(GameObject obj);
 
-    default <L extends VectorInterface> L getAbsoluteLocation() {
+    default V getAbsoluteLocation() {
         GameObject parent = getParent();
         return parent == null ? getLocation()
                 : parent.getAbsoluteLocation().add(getLocation());
     }
 
-    <L extends VectorInterface> L getLocation();
+    V getLocation();
 
-    <L extends VectorInterface> void setLocation(L v);
+    void setLocation(V v);
 
-    <S extends VectorInterface> S getSize();
+    V getSize();
 
-    <S extends VectorInterface> void setSize(S v);
+    V setSize(V v);
 
     double getScale();
 

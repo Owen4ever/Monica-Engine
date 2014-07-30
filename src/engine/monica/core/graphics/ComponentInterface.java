@@ -16,16 +16,15 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
-package engine.monica.core.object;
+package engine.monica.core.graphics;
 
-import engine.monica.core.graphics.GameObject;
-import engine.monica.util.VectorInterface;
+public interface ComponentInterface {
 
-public interface Role<V extends VectorInterface> {
+    int getX();
 
-    GameObject<V>[] getGameObjects();
+    int getY();
 
-    Name getName();
+    int getWidth();
 
-    Career[] getCareers();
+    int getHeight();
 }

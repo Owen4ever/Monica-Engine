@@ -18,5 +18,8 @@
 
 package engine.monica.core.object;
 
-public interface TalentInterface extends SkillInterface {
+import engine.monica.util.VectorInterface;
+
+public interface TalentInterface<V extends VectorInterface>
+        extends SkillInterface<V> {
 }

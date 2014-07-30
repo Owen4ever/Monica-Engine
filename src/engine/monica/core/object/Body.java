@@ -18,13 +18,16 @@
 
 package engine.monica.core.object;
 
+import engine.monica.core.graphics.GameObject;
 import engine.monica.core.property.PropertyList;
 import engine.monica.util.StringID;
+import engine.monica.util.VectorInterface;
 
-public final class Body {
+public final class Body<V extends VectorInterface> {
 
     public Body(StringID id, Name name, String describe,
-            PropertyList defaultProperties, TalentInterface... talents) {
+            PropertyList defaultProperties, TalentInterface[] talents,
+            GameObject<V>[] bodyObjects) {
         if (id == null)
             throw new NullPointerException("The id is null.");
         if (name == null)
@@ -36,7 +39,8 @@ public final class Body {
         this.describe = describe;
         if (defaultProperties != null)
             this.defaultProperties.addAll(defaultProperties);
-        this.talents = talents;
+        this.talents = talents == null ? new TalentInterface[0] : talents;
+        this.bodyObjects = bodyObjects;
     }
 
     public StringID getID() {
@@ -57,6 +61,10 @@ public final class Body {
 
     public TalentInterface[] getTalents() {
         return talents;
+    }
+
+    public GameObject<V>[] getBodyObjects() {
+        return bodyObjects;
     }
 
     @Override
@@ -86,4 +94,5 @@ public final class Body {
     private final String describe;
     private final PropertyList defaultProperties = new PropertyList();
     private final TalentInterface[] talents;
+    private final GameObject<V>[] bodyObjects;
 }

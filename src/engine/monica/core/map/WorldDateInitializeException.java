@@ -20,6 +20,8 @@ package engine.monica.core.map;
 
 public class WorldDateInitializeException extends RuntimeException {
 
+    private static final long serialVersionUID = 45246457845841L;
+
     public WorldDateInitializeException() {
     }
 

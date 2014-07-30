@@ -19,9 +19,12 @@
 package engine.monica.core.engine;
 
 import engine.monica.core.element.ElementProviderType;
+import engine.monica.core.input.InputConstants;
 
 /**
- * Aggregate all the constants which are available to public.
+ * Concentrate all the constants which are available to public.
  */
-public interface EngineConstants extends ElementProviderType {
+public interface EngineConstants extends
+        ElementProviderType,
+        InputConstants {
 }

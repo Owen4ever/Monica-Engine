@@ -18,20 +18,23 @@
 
 package engine.monica.core.object;
 
+import engine.monica.core.graphics.GameObject;
 import engine.monica.core.property.PropertyList;
 import engine.monica.util.StringID;
+import engine.monica.util.VectorInterface;
 import java.util.Arrays;
 
-public final class Race {
+public final class Race<V extends VectorInterface> {
 
     public Race(StringID id, Name name, RoleSex[] enableSex,
-            PropertyList defaultProperties, TalentInterface[] talents) {
-        this(id, name, enableSex, defaultProperties, talents, null);
+            PropertyList defaultProperties, TalentInterface[] talents,
+            GameObject<V>[] objs) {
+        this(id, name, enableSex, defaultProperties, talents, null, objs);
     }
 
     public Race(StringID id, Name name, RoleSex[] enableSex,
             PropertyList defaultProperties, TalentInterface[] talents,
-            Body defaultBody) {
+            Body defaultBody, GameObject<V>[] objs) {
         if (id == null)
             throw new NullPointerException("The id is null.");
         if (name == null)
@@ -55,6 +58,7 @@ public final class Race {
         this.talents = talents;
         hasDefaultBody = defaultBody != null;
         body = defaultBody;
+        raceObjects = objs;
     }
 
     public StringID getID() {
@@ -83,6 +87,10 @@ public final class Race {
 
     public Body getDefaultBody() {
         return body;
+    }
+
+    public GameObject<V>[] getRaceObjects() {
+        return raceObjects;
     }
 
     @Override
@@ -117,4 +125,5 @@ public final class Race {
     private final TalentInterface[] talents;
     private final boolean hasDefaultBody;
     private final Body body;
+    private final GameObject<V>[] raceObjects;
 }

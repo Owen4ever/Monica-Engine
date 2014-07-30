@@ -31,6 +31,10 @@ public final class ProviderType {
         this.id = id;
     }
 
+    public StringID getID() {
+        return id;
+    }
+
     @Override
     public boolean equals(Object obj) {
         if (this == obj)

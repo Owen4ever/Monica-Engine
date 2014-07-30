@@ -374,6 +374,20 @@ public final class ElementEngine {
         if (r == null)
             throw new NullPointerException("The ElementSystem relation is"
                     + " null.");
+        if (r == SystemRelation.CANNOT)
+            getElements().parallelStream().forEach(fe1 -> {
+                getElements().parallelStream().forEach(fe2 -> {
+                    if (getElementRelation(fe1, fe2) == ElementRelation.SYSTEM_CAN)
+                        setElementRelation(fe1, fe2, ElementRelation.CANNOT);
+                });
+            });
+        else
+            getElements().parallelStream().forEach(fe1 -> {
+                getElements().parallelStream().forEach(fe2 -> {
+                    if (getElementRelation(fe1, fe2) == ElementRelation.CANNOT)
+                        setElementRelation(fe1, fe2, ElementRelation.SYSTEM_CAN);
+                });
+            });
         RET(defaultEngineLock, () -> {
             systemRelations.put(new NonOrderedFinalPair<>(e1.getID(), e2.getID()), r);
         });
@@ -388,7 +402,7 @@ public final class ElementEngine {
     public Condition getSystemCondition(ElementSystem e1, ElementSystem e2) {
         if (e1 == null || e2 == null)
             throw new NullPointerException("The ElementSystem is null.");
-        return elementConditions.get(new NonOrderedFinalPair<>(e1.getID(), e2.getID()));
+        return systemConditions.get(new NonOrderedFinalPair<>(e1.getID(), e2.getID()));
     }
 
     public void setSystemCondition(ElementSystem e1, ElementSystem e2, Condition l) {

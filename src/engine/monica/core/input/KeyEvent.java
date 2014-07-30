@@ -16,16 +16,11 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
-package engine.monica.core.object;
+package engine.monica.core.input;
 
-import engine.monica.core.graphics.GameObject;
-import engine.monica.util.VectorInterface;
+public interface KeyEvent extends InputEvent {
 
-public interface Role<V extends VectorInterface> {
+    char getKeyChar();
 
-    GameObject<V>[] getGameObjects();
-
-    Name getName();
-
-    Career[] getCareers();
+    int getKeyCode();
 }
