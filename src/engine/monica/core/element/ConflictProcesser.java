@@ -16,17 +16,15 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
-package engine.monica.core.object;
+package engine.monica.core.element;
 
-import engine.monica.core.graphics.GameObject;
 import engine.monica.core.map.Area;
 import engine.monica.core.map.Map;
 import engine.monica.util.FinalPair;
 
-@FunctionalInterface
-public interface ItemActionInterface {
+public interface ConflictProcesser {
 
-    FinalPair<FinalPair<Boolean, String>, GameObject[]>
-            action(Role owner, Role user, GameObject usingObject,
-                    Item beUsingItem, Map map, Area area);
+    FinalPair<FinalPair<AbstractElement, Integer>, FinalPair<AbstractElement, Integer>>
+            conflict(FinalPair<AbstractElement, Integer> p1,
+                    FinalPair<AbstractElement, Integer> p2, Map m, Area a);
 }

@@ -18,21 +18,21 @@
 
 package engine.monica.core.map;
 
-import engine.monica.core.graphics.GameObject;
-import engine.monica.util.VectorInterface;
+import engine.monica.core.graphics.GraphicObject;
+import engine.monica.util.Vector;
 import java.util.List;
 
 public interface Map extends ConfigInterface {
 
     World getWorld();
 
-    Area getArea(VectorInterface v);
+    Area getArea(Vector v);
 
-    void setArea(VectorInterface v, Area a);
+    void setArea(Vector v, Area a);
 
-    void createIrregularArea(VectorInterface v, Area a);
+    void createIrregularArea(Vector v, Area a);
 
-    Area[] getNearbyAreas(VectorInterface v);
+    Area[] getNearbyAreas(Vector v);
 
     Area[] getNearbyAreas(Area a);
 
@@ -40,9 +40,9 @@ public interface Map extends ConfigInterface {
 
     void setObserver(ObserverInterface o);
 
-    List<GameObject> getObjects();
+    List<GraphicObject> getObjects();
 
-    void addObject(GameObject obj);
+    void addObject(GraphicObject obj);
 
-    boolean removeObject(GameObject obj);
+    boolean removeObject(GraphicObject obj);
 }

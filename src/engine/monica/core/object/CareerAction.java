@@ -18,28 +18,14 @@
 
 package engine.monica.core.object;
 
-import engine.monica.core.graphics.GameObject;
-import engine.monica.util.StringID;
-import engine.monica.util.VectorInterface;
+import engine.monica.core.graphics.GraphicObject;
+import engine.monica.core.map.Area;
+import engine.monica.core.map.Map;
+import engine.monica.util.FinalPair;
 
-public interface SkillInterface<V extends VectorInterface> {
+public interface CareerAction {
 
-    String getName();
-
-    void setName(String name);
-
-    StringID getID();
-
-    GameObject<V>[] getReleaseObjects();
-
-    ReleaseType getReleaseType();
-
-    <T> T get(String key);
-
-    <T> void set(String key, T val);
-
-    public enum ReleaseType {
-
-        ACTIVE, PASSIVE
-    }
+    FinalPair<FinalPair<Boolean, String>, GraphicObject[]>
+            action(Role role, GraphicObject usingObject,
+                    Item beUsingItem, Map map, Area area);
 }

@@ -16,15 +16,10 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
-package engine.monica.core.graphics;
+package engine.monica.core.object;
 
-public interface ModelInterface {
+import engine.monica.util.Vector;
 
-    GameObject getObject();
-
-    int getFrame();
-
-    void setFrame(int frame);
-
-    void draw(CanvasInterface c, GraphicInterface g, GameObject obj);
+public interface Talent<V extends Vector>
+        extends Skill<V> {
 }

@@ -20,6 +20,16 @@ package engine.monica.core.element;
 
 import engine.monica.util.StringID;
 
+/**
+ * The base class of the element in the game world. Everything can be a element,
+ * such as {@code Water} is a element which is a member of
+ * {@code Natural Element System} and it is a {@code BaseElement},
+ * {@code Electricity} is a element which is a part of
+ * {@code Electrical Element System}, and also {@code Water} can be a element
+ * wich is belong to {@code Magical Element System} and is is a
+ * {@code CombinedElement} which creates by the {@code Water} in
+ * {@code Natural Element System}.
+ */
 public abstract class AbstractElement {
 
     protected AbstractElement(StringID systemId,
@@ -34,20 +44,37 @@ public abstract class AbstractElement {
         setValueToEnergy(turnToEnergy);
     }
 
+    /**
+     * If the object inherits from {@code CombinedElement}, this mothed will
+     * return true, otherwise will return false.
+     */
     public abstract boolean isCombined();
 
+    /**
+     * Return the ID of the {@code ElementSystem} which includes this
+     * {@code AbstractElement}.
+     */
     public final StringID getSystemID() {
         return systemId;
     }
 
+    /**
+     * Return the ID of this {@code AbstractElement}.
+     */
     public final StringID getID() {
         return id;
     }
 
+    /**
+     * Return the {@code Name} of this {@code AbstractElement}.
+     */
     public final String getName() {
         return name;
     }
 
+    /**
+     * To set the {@code Name} of this {@code AbstractElement}.
+     */
     public final void setName(String name) {
         if (name == null || name.isEmpty())
             throw new NullPointerException("The name of Element is null.");

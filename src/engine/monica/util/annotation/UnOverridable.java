@@ -29,7 +29,7 @@ import java.lang.annotation.Target;
 @Target({ElementType.FIELD, ElementType.METHOD})
 public @interface UnOverridable {
 
-    String describe() default "Please do not override this mothed,"
-            + " only if you are under the special requirements"
-            + " or you have a better solution.";
+    String descibe() default "Unless it is necessary to override the mothed"
+            + " or there is a better solution,"
+            + "please do not modify the mothed.";
 }

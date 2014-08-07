@@ -18,13 +18,13 @@
 
 package engine.monica.util;
 
-public interface VectorInterface {
+public interface Vector<V extends Vector> {
 
-    <V extends VectorInterface> V add(V v);
+    V add(V v);
 
-    <V extends VectorInterface> V substract(V v);
+    V substract(V v);
 
-    <V extends VectorInterface> double length(V v);
+    double length(V v);
 
-    <V extends VectorInterface> double lengthSqrt(V v);
+    double lengthSqrt(V v);
 }

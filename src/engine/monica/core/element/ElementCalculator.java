@@ -18,19 +18,22 @@
 
 package engine.monica.core.element;
 
-import engine.monica.util.StringID;
+import engine.monica.core.map.Area;
+import engine.monica.core.map.Map;
+import engine.monica.util.FinalPair;
 
-public class BasedElement extends AbstractElement {
+@FunctionalInterface
+public interface ElementCalculator {
 
-    private static final long serialVersionUID = 46274354281733422L;
-
-    public BasedElement(StringID systemId,
-            StringID id, String name, int turnToEnergy) {
-        super(systemId, id, name, turnToEnergy);
+    default FinalPair<AbstractElement, Integer>[]
+            calc(FinalPair<AbstractElement, Integer> p1,
+                    FinalPair<AbstractElement, Integer> p2,
+                    Map map, Area area) {
+        return calc(p1, p2, map, area, false);
     }
 
-    @Override
-    public final boolean isCombined() {
-        return false;
-    }
+    FinalPair<AbstractElement, Integer>[]
+            calc(FinalPair<AbstractElement, Integer> p1,
+                    FinalPair<AbstractElement, Integer> p2,
+                    Map map, Area area, boolean isConflicted);
 }

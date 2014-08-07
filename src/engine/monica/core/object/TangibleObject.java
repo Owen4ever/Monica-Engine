@@ -16,24 +16,17 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
-package engine.monica.core.element;
+package engine.monica.core.object;
 
-import engine.monica.core.map.Area;
-import engine.monica.core.map.Map;
-import engine.monica.util.FinalPair;
+import engine.monica.core.graphics.Model;
+import engine.monica.core.property.PropertyList;
+import engine.monica.util.Vector;
 
-@FunctionalInterface
-public interface ElementCalculatorInterface {
+public interface TangibleObject<V extends Vector<V>> {
 
-    default FinalPair<AbstractElement, Integer>[]
-            calc(FinalPair<AbstractElement, Integer> p1,
-                    FinalPair<AbstractElement, Integer> p2,
-                    Map map, Area area) {
-        return calc(p1, p2, map, area, false);
-    }
+    Model<V> getModel();
 
-    FinalPair<AbstractElement, Integer>[]
-            calc(FinalPair<AbstractElement, Integer> p1,
-                    FinalPair<AbstractElement, Integer> p2,
-                    Map map, Area area, boolean isConflicted);
+    Name getName();
+
+    PropertyList getProperties();
 }

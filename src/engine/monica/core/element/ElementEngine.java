@@ -67,7 +67,7 @@ public final class ElementEngine {
             }
         });
     }
-    private static final ElementConcentrationCalculatorInterface EE_DEFAULT_CONCENTRATION_CALC
+    private static final ElementConcentrationCalculator EE_DEFAULT_CONCENTRATION_CALC
             = (p, map, area) -> {
                 double da = area.getElementConcentration().getConcentration(p.first);
                 double t = area.getElementConcentration().getTotal();
@@ -82,7 +82,7 @@ public final class ElementEngine {
                     return p;
             };
     @SuppressWarnings("unchecked")
-    private static final ElementCalculatorInterface EE_DEFAULT_ELEMENT_CALC
+    private static final ElementCalculator EE_DEFAULT_ELEMENT_CALC
             = (p1, p2, map, area, c) -> {
                 int i = p1.last - p2.last;
                 if (i > 0)
@@ -95,7 +95,7 @@ public final class ElementEngine {
 
     public AbstractElement addBasedElement(StringID systemId,
             StringID id, String name, int turnToEnergy) {
-        AbstractElement e = new BasedElement(systemId, id, name, turnToEnergy);
+        AbstractElement e = new BaseElement(systemId, id, name, turnToEnergy);
         addElement(e);
         return e;
     }
@@ -151,19 +151,19 @@ public final class ElementEngine {
         });
     }
 
-    public ElementCalculatorInterface getElementCalculator(StringID e1, StringID e2) {
+    public ElementCalculator getElementCalculator(StringID e1, StringID e2) {
         if (e1 == null || e2 == null)
             throw new NullPointerException("The sid is null.");
         return elementCalcs.get(new NonOrderedFinalPair<>(e1, e2));
     }
 
-    public ElementCalculatorInterface getElementCalculator(AbstractElement e1, AbstractElement e2) {
+    public ElementCalculator getElementCalculator(AbstractElement e1, AbstractElement e2) {
         if (e1 == null || e2 == null)
             throw new NullPointerException("The element is null.");
         return elementCalcs.get(new NonOrderedFinalPair<>(e1.getID(), e2.getID()));
     }
 
-    public void setElementCalculator(AbstractElement e1, AbstractElement e2, ElementCalculatorInterface c) {
+    public void setElementCalculator(AbstractElement e1, AbstractElement e2, ElementCalculator c) {
         if (e1 == null || e2 == null)
             throw new NullPointerException("The element is null.");
         if (c == null)
@@ -173,19 +173,19 @@ public final class ElementEngine {
         });
     }
 
-    public ElementConcentrationCalculatorInterface getElementConcentrationCalculator(StringID e) {
+    public ElementConcentrationCalculator getElementConcentrationCalculator(StringID e) {
         if (e == null)
             throw new NullPointerException("The sid is null.");
         return elementConcentrationCalcs.get(e);
     }
 
-    public ElementConcentrationCalculatorInterface getElementConcentrationCalculator(AbstractElement e) {
+    public ElementConcentrationCalculator getElementConcentrationCalculator(AbstractElement e) {
         if (e == null)
             throw new NullPointerException("The element is null.");
         return elementConcentrationCalcs.get(e.getID());
     }
 
-    public void setElementConcentrationCalculator(AbstractElement e, ElementConcentrationCalculatorInterface c) {
+    public void setElementConcentrationCalculator(AbstractElement e, ElementConcentrationCalculator c) {
         if (e == null)
             throw new NullPointerException("The element is null.");
         if (c == null)
@@ -267,19 +267,19 @@ public final class ElementEngine {
         });
     }
 
-    public ConflictProcesserInterface getElementConflictProcesser(StringID e1, StringID e2) {
+    public ConflictProcesser getElementConflictProcesser(StringID e1, StringID e2) {
         if (e1 == null || e2 == null)
             throw new NullPointerException("The sid is null.");
         return elementConflictProcessers.get(new NonOrderedFinalPair<>(e1, e2));
     }
 
-    public ConflictProcesserInterface getElementConflictProcesser(AbstractElement e1, AbstractElement e2) {
+    public ConflictProcesser getElementConflictProcesser(AbstractElement e1, AbstractElement e2) {
         if (e1 == null || e2 == null)
             throw new NullPointerException("The element is null.");
         return elementConflictProcessers.get(new NonOrderedFinalPair<>(e1.getID(), e2.getID()));
     }
 
-    public void setElementConflictProcesser(AbstractElement e1, AbstractElement e2, ConflictProcesserInterface p) {
+    public void setElementConflictProcesser(AbstractElement e1, AbstractElement e2, ConflictProcesser p) {
         if (e1 == null || e2 == null)
             throw new NullPointerException("The element is null.");
         if (p == null)
@@ -291,12 +291,12 @@ public final class ElementEngine {
     private final HashMap<StringID, AbstractElement> elements
             = new HashMap<>(CoreEngine.getDefaultQuantily() * CoreEngine.getDefaultQuantily(), 0.2f);
     private final HashMap<NonOrderedFinalPair<StringID, StringID>, ElementRelation> elementRelations = new HashMap<>();
-    private final HashMap<StringID, ElementConcentrationCalculatorInterface> elementConcentrationCalcs = new HashMap<>();
-    private final HashMap<NonOrderedFinalPair<StringID, StringID>, ElementCalculatorInterface> elementCalcs = new HashMap<>();
+    private final HashMap<StringID, ElementConcentrationCalculator> elementConcentrationCalcs = new HashMap<>();
+    private final HashMap<NonOrderedFinalPair<StringID, StringID>, ElementCalculator> elementCalcs = new HashMap<>();
     private final HashMap<NonOrderedFinalPair<StringID, StringID>, Condition> elementConditions = new HashMap<>();
     private final HashMap<NonOrderedFinalPair<StringID, StringID>, ElementConflict> elementConflicts = new HashMap<>();
     private final HashMap<NonOrderedFinalPair<StringID, StringID>, Condition> elementConflictConditions = new HashMap<>();
-    private final HashMap<NonOrderedFinalPair<StringID, StringID>, ConflictProcesserInterface> elementConflictProcessers = new HashMap<>();
+    private final HashMap<NonOrderedFinalPair<StringID, StringID>, ConflictProcesser> elementConflictProcessers = new HashMap<>();
 
     public void addElementSystem(ElementSystem system) {
         if (system == null)

@@ -18,14 +18,24 @@
 
 package engine.monica.core.element;
 
-import engine.monica.core.map.Area;
-import engine.monica.core.map.Map;
-import engine.monica.util.FinalPair;
+import engine.monica.util.StringID;
 
-@FunctionalInterface
-public interface ElementConcentrationCalculatorInterface {
+/**
+ * A child class of {@code AbstractElement} and all the base elements are the
+ * instance of {@code BaseElement} such as {@code water}, {@code fire},
+ * {@code ice}, {@code air}, {@code electricity}.
+ */
+public class BaseElement extends AbstractElement {
 
-    FinalPair<AbstractElement, Integer>
-            concentrate(FinalPair<AbstractElement, Integer> p,
-                    Map map, Area area);
+    private static final long serialVersionUID = 46274354281733422L;
+
+    public BaseElement(StringID systemId,
+            StringID id, String name, int turnToEnergy) {
+        super(systemId, id, name, turnToEnergy);
+    }
+
+    @Override
+    public final boolean isCombined() {
+        return false;
+    }
 }

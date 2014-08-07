@@ -18,23 +18,23 @@
 
 package engine.monica.core.object;
 
-import engine.monica.core.graphics.GameObject;
+import engine.monica.core.graphics.GraphicObject;
 import engine.monica.core.property.PropertyList;
 import engine.monica.util.StringID;
-import engine.monica.util.VectorInterface;
+import engine.monica.util.Vector;
 import java.util.Arrays;
 
-public final class Race<V extends VectorInterface> {
+public final class Race<V extends Vector<V>> {
 
     public Race(StringID id, Name name, RoleSex[] enableSex,
-            PropertyList defaultProperties, TalentInterface[] talents,
-            GameObject<V>[] objs) {
+            PropertyList defaultProperties, Talent[] talents,
+            GraphicObject<V>[] objs) {
         this(id, name, enableSex, defaultProperties, talents, null, objs);
     }
 
     public Race(StringID id, Name name, RoleSex[] enableSex,
-            PropertyList defaultProperties, TalentInterface[] talents,
-            Body defaultBody, GameObject<V>[] objs) {
+            PropertyList defaultProperties, Talent[] talents,
+            Body defaultBody, GraphicObject<V>[] objs) {
         if (id == null)
             throw new NullPointerException("The id is null.");
         if (name == null)
@@ -48,7 +48,7 @@ public final class Race<V extends VectorInterface> {
             throw new NullPointerException("The array of default properties is null.");
         if (talents == null || talents.length == 0)
             throw new NullPointerException("The talent is null.");
-        for (TalentInterface t : talents)
+        for (Talent t : talents)
             if (t == null)
                 throw new NullPointerException("The talent is null.");
         this.id = id;
@@ -77,7 +77,7 @@ public final class Race<V extends VectorInterface> {
         return defaultProperties;
     }
 
-    public TalentInterface[] getTalents() {
+    public Talent[] getTalents() {
         return talents;
     }
 
@@ -89,7 +89,7 @@ public final class Race<V extends VectorInterface> {
         return body;
     }
 
-    public GameObject<V>[] getRaceObjects() {
+    public GraphicObject<V>[] getRaceObjects() {
         return raceObjects;
     }
 
@@ -122,8 +122,8 @@ public final class Race<V extends VectorInterface> {
     private final Name name;
     private final RoleSex[] enableSex;
     private final PropertyList defaultProperties;
-    private final TalentInterface[] talents;
+    private final Talent[] talents;
     private final boolean hasDefaultBody;
     private final Body body;
-    private final GameObject<V>[] raceObjects;
+    private final GraphicObject<V>[] raceObjects;
 }

@@ -18,16 +18,16 @@
 
 package engine.monica.core.object;
 
-import engine.monica.core.graphics.GameObject;
+import engine.monica.core.graphics.GraphicObject;
 import engine.monica.core.property.PropertyList;
 import engine.monica.util.StringID;
-import engine.monica.util.VectorInterface;
+import engine.monica.util.Vector;
 
-public final class Body<V extends VectorInterface> {
+public final class Body<V extends Vector<V>> {
 
     public Body(StringID id, Name name, String describe,
-            PropertyList defaultProperties, TalentInterface[] talents,
-            GameObject<V>[] bodyObjects) {
+            PropertyList defaultProperties, Talent[] talents,
+            GraphicObject<V>[] bodyObjects) {
         if (id == null)
             throw new NullPointerException("The id is null.");
         if (name == null)
@@ -39,7 +39,7 @@ public final class Body<V extends VectorInterface> {
         this.describe = describe;
         if (defaultProperties != null)
             this.defaultProperties.addAll(defaultProperties);
-        this.talents = talents == null ? new TalentInterface[0] : talents;
+        this.talents = talents == null ? new Talent[0] : talents;
         this.bodyObjects = bodyObjects;
     }
 
@@ -59,11 +59,11 @@ public final class Body<V extends VectorInterface> {
         return defaultProperties;
     }
 
-    public TalentInterface[] getTalents() {
+    public Talent[] getTalents() {
         return talents;
     }
 
-    public GameObject<V>[] getBodyObjects() {
+    public GraphicObject<V>[] getBodyObjects() {
         return bodyObjects;
     }
 
@@ -93,6 +93,6 @@ public final class Body<V extends VectorInterface> {
     private final Name name;
     private final String describe;
     private final PropertyList defaultProperties = new PropertyList();
-    private final TalentInterface[] talents;
-    private final GameObject<V>[] bodyObjects;
+    private final Talent[] talents;
+    private final GraphicObject<V>[] bodyObjects;
 }

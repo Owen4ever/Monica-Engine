@@ -18,30 +18,24 @@
 
 package engine.monica.core.object;
 
-import engine.monica.core.graphics.GameObject;
 import engine.monica.core.map.Area;
 import engine.monica.core.map.Map;
-import engine.monica.core.property.PropertyList;
 import engine.monica.util.FinalPair;
-import engine.monica.util.VectorInterface;
+import engine.monica.util.Vector;
 
-public interface Item<V extends VectorInterface> {
-
-    GameObject<V>[] getGameObjects();
+public interface Item<V extends Vector<V>> extends TangibleObject<V> {
 
     ItemKind getItemKind();
 
-    Name getName();
-
-    PropertyList getProperties();
-
-    ItemActionList getItemActions();
+    ItemActionList<V> getItemActions();
 
     Material[] getMaterials();
 
-    default FinalPair<FinalPair<Boolean, String>, GameObject[]> action(String name,
-            Role owner, Role user, GameObject usingObject,
-            Map map, Area area) {
-        return getItemActions().action(name, owner, user, usingObject, this, map, area);
+    Role getOwner();
+
+    default FinalPair<FinalPair<Boolean, String>, TangibleObject<V>[]>
+            action(String name, Role user, TangibleObject<V> target,
+                    Map map, Area area) {
+        return getItemActions().action(name, getOwner(), user, target, this, map, area);
     }
 }

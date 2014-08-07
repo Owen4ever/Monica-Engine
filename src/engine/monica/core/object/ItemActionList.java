@@ -18,14 +18,15 @@
 
 package engine.monica.core.object;
 
-import engine.monica.core.graphics.GameObject;
+import engine.monica.core.graphics.GraphicObject;
 import engine.monica.core.map.Area;
 import engine.monica.core.map.Map;
 import engine.monica.util.FinalPair;
+import engine.monica.util.Vector;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public final class ItemActionList {
+public final class ItemActionList<V extends Vector<V>> {
 
     public ItemActionList() {
     }
@@ -34,7 +35,7 @@ public final class ItemActionList {
         return names.toArray(new String[names.size()]);
     }
 
-    public ItemActionList add(String name, ItemActionInterface action) {
+    public ItemActionList add(String name, ItemAction action) {
         if (!actions.containsKey(name)) {
             actions.put(name, action);
             names.add(name);
@@ -47,18 +48,18 @@ public final class ItemActionList {
         names.add(name);
     }
 
-    public FinalPair<FinalPair<Boolean, String>, GameObject[]> action(String name,
-            Role owner, Role user, GameObject usingObject,
+    public FinalPair<FinalPair<Boolean, String>, TangibleObject<V>[]> action(String name,
+            Role owner, Role user, TangibleObject<V> target,
             Item beUsingItem, Map map, Area area) {
         if (name == null || name.isEmpty())
-            return DEFAULT_RESULT;
+            return DEFAULT.action(owner, user, target, beUsingItem, map, area);
         return actions.getOrDefault(name, DEFAULT)
-                .action(owner, user, usingObject, beUsingItem, map, area);
+                .action(owner, user, target, beUsingItem, map, area);
     }
     private final ArrayList<String> names = new ArrayList<>(4);
-    private final HashMap<String, ItemActionInterface> actions = new HashMap<>(4, 0.1f);
+    private final HashMap<String, ItemAction> actions = new HashMap<>(4, 0.1f);
 
-    private static final FinalPair<FinalPair<Boolean, String>, GameObject[]> DEFAULT_RESULT
-            = new FinalPair<>(new FinalPair<>(false, "Do not has this action."), new GameObject[]{});
-    private static final ItemActionInterface DEFAULT = (o, u, uo, buo, m, a) -> DEFAULT_RESULT;
+    private static final FinalPair<FinalPair<Boolean, String>, GraphicObject[]> DEFAULT_RESULT
+            = new FinalPair<>(new FinalPair<>(false, "Do not has this action."), new GraphicObject[]{});
+    private static final ItemAction DEFAULT = (o, u, uo, buo, m, a) -> DEFAULT_RESULT;
 }

@@ -18,27 +18,28 @@
 
 package engine.monica.core.object;
 
-import engine.monica.core.property.PropertyList;
+import engine.monica.core.graphics.GraphicObject;
 import engine.monica.util.StringID;
+import engine.monica.util.Vector;
 
-public final class Career {
+public interface Skill<V extends Vector<V>> {
 
-    public Career(StringID id, PropertyList defaultProperties) {
-        if (id == null)
-            throw new NullPointerException("The id is null.");
-        if (defaultProperties == null)
-            throw new NullPointerException("The default properties are null.");
-        this.id = id;
-        this.defaultProperties = defaultProperties;
+    String getName();
+
+    void setName(String name);
+
+    StringID getID();
+
+    GraphicObject<V>[] getReleaseObjects();
+
+    ReleaseType getReleaseType();
+
+    <T> T get(String key);
+
+    <T> void set(String key, T val);
+
+    public enum ReleaseType {
+
+        ACTIVE, PASSIVE
     }
-
-    public StringID getID() {
-        return id;
-    }
-
-    public PropertyList getProperties() {
-        return defaultProperties;
-    }
-    private final StringID id;
-    private final PropertyList defaultProperties;
 }

@@ -16,15 +16,29 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
-package engine.monica.core.element;
+package engine.monica.core.object;
 
 import engine.monica.core.map.Area;
 import engine.monica.core.map.Map;
 import engine.monica.util.FinalPair;
+import engine.monica.util.Vector;
 
-public interface ConflictProcesserInterface {
+@FunctionalInterface
+public interface ItemAction<V extends Vector<V>> {
 
-    FinalPair<FinalPair<AbstractElement, Integer>, FinalPair<AbstractElement, Integer>>
-            conflict(FinalPair<AbstractElement, Integer> p1,
-                    FinalPair<AbstractElement, Integer> p2, Map m, Area a);
+    /**
+     * Do an action to the item.
+     *
+     * @param owner The owner of the item.
+     * @param user The user of the item.
+     * @param target The target.
+     * @param beUsingItem The item.
+     * @param map The map.
+     * @param area The area.
+     * @return Boolean: Is succeed? String: Visible message. TangibleObject[]:
+     * The objects the action created.
+     */
+    FinalPair<FinalPair<Boolean, String>, TangibleObject<V>[]>
+            action(Role owner, Role user, TangibleObject<V> target,
+                    Item beUsingItem, Map map, Area area);
 }
