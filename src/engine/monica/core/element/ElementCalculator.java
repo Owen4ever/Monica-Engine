@@ -16,15 +16,24 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
-package engine.monica.core.graphics;
+package engine.monica.core.element;
 
-public interface ModelInterface {
+import engine.monica.core.map.Area;
+import engine.monica.core.map.Map;
+import engine.monica.util.FinalPair;
 
-    GameObject getObject();
+@FunctionalInterface
+public interface ElementCalculator {
 
-    int getFrame();
+    default FinalPair<AbstractElement, Integer>[]
+            calc(FinalPair<AbstractElement, Integer> p1,
+                    FinalPair<AbstractElement, Integer> p2,
+                    Map map, Area area) {
+        return calc(p1, p2, map, area, false);
+    }
 
-    void setFrame(int frame);
-
-    void draw(CanvasInterface c, GraphicInterface g, GameObject obj);
+    FinalPair<AbstractElement, Integer>[]
+            calc(FinalPair<AbstractElement, Integer> p1,
+                    FinalPair<AbstractElement, Integer> p2,
+                    Map map, Area area, boolean isConflicted);
 }

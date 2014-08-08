@@ -20,10 +20,12 @@ package engine.monica.core.map;
 
 import engine.monica.core.graphics.CanvasInterface;
 import engine.monica.core.graphics.GraphicInterface;
+import engine.monica.core.object.TangibleObject;
+import engine.monica.util.Vector;
 
-public interface ObserverInterface {
+public interface ObserverInterface<V extends Vector> {
 
-    Map getMap();
+    TangibleObject getOwner();
 
     void draw(CanvasInterface c, GraphicInterface g);
 }

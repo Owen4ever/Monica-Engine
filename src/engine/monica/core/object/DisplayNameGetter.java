@@ -16,16 +16,10 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
-package engine.monica.core.element;
-
-import engine.monica.core.map.Area;
-import engine.monica.core.map.Map;
-import engine.monica.util.FinalPair;
+package engine.monica.core.object;
 
 @FunctionalInterface
-public interface ElementConcentrationCalculatorInterface {
+public interface DisplayNameGetter {
 
-    FinalPair<AbstractElement, Integer>
-            concentrate(FinalPair<AbstractElement, Integer> p,
-                    Map map, Area area);
+    String getDisplayName();
 }

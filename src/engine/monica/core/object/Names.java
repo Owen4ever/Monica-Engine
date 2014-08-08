@@ -22,14 +22,14 @@ import engine.monica.util.SimpleArrayList;
 import java.util.HashSet;
 import java.util.Set;
 
-public final class Name {
+public final class Names {
 
-    public Name() {
+    public Names() {
         this("Nameless");
     }
 
-    public Name(String name, String... nickName) {
-        setName(name);
+    public Names(String name, String... nickName) {
+        setDisplayName(name);
         if (nickName.length > 0) {
             SimpleArrayList<String> ns = new SimpleArrayList<>(nickName);
             ns.forEach(n -> {
@@ -39,13 +39,13 @@ public final class Name {
         }
     }
 
-    public String getName() {
-        return name;
+    public String getDisplayName() {
+        return displayName;
     }
 
-    public void setName(String name) {
+    public void setDisplayName(String name) {
         checkName(name);
-        this.name = name;
+        this.displayName = name;
     }
 
     public Set<String> getNickNames() {
@@ -60,7 +60,7 @@ public final class Name {
     public void removeNickName(String name) {
         nickNames.remove(name);
     }
-    private String name;
+    private String displayName;
     private final HashSet<String> nickNames = new HashSet<>();
 
     private static void checkName(String name) {

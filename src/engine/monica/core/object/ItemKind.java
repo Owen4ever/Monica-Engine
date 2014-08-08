@@ -23,7 +23,7 @@ import engine.monica.util.StringID;
 public final class ItemKind {
 
     public ItemKind(StringID id, String name) {
-        this(id, name, null);
+        this(id, name, PARENT);
     }
 
     public ItemKind(StringID id, String name, ItemKind parent) {
@@ -34,7 +34,14 @@ public final class ItemKind {
         this.id = id;
         this.name = name;
         hasParent = parent != null;
-        this.parent = parent;
+        this.parent = hasParent ? parent : PARENT;
+    }
+
+    private ItemKind() {
+        id = null;
+        name = null;
+        hasParent = false;
+        parent = null;
     }
 
     public StringID getID() {
@@ -79,4 +86,6 @@ public final class ItemKind {
     private final String name;
     private final boolean hasParent;
     private final ItemKind parent;
+
+    private static final ItemKind PARENT = new ItemKind();
 }

@@ -16,20 +16,26 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
-package engine.monica.util.annotation;
+package engine.monica.core.object;
 
-import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import engine.monica.core.graphics.GraphicObject;
+import engine.monica.util.StringID;
+import engine.monica.util.Vector;
 
-@Documented
-@Retention(RetentionPolicy.SOURCE)
-@Target({ElementType.FIELD, ElementType.METHOD})
-public @interface UnOverridable {
+public interface Skill<V extends Vector<V>> extends NamesGetter {
 
-    String describe() default "Please do not override this mothed,"
-            + " only if you are under the special requirements"
-            + " or you have a better solution.";
+    StringID getID();
+
+    GraphicObject<V>[] getReleaseObjects();
+
+    ReleaseType getReleaseType();
+
+    <T> T get(String key);
+
+    <T> void set(String key, T val);
+
+    public enum ReleaseType {
+
+        ACTIVE, PASSIVE
+    }
 }

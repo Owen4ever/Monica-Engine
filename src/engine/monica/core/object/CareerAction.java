@@ -16,33 +16,26 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
-package engine.monica.core.map;
+package engine.monica.core.object;
 
-import engine.monica.core.graphics.GraphicObject;
+import engine.monica.core.map.Area;
+import engine.monica.core.map.Map;
+import engine.monica.util.FinalPair;
 import engine.monica.util.Vector;
-import java.util.List;
 
-public interface Map extends ConfigInterface {
+@FunctionalInterface
+public interface CareerAction<V extends Vector<V>> {
 
-    World getWorld();
-
-    Area getArea(Vector v);
-
-    void setArea(Vector v, Area a);
-
-    void createIrregularArea(Vector v, Area a);
-
-    Area[] getNearbyAreas(Vector v);
-
-    Area[] getNearbyAreas(Area a);
-
-    ObserverInterface getObserver();
-
-    void setObserver(ObserverInterface o);
-
-    List<GraphicObject> getObjects();
-
-    void addObject(GraphicObject obj);
-
-    boolean removeObject(GraphicObject obj);
+    /**
+     * Do an action to the item.
+     *
+     * @param user The user of the item.
+     * @param target The target.
+     * @param map The map.
+     * @param area The area.
+     * @return Boolean: Is succeed? String: Visible message. TangibleObject[]:
+     * The objects the action created.
+     */
+    FinalPair<FinalPair<Boolean, String>, TangibleObject<V>[]>
+            action(Role user, TangibleObject<V> target, Map map, Area area);
 }

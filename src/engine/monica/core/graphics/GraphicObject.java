@@ -20,11 +20,16 @@ package engine.monica.core.graphics;
 
 import engine.monica.core.map.Map;
 import engine.monica.core.map.VisibleLevel;
-import engine.monica.util.VectorInterface;
+import engine.monica.util.Vector;
 
-public interface GameObject<V extends VectorInterface> {
+public interface GraphicObject<V extends Vector<V>> {
 
-    Map getMap();
+    String getName();
+
+    /**
+     * Get the map which the {@code  GraphicObject} is located.
+     */
+    Map getLocatedMap();
 
     VisibleLevel getVisibleLevel();
 
@@ -32,22 +37,22 @@ public interface GameObject<V extends VectorInterface> {
         return getVisibleLevel().isVisible();
     }
 
-    GameObject getParent();
+    GraphicObject<V> getParent();
 
-    void setParent(GameObject obj);
+    void setParent(GraphicObject<V> obj);
 
     default boolean hasParent() {
         return getParent() != null;
     }
 
-    GameObject[] getChilds();
+    GraphicObject<V>[] getChilds();
 
-    void addChild(GameObject obj);
+    void addChild(GraphicObject obj);
 
-    boolean removeChild(GameObject obj);
+    boolean removeChild(GraphicObject obj);
 
     default V getAbsoluteLocation() {
-        GameObject parent = getParent();
+        GraphicObject<V> parent = getParent();
         return parent == null ? getLocation()
                 : parent.getAbsoluteLocation().add(getLocation());
     }
@@ -63,10 +68,6 @@ public interface GameObject<V extends VectorInterface> {
     double getScale();
 
     void setScale(double d);
-
-    ModelInterface getModel();
-
-    void setModel(ModelInterface model);
 
     <T> T getAttribute(String key);
 

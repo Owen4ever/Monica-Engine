@@ -16,21 +16,15 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
-package engine.monica.core.element;
+package engine.monica.util;
 
-import engine.monica.util.StringID;
+public interface Vector<V extends Vector> {
 
-public class BasedElement extends AbstractElement {
+    V add(V v);
 
-    private static final long serialVersionUID = 46274354281733422L;
+    V substract(V v);
 
-    public BasedElement(StringID systemId,
-            StringID id, String name, int turnToEnergy) {
-        super(systemId, id, name, turnToEnergy);
-    }
+    double length(V v);
 
-    @Override
-    public final boolean isCombined() {
-        return false;
-    }
+    double lengthSqrt(V v);
 }

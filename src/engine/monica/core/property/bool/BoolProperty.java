@@ -35,7 +35,6 @@ import engine.monica.core.property.PropertyID;
 import engine.monica.util.LinkedPointer;
 import engine.monica.util.StringID;
 import engine.monica.util.Wrapper;
-import engine.monica.util.annotation.UnOverridable;
 import java.util.HashMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -55,7 +54,6 @@ public class BoolProperty extends AbstractProperty<Boolean> {
     }
 
     @Override
-    @UnOverridable
     protected void getCalcWriteLock() {
         while (true) {
             if (!calcLocker.isWriteLocked() && calcLocker.writeLock().tryLock())
@@ -70,7 +68,6 @@ public class BoolProperty extends AbstractProperty<Boolean> {
     }
 
     @Override
-    @UnOverridable
     protected void unlockCalcWriteLock() {
         isCalc = false;
         calcLocker.writeLock().unlock();

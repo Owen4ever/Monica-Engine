@@ -16,10 +16,16 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
-package engine.monica.core.object;
+package engine.monica.core.element;
 
-import engine.monica.util.VectorInterface;
+import engine.monica.core.map.Area;
+import engine.monica.core.map.Map;
+import engine.monica.util.FinalPair;
 
-public interface TalentInterface<V extends VectorInterface>
-        extends SkillInterface<V> {
+@FunctionalInterface
+public interface ElementConcentrationCalculator {
+
+    FinalPair<AbstractElement, Integer>
+            concentrate(FinalPair<AbstractElement, Integer> p,
+                    Map map, Area area);
 }

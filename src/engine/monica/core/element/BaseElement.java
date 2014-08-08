@@ -16,15 +16,26 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
-package engine.monica.util;
+package engine.monica.core.element;
 
-public interface VectorInterface {
+import engine.monica.util.StringID;
 
-    <V extends VectorInterface> V add(V v);
+/**
+ * A child class of {@code AbstractElement} and all the base elements are the
+ * instance of {@code BaseElement} such as {@code water}, {@code fire},
+ * {@code ice}, {@code air}, {@code electricity}.
+ */
+public class BaseElement extends AbstractElement {
 
-    <V extends VectorInterface> V substract(V v);
+    private static final long serialVersionUID = 46274354281733422L;
 
-    <V extends VectorInterface> double length(V v);
+    public BaseElement(StringID systemId,
+            StringID id, String name, int turnToEnergy) {
+        super(systemId, id, name, turnToEnergy);
+    }
 
-    <V extends VectorInterface> double lengthSqrt(V v);
+    @Override
+    public final boolean isCombined() {
+        return false;
+    }
 }

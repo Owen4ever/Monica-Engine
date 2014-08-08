@@ -18,14 +18,22 @@
 
 package engine.monica.core.object;
 
-import engine.monica.core.graphics.GameObject;
-import engine.monica.util.VectorInterface;
+import engine.monica.util.Vector;
 
-public interface Role<V extends VectorInterface> {
+public interface Role<V extends Vector<V>> extends NamesGetter, TangibleObject<V> {
 
-    GameObject<V>[] getGameObjects();
+    @Override
+    default String getDisplayName() {
+        return getNames().getDisplayName();
+    }
 
-    Name getName();
+    RoleSex getSex();
 
     Career[] getCareers();
+
+    Item<V>[] getItemsOnBody();
+
+    Item<V>[] getAllItems();
+
+    Item<V>[] getOwnedItems();
 }

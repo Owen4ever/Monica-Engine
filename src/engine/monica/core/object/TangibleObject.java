@@ -16,33 +16,16 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
-package engine.monica.core.map;
+package engine.monica.core.object;
 
-import engine.monica.core.graphics.GraphicObject;
+import engine.monica.core.graphics.Model;
+import engine.monica.core.property.PropertyList;
 import engine.monica.util.Vector;
-import java.util.List;
 
-public interface Map extends ConfigInterface {
+public interface TangibleObject<V extends Vector<V>>
+        extends DisplayNameGetter, NamesGetter {
 
-    World getWorld();
+    Model<V> getModel();
 
-    Area getArea(Vector v);
-
-    void setArea(Vector v, Area a);
-
-    void createIrregularArea(Vector v, Area a);
-
-    Area[] getNearbyAreas(Vector v);
-
-    Area[] getNearbyAreas(Area a);
-
-    ObserverInterface getObserver();
-
-    void setObserver(ObserverInterface o);
-
-    List<GraphicObject> getObjects();
-
-    void addObject(GraphicObject obj);
-
-    boolean removeObject(GraphicObject obj);
+    PropertyList getProperties();
 }

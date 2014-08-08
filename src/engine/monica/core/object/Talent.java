@@ -18,28 +18,7 @@
 
 package engine.monica.core.object;
 
-import engine.monica.core.graphics.GameObject;
-import engine.monica.util.StringID;
-import engine.monica.util.VectorInterface;
+import engine.monica.util.Vector;
 
-public interface SkillInterface<V extends VectorInterface> {
-
-    String getName();
-
-    void setName(String name);
-
-    StringID getID();
-
-    GameObject<V>[] getReleaseObjects();
-
-    ReleaseType getReleaseType();
-
-    <T> T get(String key);
-
-    <T> void set(String key, T val);
-
-    public enum ReleaseType {
-
-        ACTIVE, PASSIVE
-    }
+public interface Talent<V extends Vector<V>> extends Skill<V> {
 }
