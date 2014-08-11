@@ -23,7 +23,7 @@ import engine.monica.core.graphics.GraphicInterface;
 import engine.monica.core.object.TangibleObject;
 import engine.monica.util.Vector;
 
-public interface ObserverInterface<V extends Vector> {
+public interface ObserverInterface<V extends Vector<V>> {
 
     default boolean hasOwner() {
         return getOwner() != null;
