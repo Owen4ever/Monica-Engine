@@ -16,20 +16,18 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
-package engine.monica.core.map;
+package engine.monica.core.property.simple;
 
-import engine.monica.core.graphics.CanvasInterface;
-import engine.monica.core.graphics.GraphicInterface;
-import engine.monica.core.object.TangibleObject;
-import engine.monica.util.Vector;
+import engine.monica.core.property.PropertyID;
 
-public interface ObserverInterface<V extends Vector> {
+public class SimpleBoolProperty extends SimpleProperty<Boolean> {
 
-    default boolean hasOwner() {
-        return getOwner() != null;
+    public SimpleBoolProperty(PropertyID id, boolean defaultVal, boolean offsetVal) {
+        super(id, defaultVal, offsetVal);
     }
 
-    TangibleObject getOwner();
-
-    void draw(CanvasInterface c, GraphicInterface g);
+    @Override
+    public Boolean getTotalValue() {
+        return defaultVal | offsetVal;
+    }
 }

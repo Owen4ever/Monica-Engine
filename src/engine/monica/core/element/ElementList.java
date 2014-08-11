@@ -25,11 +25,9 @@ public final class ElementList {
 
     @SafeVarargs
     public ElementList(AbstractElement... e) {
-        if (e == null)
-            throw new NullPointerException("Element is null.");
         elements = new AbstractElement[e.length];
-        HashSet<AbstractElement> temp = new HashSet<>(e.length, 1f);
-        if (e.length != 0)
+        if (e.length != 0) {
+            HashSet<AbstractElement> temp = new HashSet<>(e.length, 1f);
             for (int i = 0; i != e.length; ++i)
                 if (e[i] == null)
                     throw new NullPointerException("Element is null.");
@@ -39,7 +37,7 @@ public final class ElementList {
                                 + " has already existed in the array.");
                     elements[i] = e[i];
                 }
-        temp = null;
+        }
     }
 
     public AbstractElement[] getElements() {

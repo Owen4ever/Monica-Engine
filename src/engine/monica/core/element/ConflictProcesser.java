@@ -24,6 +24,10 @@ import engine.monica.util.FinalPair;
 
 public interface ConflictProcesser {
 
+    /**
+     * @return FinalPair(AbstractElement, Integer): p1,
+     * FinalPair(AbstractElement, Integer): p2
+     */
     FinalPair<FinalPair<AbstractElement, Integer>, FinalPair<AbstractElement, Integer>>
             conflict(FinalPair<AbstractElement, Integer> p1,
                     FinalPair<AbstractElement, Integer> p2, Map m, Area a);

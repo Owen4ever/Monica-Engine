@@ -18,6 +18,7 @@
 
 package engine.monica.core.element;
 
+import engine.monica.util.Convertor;
 import engine.monica.util.StringID;
 
 public final class ElementSystem {
@@ -31,7 +32,7 @@ public final class ElementSystem {
 
     public ElementSystem(StringID id, String name, Energy energy,
             ElementList elements, ElementSystem basedOn,
-            ConvertorInterface<Integer> c) {
+            Convertor<Integer> c) {
         if (id == null)
             throw new NullPointerException("The id is null.");
         if (energy == null)
@@ -126,5 +127,5 @@ public final class ElementSystem {
     private final ElementList elements;
     private final boolean hasBasedElementSystem;
     private final ElementSystem basedOn;
-    private ConvertorInterface<Integer> convertor;
+    private Convertor<Integer> convertor;
 }

@@ -26,6 +26,6 @@ import engine.monica.util.FinalPair;
 public interface ElementConcentrationCalculator {
 
     FinalPair<AbstractElement, Integer>
-            concentrate(FinalPair<AbstractElement, Integer> p,
+            calcByConcentration(FinalPair<AbstractElement, Integer> p,
                     Map map, Area area);
 }

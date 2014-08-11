@@ -16,20 +16,17 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
-package engine.monica.core.map;
+package engine.monica.util;
 
-import engine.monica.core.graphics.CanvasInterface;
-import engine.monica.core.graphics.GraphicInterface;
-import engine.monica.core.object.TangibleObject;
-import engine.monica.util.Vector;
+import java.util.function.Function;
 
-public interface ObserverInterface<V extends Vector> {
+@FunctionalInterface
+public interface Convertor<T> extends Function<T, T> {
 
-    default boolean hasOwner() {
-        return getOwner() != null;
+    T convert(T t);
+
+    @Override
+    default T apply(T t) {
+        return convert(t);
     }
-
-    TangibleObject getOwner();
-
-    void draw(CanvasInterface c, GraphicInterface g);
 }

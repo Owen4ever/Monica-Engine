@@ -16,10 +16,18 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
-package engine.monica.core.element;
+package engine.monica.core.property.simple;
 
-@FunctionalInterface
-public interface ConvertorInterface<T> {
+import engine.monica.core.property.PropertyID;
 
-    T convert(T t);
+public class SimpleNumberProperty extends SimpleProperty<Double> {
+
+    public SimpleNumberProperty(PropertyID id, double defaultVal, double offsetVal) {
+        super(id, defaultVal, offsetVal);
+    }
+
+    @Override
+    public Double getTotalValue() {
+        return defaultVal + offsetVal;
+    }
 }

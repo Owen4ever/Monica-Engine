@@ -18,7 +18,10 @@
 
 package engine.monica.core.element;
 
+import engine.monica.util.Convertor;
 import engine.monica.core.engine.CoreEngine;
+import static engine.monica.core.engine.EngineConstants.ELEMENT_CONCENTRATION_CALC_DEFAULT;
+import static engine.monica.core.engine.EngineConstants.ELEMENT_CALC_DEFAULT;
 import engine.monica.core.map.Area;
 import engine.monica.core.map.Map;
 import engine.monica.util.FinalPair;
@@ -60,38 +63,13 @@ public final class ElementEngine {
                     elementConflicts.put(key, ElementConflict.CANNOT);
                 });
                 elements.put(element.getID(), element);
-                elementConcentrationCalcs.put(element.getID(), EE_DEFAULT_CONCENTRATION_CALC);
+                elementConcentrationCalcs.put(element.getID(), ELEMENT_CONCENTRATION_CALC_DEFAULT);
                 NonOrderedFinalPair<StringID, StringID> self = new NonOrderedFinalPair<>(element.getID(), element.getID());
                 elementRelations.put(self, ElementRelation.CAN);
-                elementCalcs.put(self, EE_DEFAULT_ELEMENT_CALC);
+                elementCalcs.put(self, ELEMENT_CALC_DEFAULT);
             }
         });
     }
-    private static final ElementConcentrationCalculator EE_DEFAULT_CONCENTRATION_CALC
-            = (p, map, area) -> {
-                double da = area.getElementConcentration().getConcentration(p.first);
-                double t = area.getElementConcentration().getTotal();
-                double per = da / t;
-                if (per >= .8)
-                    return new FinalPair<>(p.first, p.last << 1);
-                else if (per >= .68)
-                    return new FinalPair<>(p.first, (p.last * 3) >> 1);
-                else if (per >= .56)
-                    return new FinalPair<>(p.first, (p.last * 10) >> 3);
-                else
-                    return p;
-            };
-    @SuppressWarnings("unchecked")
-    private static final ElementCalculator EE_DEFAULT_ELEMENT_CALC
-            = (p1, p2, map, area, c) -> {
-                int i = p1.last - p2.last;
-                if (i > 0)
-                    return new FinalPair[]{new FinalPair<>(p1.first, i), new FinalPair<>(p2.first, -p2.last)};
-                else if (i < 0)
-                    return new FinalPair[]{new FinalPair<>(p2.first, i), new FinalPair<>(p1.first, -p1.last)};
-                else
-                    return null;
-            };
 
     public AbstractElement addBasedElement(StringID systemId,
             StringID id, String name, int turnToEnergy) {
@@ -153,7 +131,7 @@ public final class ElementEngine {
 
     public ElementCalculator getElementCalculator(StringID e1, StringID e2) {
         if (e1 == null || e2 == null)
-            throw new NullPointerException("The sid is null.");
+            throw new NullPointerException("The element is null.");
         return elementCalcs.get(new NonOrderedFinalPair<>(e1, e2));
     }
 
@@ -331,7 +309,7 @@ public final class ElementEngine {
     }
 
     public ElementSystem addElementSystem(StringID id, String name, Energy energy,
-            ElementList elements, ElementSystem basedOn, ConvertorInterface<Integer> c) {
+            ElementList elements, ElementSystem basedOn, Convertor<Integer> c) {
         ElementSystem s = new ElementSystem(id, name, energy, elements, basedOn, c);
         addElementSystem(s);
         return s;
@@ -499,7 +477,7 @@ public final class ElementEngine {
     private FinalPair<AbstractElement, Integer>
             calc_concentrate(FinalPair<AbstractElement, Integer> p,
                     Map map, Area area) {
-        return getElementConcentrationCalculator(p.first.getID()).concentrate(p, map, area);
+        return getElementConcentrationCalculator(p.first.getID()).calcByConcentration(p, map, area);
     }
 
     private static void calc_check(ConcurrentHashMap<AbstractElement, Wrapper<Integer>> hashMap,

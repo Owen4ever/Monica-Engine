@@ -27,4 +27,6 @@ public interface ComponentInterface {
     int getWidth();
 
     int getHeight();
+
+    void paintComponent(GraphicInterface g);
 }

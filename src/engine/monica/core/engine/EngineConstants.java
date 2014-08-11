@@ -18,8 +18,14 @@
 
 package engine.monica.core.engine;
 
+import engine.monica.core.element.ElementCalculator;
+import engine.monica.core.element.ElementConcentrationCalculator;
+import engine.monica.core.element.ElementCountSet;
+import engine.monica.core.element.ElementList;
 import engine.monica.core.element.ElementProviderType;
+import engine.monica.core.graphics.GraphicObject;
 import engine.monica.core.input.InputConstants;
+import engine.monica.util.FinalPair;
 
 /**
  * Concentrate all the constants which are available to public.
@@ -27,4 +33,33 @@ import engine.monica.core.input.InputConstants;
 public interface EngineConstants extends
         ElementProviderType,
         InputConstants {
+
+    ElementList ELEMENT_LIST_NULL = new ElementList();
+    ElementCountSet ELEMENT_COUNT_SET_NULL = new ElementCountSet();
+    GraphicObject[] ARRAY_GRAPHIC_OBJECT_NULL = new GraphicObject[0];
+    ElementConcentrationCalculator ELEMENT_CONCENTRATION_CALC_DEFAULT
+            = (p, map, area) -> {
+                double per
+                    = area.getElementConcentration().getConcentration(p.first)
+                        / area.getElementConcentration().getTotal();
+                if (per >= .8)
+                    return new FinalPair<>(p.first, p.last << 1);
+                else if (per >= .68)
+                    return new FinalPair<>(p.first, (p.last * 3) >> 1);
+                else if (per >= .56)
+                    return new FinalPair<>(p.first, (p.last * 10) >> 3);
+                else
+                    return p;
+            };
+    @SuppressWarnings("unchecked")
+    ElementCalculator ELEMENT_CALC_DEFAULT
+            = (p1, p2, map, area, c) -> {
+                int i = p1.last - p2.last;
+                if (i > 0)
+                    return new FinalPair[]{new FinalPair<>(p1.first, i), new FinalPair<>(p2.first, -p2.last)};
+                else if (i < 0)
+                    return new FinalPair[]{new FinalPair<>(p2.first, i), new FinalPair<>(p1.first, -p1.last)};
+                else
+                    return null;
+            };
 }
