@@ -71,7 +71,7 @@ public abstract class SimpleProperty<T> extends AbstractProperty<T> {
     }
 
     @Override
-    public void setAdjustment(PropertyAdjustment adjustment) {
+    public void setAdjustment(PropertyAdjustment<T> adjustment) {
         if (adjustment == null)
             throw new NullPointerException("The adjustment is null.");
         getCalcWriteLock();
@@ -84,7 +84,7 @@ public abstract class SimpleProperty<T> extends AbstractProperty<T> {
     }
 
     @Override
-    public void setAdjustment(ParentPropertyInterface parent) {
+    public void setAdjustment(ParentPropertyInterface<T> parent) {
         if (parent == null)
             throw new NullPointerException("The parent property is null.");
         getCalcWriteLock();

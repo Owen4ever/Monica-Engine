@@ -34,7 +34,7 @@ public final class ItemActionList<V extends Vector<V>> {
         return names.toArray(new String[names.size()]);
     }
 
-    public ItemActionList add(String name, ItemAction action) {
+    public ItemActionList add(String name, ItemAction<V> action) {
         if (!actions.containsKey(name)) {
             actions.put(name, action);
             names.add(name);
@@ -47,6 +47,7 @@ public final class ItemActionList<V extends Vector<V>> {
         names.add(name);
     }
 
+    @SuppressWarnings("unchecked")
     public FinalPair<FinalPair<Boolean, String>, TangibleObject<V>[]> action(String name,
             Role owner, Role user, TangibleObject<V> target,
             Item beUsingItem, Map map, Area area) {
@@ -56,7 +57,7 @@ public final class ItemActionList<V extends Vector<V>> {
                 .action(owner, user, target, beUsingItem, map, area);
     }
     private final ArrayList<String> names = new ArrayList<>(4);
-    private final HashMap<String, ItemAction> actions = new HashMap<>(4, 0.1f);
+    private final HashMap<String, ItemAction<V>> actions = new HashMap<>(4, 0.1f);
 
     private static final FinalPair<FinalPair<Boolean, String>, TangibleObject[]> DEFAULT_RESULT
             = new FinalPair<>(new FinalPair<>(false, "Do not has this action."), new TangibleObject[]{});
