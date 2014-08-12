@@ -19,11 +19,10 @@
 package engine.monica.core.object;
 
 import engine.monica.core.property.PropertyList;
-import engine.monica.util.StringID;
 
 public final class Career implements NamesGetter {
 
-    public Career(StringID id, Names names, PropertyList defaultProperties) {
+    public Career(String id, Names names, PropertyList defaultProperties) {
         if (id == null)
             throw new NullPointerException("The id is null.");
         if (names == null)
@@ -35,7 +34,7 @@ public final class Career implements NamesGetter {
         this.defaultProperties = defaultProperties;
     }
 
-    public StringID getID() {
+    public String getID() {
         return id;
     }
 
@@ -47,7 +46,7 @@ public final class Career implements NamesGetter {
     public PropertyList getProperties() {
         return defaultProperties;
     }
-    private final StringID id;
+    private final String id;
     private final Names names;
     private final PropertyList defaultProperties;
 }

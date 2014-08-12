@@ -18,22 +18,21 @@
 
 package engine.monica.core.map;
 
-import engine.monica.util.StringID;
 import java.util.Set;
 
 public interface ConfigInterface {
 
-    <T> void set(StringID key, T value);
+    <T> void set(String key, T value);
 
-    <T> T get(StringID key);
+    <T> T get(String key);
 
-    boolean remove(StringID key);
+    boolean remove(String key);
 
-    default boolean containKey(StringID key) {
+    default boolean containKey(String key) {
         return get(key) != null;
     }
 
-    Set<StringID> keySet();
+    Set<String> keySet();
 
     default void clearConfig() {
         keySet().stream().forEach(id -> remove(id));

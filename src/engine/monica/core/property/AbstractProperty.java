@@ -19,7 +19,6 @@
 package engine.monica.core.property;
 
 import engine.monica.util.LinkedPointer;
-import engine.monica.util.StringID;
 
 public abstract class AbstractProperty<T>
         implements Comparable<AbstractProperty> {
@@ -34,9 +33,9 @@ public abstract class AbstractProperty<T>
         this.offsetVal = offsetVal;
     }
 
-    protected abstract void getCalcWriteLock();
+    protected abstract void lock();
 
-    protected abstract void unlockCalcWriteLock();
+    protected abstract void unlock();
 
     public final PropertyID getType() {
         return type;
@@ -47,11 +46,11 @@ public abstract class AbstractProperty<T>
     }
 
     public final void setDefaultValue(T val) {
-        getCalcWriteLock();
+        lock();
         try {
             this.defaultVal = val;
         } finally {
-            unlockCalcWriteLock();
+            unlock();
         }
     }
 
@@ -60,11 +59,11 @@ public abstract class AbstractProperty<T>
     }
 
     public final void setOffsetValue(T val) {
-        getCalcWriteLock();
+        lock();
         try {
             this.offsetVal = val;
         } finally {
-            unlockCalcWriteLock();
+            unlock();
         }
     }
 
@@ -72,7 +71,7 @@ public abstract class AbstractProperty<T>
 
     public abstract LinkedPointer addEffect(AbstractEffect<T> effect);
 
-    public abstract void removeEffect(StringID id);
+    public abstract void removeEffect(String id);
 
     public abstract void removeEffect(LinkedPointer pointer);
 
@@ -93,9 +92,29 @@ public abstract class AbstractProperty<T>
         }
     }
 
-    public abstract void setAdjustment(PropertyAdjustment<T> adjustment);
+    public final void setAdjustment(PropertyAdjustment<T> adjustment) {
+        if (adjustment == null)
+            throw new NullPointerException("The adjustment is null.");
+        lock();
+        try {
+            this.adjustment = adjustment;
+            hasAdjustment = PRO_ADJ_ADJ;
+        } finally {
+            unlock();
+        }
+    }
 
-    public abstract void setAdjustment(ParentPropertyInterface<T> parent);
+    public final void setAdjustment(ParentPropertyInterface<T> parent) {
+        if (parent == null)
+            throw new NullPointerException("The parent property is null.");
+        lock();
+        try {
+            this.parentProperty = parent;
+            hasAdjustment = PRO_ADJ_PAR;
+        } finally {
+            unlock();
+        }
+    }
 
     public abstract T getTotalValue();
 

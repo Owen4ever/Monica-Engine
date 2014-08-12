@@ -20,9 +20,9 @@ package engine.monica.core.engine;
 
 import engine.monica.core.map.World;
 import engine.monica.core.map.WorldFactory;
+import engine.monica.util.AlreadyExistsInContainerException;
 import engine.monica.util.OMath;
 import engine.monica.util.SimpleArrayList;
-import engine.monica.util.StringID;
 import engine.monica.util.ThreadRouser;
 import engine.monica.util.Wrapper;
 import engine.monica.util.condition.ProcesserInterface;
@@ -32,7 +32,6 @@ import engine.monica.util.condition.UnkownProviderTypeException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public final class CoreEngine {
@@ -316,33 +315,27 @@ public final class CoreEngine {
     }
     private static int defaultQuantily = 16;
 
-    public static StringID newStringID(String sid) {
+    public static String newID(String sid) {
         if (sid == null || sid.isEmpty())
             throw new NullPointerException("The sid is null.");
-        int index = strIds.indexOf(sid);
-        if (index >= 0)
-            return ids.get(index);
+        if (ids.contains(sid))
+            throw new AlreadyExistsInContainerException("The id has already added into the set.");
         else {
-            StringID id = new StringID(sid);
-            ids.add(id);
-            strIds.add(sid);
-            return id;
+            ids.add(sid);
+            return sid;
         }
     }
 
-    public static StringID getStringID(String sid) {
+    public static String getID(String sid) {
         if (sid == null || sid.isEmpty())
             throw new NullPointerException("The sid is null.");
-        int index = strIds.indexOf(sid);
-        if (index >= 0)
-            return ids.get(index);
+        if (ids.contains(sid))
+            return sid;
         else
             return null;
     }
-    private static final CopyOnWriteArrayList<StringID> ids
-            = new CopyOnWriteArrayList<>();
-    private static final CopyOnWriteArrayList<String> strIds
-            = new CopyOnWriteArrayList<>();
+    private static final HashSet<String> ids
+            = new HashSet<>(getDefaultQuantily(), 0.4f);
 
     public static WorldFactory getWorldFactory() {
         return worldFactory;

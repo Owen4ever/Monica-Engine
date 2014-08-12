@@ -18,19 +18,24 @@
 
 package engine.monica.core.property;
 
-import engine.monica.util.StringID;
+public abstract class LongTimeEffect<T> extends AbstractEffect<T> {
 
-public abstract class AbstractLongTimeEffect<T> extends AbstractEffect<T> {
+    public LongTimeEffect(String id, PropertyID affectTo,
+            Effector<T> effector, int beginningTime,
+            int intervalDuration, boolean isInterval) {
+        this(id, EffectType.TYPE_LONGTIME, affectTo,
+                effector, beginningTime, intervalDuration, isInterval);
+    }
 
-    protected AbstractLongTimeEffect(StringID id, EffectType type,
-            PropertyID affectTo, EffectorInterface<T> effector,
-            int startingTime, int intervalDuration, boolean isInterval) {
+    protected LongTimeEffect(String id, EffectType type,
+            PropertyID affectTo, Effector<T> effector,
+            int beginning, int intervalDuration, boolean isInterval) {
         super(id, type, affectTo, effector);
-        if (startingTime < 0)
+        if (beginning < 0)
             throw new EffectInitializeException("The starting time of the effect"
                     + " is less than 0.");
         this.isInterval = isInterval;
-        this.startingTime = startingTime;
+        this.beginningTime = beginning;
         if (this.isInterval) {
             if (intervalDuration <= 0)
                 throw new EffectInitializeException("The duration of the effect"
@@ -40,6 +45,10 @@ public abstract class AbstractLongTimeEffect<T> extends AbstractEffect<T> {
             this.intervalDuration = 0;
     }
 
+    public final int getBeginningTime() {
+        return beginningTime;
+    }
+
     public final boolean isInterval() {
         return isInterval;
     }
@@ -47,7 +56,7 @@ public abstract class AbstractLongTimeEffect<T> extends AbstractEffect<T> {
     public final int getIntervalDuration() {
         return intervalDuration;
     }
-    protected final int startingTime;
-    protected final boolean isInterval;
-    protected final int intervalDuration;
+    private final int beginningTime;
+    private final boolean isInterval;
+    private final int intervalDuration;
 }

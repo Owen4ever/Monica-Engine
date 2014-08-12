@@ -18,8 +18,6 @@
 
 package engine.monica.core.element;
 
-import engine.monica.util.StringID;
-
 /**
  * The base class of the element in the game world. Everything can be a element,
  * such as {@code Water} is a element which is a member of
@@ -32,8 +30,8 @@ import engine.monica.util.StringID;
  */
 public abstract class AbstractElement {
 
-    protected AbstractElement(StringID systemId,
-            StringID id, String name, int turnToEnergy) {
+    protected AbstractElement(String systemId,
+            String id, String name, int turnToEnergy) {
         if (systemId == null)
             throw new NullPointerException("The ElementSystem id is null.");
         if (id == null)
@@ -54,14 +52,14 @@ public abstract class AbstractElement {
      * Return the ID of the {@code ElementSystem} which includes this
      * {@code AbstractElement}.
      */
-    public final StringID getSystemID() {
+    public final String getSystemID() {
         return systemId;
     }
 
     /**
      * Return the ID of this {@code AbstractElement}.
      */
-    public final StringID getID() {
+    public final String getID() {
         return id;
     }
 
@@ -115,8 +113,8 @@ public abstract class AbstractElement {
                 + ", SystemID = " + systemId
                 + ", To Energy = " + toEnergy + " ]";
     }
-    private final StringID systemId;
-    private final StringID id;
+    private final String systemId;
+    private final String id;
     private String name;
     private int toEnergy;
 }

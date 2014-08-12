@@ -18,24 +18,7 @@
 
 package engine.monica.core.property;
 
-import engine.monica.util.StringID;
-import engine.monica.util.Wrapper;
+public interface IntervalEffector<T> extends Effector<T> {
 
-public abstract class AbstractFixedEffect<T> extends AbstractEffect<T> {
-
-    public AbstractFixedEffect(StringID id, EffectType type,
-            PropertyID affectTo, T val) {
-        super(id, type, affectTo, v -> null);
-        this.val = new Wrapper<>(val);
-        setEffector(v -> this.val.pack);
-    }
-
-    public T getValue() {
-        return val.pack;
-    }
-
-    public void setValue(T t) {
-        val.pack = t;
-    }
-    private final Wrapper<T> val;
+    void intervalChange();
 }

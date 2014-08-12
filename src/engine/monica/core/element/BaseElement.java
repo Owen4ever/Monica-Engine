@@ -18,8 +18,6 @@
 
 package engine.monica.core.element;
 
-import engine.monica.util.StringID;
-
 /**
  * A child class of {@code AbstractElement} and all the base elements are the
  * instance of {@code BaseElement} such as {@code water}, {@code fire},
@@ -29,8 +27,8 @@ public class BaseElement extends AbstractElement {
 
     private static final long serialVersionUID = 46274354281733422L;
 
-    public BaseElement(StringID systemId,
-            StringID id, String name, int turnToEnergy) {
+    public BaseElement(String systemId,
+            String id, String name, int turnToEnergy) {
         super(systemId, id, name, turnToEnergy);
     }
 

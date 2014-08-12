@@ -20,12 +20,11 @@ package engine.monica.core.element;
 
 import engine.monica.util.FinalPair;
 import engine.monica.util.SimpleArrayList;
-import engine.monica.util.StringID;
 
 public class CombinedElement extends AbstractElement {
 
     @SafeVarargs
-    public CombinedElement(StringID systemId, StringID id, String name,
+    public CombinedElement(String systemId, String id, String name,
             FinalPair<AbstractElement, Integer>... elementAndCount) {
         super(systemId, id, name, new SimpleArrayList<>(elementAndCount).stream()
                 .mapToInt(e -> e.first.toEnergy() * e.last).sum());

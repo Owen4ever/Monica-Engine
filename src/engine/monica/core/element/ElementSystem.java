@@ -19,18 +19,17 @@
 package engine.monica.core.element;
 
 import engine.monica.util.Convertor;
-import engine.monica.util.StringID;
 
 public final class ElementSystem {
 
     private static final long serialVersionUID = 46274354282777902L;
 
-    public ElementSystem(StringID id, String name, Energy energy,
+    public ElementSystem(String id, String name, Energy energy,
             ElementList elements) {
         this(id, name, energy, elements, null, null);
     }
 
-    public ElementSystem(StringID id, String name, Energy energy,
+    public ElementSystem(String id, String name, Energy energy,
             ElementList elements, ElementSystem basedOn,
             Convertor<Integer> c) {
         if (id == null)
@@ -50,7 +49,7 @@ public final class ElementSystem {
         this.convertor = c;
     }
 
-    public final StringID getID() {
+    public final String getID() {
         return id;
     }
 
@@ -121,7 +120,7 @@ public final class ElementSystem {
                 + (hasBasedElementSystem ? basedOn.getName() : "Null")
                 + " ]";
     }
-    private final StringID id;
+    private final String id;
     private String name;
     private final Energy energy;
     private final ElementList elements;

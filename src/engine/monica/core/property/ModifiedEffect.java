@@ -16,38 +16,24 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
-package engine.monica.util;
+package engine.monica.core.property;
 
-public class Type<T> {
+import engine.monica.util.Wrapper;
 
-    public Type(T t) {
-        type = t;
+public class ModifiedEffect<T> extends AbstractEffect<T> {
+
+    public ModifiedEffect(String id, PropertyID affectTo, T val) {
+        super(id, EffectType.TYPE_MODIFIED, affectTo, v -> null);
+        this.val = new Wrapper<>(val);
+        setEffector(v -> this.val.pack);
     }
 
-    public final T set(T t) {
-        T tt = type;
-        type = t;
-        return tt;
+    public T getValue() {
+        return val.pack;
     }
 
-    public final T get() {
-        return type;
+    public void setValue(T t) {
+        val.pack = t;
     }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (obj == null || obj.getClass() != getClass())
-            return false;
-        @SuppressWarnings("unchecked")
-        Type<T> t = (Type<T>) obj;
-        if (type == null)
-            return t.type == null;
-        return type.equals(t.type);
-    }
-
-    @Override
-    public int hashCode() {
-        return (type == null ? -1024 : type.hashCode());
-    }
-    private T type;
+    private final Wrapper<T> val;
 }

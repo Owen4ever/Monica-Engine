@@ -18,7 +18,15 @@
 
 package engine.monica.core.property;
 
-public interface IntervalEffectorInterface<T> extends EffectorInterface<T> {
+public class SimpleEffect<T> extends AbstractEffect<T> {
 
-    void intervalChange();
+    public SimpleEffect(String id, PropertyID affectTo,
+            Effector<T> effector) {
+        super(id, EffectType.TYPE_SIMPLE, affectTo, effector);
+    }
+
+    @Override
+    public SimpleEffect<T> clone() {
+        return new SimpleEffect<>(getID(), affectTo(), getEffector());
+    }
 }

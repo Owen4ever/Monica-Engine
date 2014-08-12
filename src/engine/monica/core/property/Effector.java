@@ -16,26 +16,10 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
-package engine.monica.core.property.bool;
+package engine.monica.core.property;
 
-import engine.monica.core.property.AbstractFixedEffect;
-import engine.monica.core.property.EffectType;
-import engine.monica.core.property.PropertyID;
-import engine.monica.util.StringID;
+@FunctionalInterface
+public interface Effector<T> {
 
-public class BoolFixedEffect extends AbstractFixedEffect<Boolean> {
-
-    protected BoolFixedEffect(StringID id, PropertyID affectTo, boolean val) {
-        super(id, EffectType.TYPE_BOOL_FIXED, affectTo, val);
-    }
-
-    @Override
-    public BoolFixedEffect clone() {
-        return new BoolFixedEffect(id, affectTo, getValue());
-    }
-
-    public static BoolFixedEffect newFixedEffect(StringID id,
-            PropertyID affectTo, boolean val) {
-        return new BoolFixedEffect(id, affectTo, val);
-    }
+    T affect(T t);
 }

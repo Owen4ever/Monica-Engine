@@ -21,19 +21,17 @@ package engine.monica.core.property.number;
 import engine.monica.core.engine.CoreEngine;
 import engine.monica.core.engine.EngineThread;
 import engine.monica.core.engine.EngineThreadGroup;
-import engine.monica.core.property.AbstractBuffEffect;
+import engine.monica.core.property.BuffEffect;
 import engine.monica.core.property.AbstractEffect;
-import engine.monica.core.property.AbstractFixedEffect;
-import engine.monica.core.property.AbstractIntervalBuffEffect;
-import engine.monica.core.property.AbstractIntervalLongTimeEffect;
-import engine.monica.core.property.AbstractLongTimeEffect;
+import engine.monica.core.property.ModifiedEffect;
+import engine.monica.core.property.IntervalBuffEffect;
+import engine.monica.core.property.IntervalLongTimeEffect;
+import engine.monica.core.property.LongTimeEffect;
 import engine.monica.core.property.AbstractProperty;
 import engine.monica.core.property.ErrorTypeException;
-import engine.monica.core.property.ParentPropertyInterface;
-import engine.monica.core.property.PropertyAdjustment;
 import engine.monica.core.property.PropertyID;
 import engine.monica.util.LinkedPointer;
-import engine.monica.util.StringID;
+
 import engine.monica.util.Wrapper;
 import java.util.HashMap;
 import java.util.concurrent.ConcurrentHashMap;
@@ -54,7 +52,7 @@ public class NumberProperty extends AbstractProperty<Double> {
     }
 
     @Override
-    protected void getCalcWriteLock() {
+    protected void lock() {
         while (true) {
             if (!calcLocker.isWriteLocked() && calcLocker.writeLock().tryLock())
                 if (calcLocker.getWriteHoldCount() != 1)
@@ -68,7 +66,7 @@ public class NumberProperty extends AbstractProperty<Double> {
     }
 
     @Override
-    protected void unlockCalcWriteLock() {
+    protected void unlock() {
         isCalc = false;
         calcLocker.writeLock().unlock();
     }
@@ -79,7 +77,7 @@ public class NumberProperty extends AbstractProperty<Double> {
         return currentEffectPointer;
     }
 
-    private LinkedPointer addBuffEffect(AbstractBuffEffect<Double> e) {
+    private LinkedPointer addBuffEffect(BuffEffect<Double> e) {
         currentEffectPointer = currentEffectPointer.linkNew();
         effects.put(currentEffectPointer, e);
         BuffRunnable r = new BuffRunnable(currentEffectPointer);
@@ -91,7 +89,7 @@ public class NumberProperty extends AbstractProperty<Double> {
         return currentEffectPointer;
     }
 
-    private LinkedPointer addLongTimeEffect(AbstractLongTimeEffect<Double> e) {
+    private LinkedPointer addLongTimeEffect(LongTimeEffect<Double> e) {
         currentEffectPointer = currentEffectPointer.linkNew();
         effects.put(currentEffectPointer, e);
         LTRunnable r = new LTRunnable(currentEffectPointer);
@@ -107,7 +105,7 @@ public class NumberProperty extends AbstractProperty<Double> {
     protected static final EngineThreadGroup TG_PROPERTY_NUM
             = new EngineThreadGroup("NumberProperty Thread Group");
 
-    private void setFixedEffect(AbstractFixedEffect<Double> e) {
+    private void setFixedEffect(ModifiedEffect<Double> e) {
         fixedEffect = e;
         isFixed = true;
     }
@@ -124,35 +122,33 @@ public class NumberProperty extends AbstractProperty<Double> {
         if (!e.affectTo().equals(type))
             throw new NullPointerException("The effect cannot "
                     + "affect this property.");
-        getCalcWriteLock();
+        lock();
         try {
             switch (e.getEffectType()) {
-                case TYPE_NUM_SIMPLE:
+                case TYPE_SIMPLE:
                     return addAdditionValue(e);
-                case TYPE_NUM_BUFF:
-                case TYPE_NUM_BUFF_INTERVAL:
-                case TYPE_NUM_DEBUFF:
-                case TYPE_NUM_DEBUFF_INTERVAL:
-                    return addBuffEffect((AbstractBuffEffect<Double>) e);
-                case TYPE_NUM_FIXED:
-                    setFixedEffect((NumberFixedEffect) e);
+                case TYPE_BUFF:
+                case TYPE_BUFF_INTERVAL:
+                    return addBuffEffect((BuffEffect<Double>) e);
+                case TYPE_MODIFIED:
+                    setFixedEffect((ModifiedEffect<Double>) e);
                     return null;
-                case TYPE_NUM_LONGTIME:
-                case TYPE_NUM_LONGTIME_INTERVAL:
-                    return addLongTimeEffect((AbstractLongTimeEffect<Double>) e);
+                case TYPE_LONGTIME:
+                case TYPE_LONGTIME_INTERVAL:
+                    return addLongTimeEffect((LongTimeEffect<Double>) e);
                 default:
                     throw new ErrorTypeException("Error effect type.");
             }
         } finally {
-            unlockCalcWriteLock();
+            unlock();
         }
     }
 
     @Override
-    public final void removeEffect(final StringID sid) {
+    public final void removeEffect(final String sid) {
         if (sid == null)
-            throw new NullPointerException("The StringID is null.");
-        getCalcWriteLock();
+            throw new NullPointerException("The String is null.");
+        lock();
         try {
             if (isFixed && fixedEffect.getID().equals(sid))
                 isFixed = false;
@@ -167,24 +163,22 @@ public class NumberProperty extends AbstractProperty<Double> {
                     effects.putAll(tempEffects);
                     p.delete();
                     switch (e.getEffectType()) {
-                        case TYPE_NUM_BUFF:
-                        case TYPE_NUM_BUFF_INTERVAL:
-                        case TYPE_NUM_DEBUFF:
-                        case TYPE_NUM_DEBUFF_INTERVAL:
+                        case TYPE_BUFF:
+                        case TYPE_BUFF_INTERVAL:
                             bltThreads.remove(p);
                             tempBltThreads.clear();
                             tempBltThreads.putAll(bltThreads);
                             bltThreads.clear();
                             bltThreads.putAll(bltThreads);
                             return;
-                        case TYPE_NUM_LONGTIME_INTERVAL:
+                        case TYPE_LONGTIME_INTERVAL:
                             bltThreads.remove(p);
                             return;
                     }
                 }
             });
         } finally {
-            unlockCalcWriteLock();
+            unlock();
         }
     }
 
@@ -192,7 +186,7 @@ public class NumberProperty extends AbstractProperty<Double> {
     public final void removeEffect(LinkedPointer pointer) {
         if (pointer == null)
             throw new NullPointerException("The EffectPointer is null.");
-        getCalcWriteLock();
+        lock();
         try {
             effects.remove(pointer);
             tempEffects.clear();
@@ -202,46 +196,16 @@ public class NumberProperty extends AbstractProperty<Double> {
             bltThreads.remove(pointer);
             pointer.delete();
         } finally {
-            unlockCalcWriteLock();
-        }
-    }
-
-    @Override
-    public final void setAdjustment(PropertyAdjustment<Double> a) {
-        if (a == null)
-            throw new NullPointerException("The adjustment is null.");
-        getCalcWriteLock();
-        try {
-            this.hasAdjustment = PRO_ADJ_ADJ;
-            this.adjustment = a;
-            if (isCalc)
-                totalVal = adjustment.adjust(totalVal);
-        } finally {
-            unlockCalcWriteLock();
-        }
-    }
-
-    @Override
-    public final void setAdjustment(ParentPropertyInterface<Double> p) {
-        if (p == null)
-            throw new NullPointerException("The ParentProperty is null.");
-        getCalcWriteLock();
-        try {
-            this.hasAdjustment = PRO_ADJ_PAR;
-            this.parentProperty = p;
-            if (isCalc)
-                totalVal = parentProperty.adjust(totalVal);
-        } finally {
-            unlockCalcWriteLock();
+            unlock();
         }
     }
 
     public final void removeAdjustment() {
-        getCalcWriteLock();
+        lock();
         try {
             this.hasAdjustment = PRO_ADJ_NONE;
         } finally {
-            unlockCalcWriteLock();
+            unlock();
         }
     }
 
@@ -256,7 +220,7 @@ public class NumberProperty extends AbstractProperty<Double> {
     }
 
     private void calcTotalValue() {
-        getCalcWriteLock();
+        lock();
         try {
             if (isFixed)
                 totalVal = fixedEffect.affect(0d);
@@ -290,7 +254,7 @@ public class NumberProperty extends AbstractProperty<Double> {
             }
             isCalc = true;
         } finally {
-            unlockCalcWriteLock();
+            unlock();
         }
     }
 
@@ -341,7 +305,7 @@ public class NumberProperty extends AbstractProperty<Double> {
             = new HashMap<>(CoreEngine.getDefaultQuantily(), .2f);
     protected LinkedPointer currentEffectPointer = LinkedPointer.first();
     private boolean isFixed = false;
-    protected AbstractFixedEffect<Double> fixedEffect;
+    protected ModifiedEffect<Double> fixedEffect;
     protected transient volatile boolean isCalc = false;
     private final transient ReentrantReadWriteLock calcLocker
             = new ReentrantReadWriteLock();
@@ -356,13 +320,13 @@ public class NumberProperty extends AbstractProperty<Double> {
 
         @Override
         public void run() {
-            AbstractBuffEffect<Double> effect
-                    = (AbstractBuffEffect<Double>) effects.get(pointer);
+            BuffEffect<Double> effect
+                    = (BuffEffect<Double>) effects.get(pointer);
             int ce1mscc = CoreEngine.get1msSuspendTimeChangeCount();
             int time = CoreEngine.calcSuspendTime(effect.getMaxDuration());
-            if (effect.getStartingTime() > 0) {
+            if (effect.getBeginningTime() > 0) {
                 isInStartingTime = true;
-                startingTimeAlready = effect.getStartingTime();
+                startingTimeAlready = effect.getBeginningTime();
             }
             if (effect.isInterval()) {
                 int it = CoreEngine
@@ -396,15 +360,15 @@ public class NumberProperty extends AbstractProperty<Double> {
                         }
                         already = 0;
                         alreadyTime += effect.getIntervalDuration();
-                        if (alreadyTime + effect.getStartingTime()
+                        if (alreadyTime + effect.getBeginningTime()
                                 >= effect.getMaxDuration()) {
                             removeEffect(pointer);
                             return;
                         }
-                        getCalcWriteLock();
-                        ((AbstractIntervalBuffEffect<Double>) effect)
+                        lock();
+                        ((IntervalBuffEffect<Double>) effect)
                                 .getIntervalEffector().intervalChange();
-                        unlockCalcWriteLock();
+                        unlock();
                     }
                 }
             } else {
@@ -464,8 +428,8 @@ public class NumberProperty extends AbstractProperty<Double> {
 
         @Override
         public void run() {
-            AbstractLongTimeEffect<Double> effect
-                    = (AbstractLongTimeEffect<Double>) effects.get(pointer);
+            LongTimeEffect<Double> effect
+                    = (LongTimeEffect<Double>) effects.get(pointer);
             int ce1mscc = CoreEngine.get1msSuspendTimeChangeCount();
             int it = CoreEngine
                     .calcSuspendTime(effect.getIntervalDuration());
@@ -499,7 +463,7 @@ public class NumberProperty extends AbstractProperty<Double> {
                         continue;
                     }
                     if (already == effect.getIntervalDuration())
-                        ((AbstractIntervalLongTimeEffect<Double>) effect)
+                        ((IntervalLongTimeEffect<Double>) effect)
                                 .getIntervalEffector().intervalChange();
                 }
             }

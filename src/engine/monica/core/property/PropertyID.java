@@ -18,11 +18,11 @@
 
 package engine.monica.core.property;
 
-import engine.monica.util.StringID;
+
 
 public final class PropertyID implements Comparable<PropertyID> {
 
-    public PropertyID(StringID id, PropertyType type, String name, String intro) {
+    public PropertyID(String id, PropertyType type, String name, String intro) {
         if (type == null)
             throw new NullPointerException("The PropertyID type is null.");
         setID(id);
@@ -35,11 +35,11 @@ public final class PropertyID implements Comparable<PropertyID> {
         return type;
     }
 
-    public StringID getID() {
+    public String getID() {
         return id;
     }
 
-    public void setID(StringID name) {
+    public void setID(String name) {
         if (name == null)
             throw new NullPointerException("The property ID name cannot be null.");
         this.id = name;
@@ -91,7 +91,7 @@ public final class PropertyID implements Comparable<PropertyID> {
                 + ", Name = " + name + ", Type = " + type.name()
                 + ", Introduction = " + intro + " ]";
     }
-    private StringID id;
+    private String id;
     private String name, intro;
     private final PropertyType type;
 

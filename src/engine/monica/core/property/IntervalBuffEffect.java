@@ -18,20 +18,22 @@
 
 package engine.monica.core.property;
 
-import engine.monica.util.StringID;
+public class IntervalBuffEffect<T> extends BuffEffect<T> {
 
-public abstract class AbstractIntervalBuffEffect<T>
-        extends AbstractBuffEffect<T> {
-
-    protected AbstractIntervalBuffEffect(StringID id, EffectType type,
-            PropertyID affectTo, IntervalEffectorInterface<T> effector,
+    public IntervalBuffEffect(String id, PropertyID affectTo,
+            IntervalEffector<T> effector,
             int startingTime, int intervalDuration, int duration) {
-        super(id, type, affectTo, effector, startingTime,
-                intervalDuration, duration, true);
+        super(id, EffectType.TYPE_BUFF_INTERVAL, affectTo, effector,
+                startingTime, intervalDuration, duration, true);
     }
 
-    public final IntervalEffectorInterface<T> getIntervalEffector() {
-        return (IntervalEffectorInterface<T>) getEffector();
+    public final IntervalEffector<T> getIntervalEffector() {
+        return (IntervalEffector<T>) getEffector();
     }
 
+    @Override
+    public IntervalBuffEffect<T> clone() {
+        return new IntervalBuffEffect<>(getID(), affectTo(), getIntervalEffector(),
+                getBeginningTime(), getIntervalDuration(), getMaxDuration());
+    }
 }

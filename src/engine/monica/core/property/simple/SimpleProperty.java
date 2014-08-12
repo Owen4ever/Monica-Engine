@@ -20,11 +20,9 @@ package engine.monica.core.property.simple;
 
 import engine.monica.core.property.AbstractEffect;
 import engine.monica.core.property.AbstractProperty;
-import engine.monica.core.property.ParentPropertyInterface;
-import engine.monica.core.property.PropertyAdjustment;
 import engine.monica.core.property.PropertyID;
 import engine.monica.util.LinkedPointer;
-import engine.monica.util.StringID;
+
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public abstract class SimpleProperty<T> extends AbstractProperty<T> {
@@ -34,7 +32,7 @@ public abstract class SimpleProperty<T> extends AbstractProperty<T> {
     }
 
     @Override
-    protected void getCalcWriteLock() {
+    protected void lock() {
         while (true)
             if (!calcLocker.isWriteLocked() && calcLocker.writeLock().tryLock())
                 if (calcLocker.getWriteHoldCount() != 1)
@@ -47,7 +45,7 @@ public abstract class SimpleProperty<T> extends AbstractProperty<T> {
     }
 
     @Override
-    protected void unlockCalcWriteLock() {
+    protected void unlock() {
         calcLocker.writeLock().unlock();
     }
     private final transient ReentrantReadWriteLock calcLocker = new ReentrantReadWriteLock();
@@ -63,36 +61,10 @@ public abstract class SimpleProperty<T> extends AbstractProperty<T> {
     }
 
     @Override
-    public void removeEffect(StringID id) {
+    public void removeEffect(String id) {
     }
 
     @Override
     public void removeEffect(LinkedPointer pointer) {
-    }
-
-    @Override
-    public void setAdjustment(PropertyAdjustment<T> adjustment) {
-        if (adjustment == null)
-            throw new NullPointerException("The adjustment is null.");
-        getCalcWriteLock();
-        try {
-            this.adjustment = adjustment;
-            hasAdjustment = PRO_ADJ_ADJ;
-        } finally {
-            unlockCalcWriteLock();
-        }
-    }
-
-    @Override
-    public void setAdjustment(ParentPropertyInterface<T> parent) {
-        if (parent == null)
-            throw new NullPointerException("The parent property is null.");
-        getCalcWriteLock();
-        try {
-            this.parentProperty = parent;
-            hasAdjustment = PRO_ADJ_PAR;
-        } finally {
-            unlockCalcWriteLock();
-        }
     }
 }

@@ -16,10 +16,15 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
-package engine.monica.core.property;
+package engine.monica.util;
 
-@FunctionalInterface
-public interface EffectorInterface<T> {
+public class RegesteredIDException extends RuntimeException {
 
-    T affect(T t);
+    public RegesteredIDException() {
+        super();
+    }
+
+    public RegesteredIDException(String msg) {
+        super(msg);
+    }
 }

@@ -19,21 +19,21 @@
 package engine.monica.core.element;
 
 import engine.monica.util.condition.ProviderType;
-import static engine.monica.util.condition.ProviderType.newStringID;
+import static engine.monica.util.condition.ProviderType.newID;
 
 public interface ElementProviderType {
 
     /* Constants */
     ProviderType PTYPE_ELEMENT_TYPE
-            = new ProviderType(newStringID("MonicaEngine$ProviderType$Element$Type"));
+            = new ProviderType(newID("MonicaEngine$ProviderType$Element$Type"));
     ProviderType PTYPE_ELEMENT_WEIGHT
-            = new ProviderType(newStringID("MonicaEngine$ProviderType$Element$Weight"));
+            = new ProviderType(newID("MonicaEngine$ProviderType$Element$Weight"));
     ProviderType PTYPE_ELEMENT_COUNT
-            = new ProviderType(newStringID("MonicaEngine$ProviderType$Element$Count"));
+            = new ProviderType(newID("MonicaEngine$ProviderType$Element$Count"));
     ProviderType PTYPE_ELEMENT_ISBASED
-            = new ProviderType(newStringID("MonicaEngine$ProviderType$Element$IsBased"));
+            = new ProviderType(newID("MonicaEngine$ProviderType$Element$IsBased"));
     ProviderType PTYPE_ELEMENT_ISCOMBINED
-            = new ProviderType(newStringID("MonicaEngine$ProviderType$Element$IsCombined"));
+            = new ProviderType(newID("MonicaEngine$ProviderType$Element$IsCombined"));
     ProviderType PTYPE_ELEMENT_COMBINEDTYPE
-            = new ProviderType(newStringID("MonicaEngine$ProviderType$Element$CombinedType"));
+            = new ProviderType(newID("MonicaEngine$ProviderType$Element$CombinedType"));
 }
