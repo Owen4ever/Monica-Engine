@@ -25,7 +25,7 @@ import java.util.Set;
 public final class Names {
 
     public Names() {
-        this("Nameless");
+        this("Unnamed");
     }
 
     public Names(String name, String... nickName) {
@@ -35,7 +35,7 @@ public final class Names {
             ns.forEach(n -> {
                 checkName(n);
             });
-            nickNames.addAll(ns);
+            otherNames.addAll(ns);
         }
     }
 
@@ -49,19 +49,19 @@ public final class Names {
     }
 
     public Set<String> getNickNames() {
-        return nickNames;
+        return otherNames;
     }
 
     public void addNickName(String name) {
         checkName(name);
-        nickNames.add(name);
+        otherNames.add(name);
     }
 
     public void removeNickName(String name) {
-        nickNames.remove(name);
+        otherNames.remove(name);
     }
     private String displayName;
-    private final HashSet<String> nickNames = new HashSet<>();
+    private final HashSet<String> otherNames = new HashSet<>();
 
     private static void checkName(String name) {
         if (name == null || name.isEmpty())

@@ -19,12 +19,11 @@
 package engine.monica.core.object;
 
 import engine.monica.core.graphics.GraphicObject;
-import engine.monica.util.StringID;
 import engine.monica.util.Vector;
 
 public interface Skill<V extends Vector<V>> extends NamesGetter {
 
-    StringID getID();
+    String getID();
 
     GraphicObject<V>[] getReleaseObjects();
 

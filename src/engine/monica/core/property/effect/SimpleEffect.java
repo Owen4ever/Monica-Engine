@@ -16,28 +16,19 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
-package engine.monica.core.property.bool;
+package engine.monica.core.property.effect;
 
-import engine.monica.core.property.AbstractEffect;
-import engine.monica.core.property.EffectType;
-import engine.monica.core.property.EffectorInterface;
 import engine.monica.core.property.PropertyID;
-import engine.monica.util.StringID;
 
-public class BoolSimpleEffect extends AbstractEffect<Boolean> {
+public class SimpleEffect<T> extends AbstractEffect<T> {
 
-    protected BoolSimpleEffect(StringID id, PropertyID affectTo,
-            EffectorInterface<Boolean> effector) {
-        super(id, EffectType.TYPE_BOOL_SIMPLE, affectTo, effector);
+    public SimpleEffect(String id, PropertyID affectTo,
+            Effector<T> effector) {
+        super(id, EffectType.TYPE_SIMPLE, affectTo, effector);
     }
 
     @Override
-    public BoolSimpleEffect clone() {
-        return new BoolSimpleEffect(id, affectTo, getEffector());
-    }
-
-    public static BoolSimpleEffect newSimpleEffect(StringID id,
-            PropertyID affectTo, EffectorInterface<Boolean> effector) {
-        return new BoolSimpleEffect(id, affectTo, effector);
+    public SimpleEffect<T> clone() {
+        return new SimpleEffect<>(getID(), affectTo(), getEffector());
     }
 }

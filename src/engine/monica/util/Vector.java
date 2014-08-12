@@ -26,5 +26,7 @@ public interface Vector<V extends Vector> {
 
     double length(V v);
 
-    double lengthSqrt(V v);
+    default double lengthSqrt(V v) {
+        return Math.sqrt(length(v));
+    }
 }

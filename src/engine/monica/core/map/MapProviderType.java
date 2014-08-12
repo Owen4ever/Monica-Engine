@@ -19,12 +19,12 @@
 package engine.monica.core.map;
 
 import engine.monica.util.condition.ProviderType;
-import static engine.monica.util.condition.ProviderType.newStringID;
+import static engine.monica.util.condition.ProviderType.newID;
 
 public interface MapProviderType {
 
     ProviderType PTYPE_MAP_ELEMENT_TYPE
-            = new ProviderType(newStringID("MonicaEngine$ProviderType$Map$ElementType"));
+            = new ProviderType(newID("MonicaEngine$ProviderType$Map$ElementType"));
     ProviderType PTYPE_MAP_ELEMENT_CONSENTRATION
-            = new ProviderType(newStringID("MonicaEngine$ProviderType$Map$ElementConsentration"));
+            = new ProviderType(newID("MonicaEngine$ProviderType$Map$ElementConsentration"));
 }

@@ -16,10 +16,9 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
-package engine.monica.core.property;
+package engine.monica.core.property.effect;
 
-@FunctionalInterface
-public interface EffectorInterface<T> {
+public interface IntervalEffector<T> extends Effector<T> {
 
-    T affect(T t);
+    void intervalChange();
 }

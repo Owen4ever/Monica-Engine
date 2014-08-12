@@ -16,9 +16,15 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
-package engine.monica.core.property;
+package engine.monica.core.property.effect;
 
-public interface IntervalEffectorInterface<T> extends EffectorInterface<T> {
+public enum EffectType {
 
-    void intervalChange();
+    //
+    TYPE_MODIFIED,
+    TYPE_SIMPLE,
+    TYPE_BUFF,
+    TYPE_BUFF_INTERVAL,
+    TYPE_LONGTIME,
+    TYPE_LONGTIME_INTERVAL,
 }

@@ -21,19 +21,16 @@ package engine.monica.core.property.bool;
 import engine.monica.core.engine.CoreEngine;
 import engine.monica.core.engine.EngineThread;
 import engine.monica.core.engine.EngineThreadGroup;
-import engine.monica.core.property.AbstractBuffEffect;
-import engine.monica.core.property.AbstractEffect;
-import engine.monica.core.property.AbstractFixedEffect;
-import engine.monica.core.property.AbstractIntervalBuffEffect;
-import engine.monica.core.property.AbstractIntervalLongTimeEffect;
-import engine.monica.core.property.AbstractLongTimeEffect;
+import engine.monica.core.property.effect.BuffEffect;
+import engine.monica.core.property.effect.AbstractEffect;
+import engine.monica.core.property.effect.ModifiedEffect;
+import engine.monica.core.property.effect.IntervalBuffEffect;
+import engine.monica.core.property.effect.IntervalLongTimeEffect;
+import engine.monica.core.property.effect.LongTimeEffect;
 import engine.monica.core.property.AbstractProperty;
 import engine.monica.core.property.ErrorTypeException;
-import engine.monica.core.property.ParentPropertyInterface;
-import engine.monica.core.property.PropertyAdjustment;
 import engine.monica.core.property.PropertyID;
 import engine.monica.util.LinkedPointer;
-import engine.monica.util.StringID;
 import engine.monica.util.Wrapper;
 import java.util.HashMap;
 import java.util.concurrent.ConcurrentHashMap;
@@ -54,7 +51,7 @@ public class BoolProperty extends AbstractProperty<Boolean> {
     }
 
     @Override
-    protected void getCalcWriteLock() {
+    protected void lock() {
         while (true) {
             if (!calcLocker.isWriteLocked() && calcLocker.writeLock().tryLock())
                 if (calcLocker.getWriteHoldCount() != 1)
@@ -68,7 +65,7 @@ public class BoolProperty extends AbstractProperty<Boolean> {
     }
 
     @Override
-    protected void unlockCalcWriteLock() {
+    protected void unlock() {
         isCalc = false;
         calcLocker.writeLock().unlock();
     }
@@ -79,7 +76,7 @@ public class BoolProperty extends AbstractProperty<Boolean> {
         return currentEffectPointer;
     }
 
-    private LinkedPointer addBuffEffect(AbstractBuffEffect<Boolean> e) {
+    private LinkedPointer addBuffEffect(BuffEffect<Boolean> e) {
         currentEffectPointer = currentEffectPointer.linkNew();
         effects.put(currentEffectPointer, e);
         BuffRunnable r = new BuffRunnable(currentEffectPointer);
@@ -91,7 +88,7 @@ public class BoolProperty extends AbstractProperty<Boolean> {
         return currentEffectPointer;
     }
 
-    private LinkedPointer addLongTimeEffect(AbstractLongTimeEffect<Boolean> e) {
+    private LinkedPointer addLongTimeEffect(LongTimeEffect<Boolean> e) {
         currentEffectPointer = currentEffectPointer.linkNew();
         effects.put(currentEffectPointer, e);
         LTRunnable r = new LTRunnable(currentEffectPointer);
@@ -107,7 +104,7 @@ public class BoolProperty extends AbstractProperty<Boolean> {
     protected static final EngineThreadGroup TG_PROPERTY_NUM
             = new EngineThreadGroup("BoolProperty Thread Group");
 
-    private void setFixedEffect(AbstractFixedEffect<Boolean> e) {
+    private void setFixedEffect(ModifiedEffect<Boolean> e) {
         fixedEffect = e;
         isFixed = true;
     }
@@ -124,34 +121,32 @@ public class BoolProperty extends AbstractProperty<Boolean> {
         if (!e.affectTo().equals(type))
             throw new NullPointerException("The effect cannot "
                     + "affect this property.");
-        getCalcWriteLock();
+        lock();
         try {
             switch (e.getEffectType()) {
-                case TYPE_NUM_SIMPLE:
+                case TYPE_SIMPLE:
                     return addAdditionValue(e);
-                case TYPE_NUM_BUFF:
-                case TYPE_NUM_BUFF_INTERVAL:
-                case TYPE_NUM_DEBUFF:
-                case TYPE_NUM_DEBUFF_INTERVAL:
-                    return addBuffEffect((AbstractBuffEffect<Boolean>) e);
-                case TYPE_NUM_FIXED:
-                    setFixedEffect((BoolFixedEffect) e);
+                case TYPE_BUFF:
+                case TYPE_BUFF_INTERVAL:
+                    return addBuffEffect((BuffEffect<Boolean>) e);
+                case TYPE_MODIFIED:
+                    setFixedEffect((ModifiedEffect<Boolean>) e);
                     return null;
-                case TYPE_NUM_LONGTIME:
-                    return addLongTimeEffect((AbstractLongTimeEffect<Boolean>) e);
+                case TYPE_LONGTIME:
+                    return addLongTimeEffect((LongTimeEffect<Boolean>) e);
                 default:
                     throw new ErrorTypeException("Error effect type.");
             }
         } finally {
-            unlockCalcWriteLock();
+            unlock();
         }
     }
 
     @Override
-    public final void removeEffect(final StringID sid) {
+    public final void removeEffect(final String sid) {
         if (sid == null)
-            throw new NullPointerException("The StringID is null.");
-        getCalcWriteLock();
+            throw new NullPointerException("The String is null.");
+        lock();
         try {
             if (isFixed && fixedEffect.getID().equals(sid))
                 isFixed = false;
@@ -166,23 +161,21 @@ public class BoolProperty extends AbstractProperty<Boolean> {
                     effects.putAll(tempEffects);
                     p.delete();
                     switch (e.getEffectType()) {
-                        case TYPE_NUM_BUFF:
-                        case TYPE_NUM_BUFF_INTERVAL:
-                        case TYPE_NUM_DEBUFF:
-                        case TYPE_NUM_DEBUFF_INTERVAL:
+                        case TYPE_BUFF:
+                        case TYPE_BUFF_INTERVAL:
                             bltThreads.remove(p);
                             tempBltThreads.clear();
                             tempBltThreads.putAll(bltThreads);
                             bltThreads.clear();
                             bltThreads.putAll(bltThreads);
                             return;
-                        case TYPE_NUM_LONGTIME_INTERVAL:
+                        case TYPE_LONGTIME_INTERVAL:
                             bltThreads.remove(p);
                     }
                 }
             });
         } finally {
-            unlockCalcWriteLock();
+            unlock();
         }
     }
 
@@ -190,7 +183,7 @@ public class BoolProperty extends AbstractProperty<Boolean> {
     public final void removeEffect(LinkedPointer pointer) {
         if (pointer == null)
             throw new NullPointerException("The EffectPointer is null.");
-        getCalcWriteLock();
+        lock();
         try {
             effects.remove(pointer);
             tempEffects.clear();
@@ -200,46 +193,16 @@ public class BoolProperty extends AbstractProperty<Boolean> {
             bltThreads.remove(pointer);
             pointer.delete();
         } finally {
-            unlockCalcWriteLock();
-        }
-    }
-
-    @Override
-    public final void setAdjustment(PropertyAdjustment<Boolean> a) {
-        if (a == null)
-            throw new NullPointerException("The adjustment is null.");
-        getCalcWriteLock();
-        try {
-            this.hasAdjustment = PRO_ADJ_ADJ;
-            this.adjustment = a;
-            if (isCalc)
-                totalVal = adjustment.adjust(totalVal);
-        } finally {
-            unlockCalcWriteLock();
-        }
-    }
-
-    @Override
-    public final void setAdjustment(ParentPropertyInterface<Boolean> p) {
-        if (p == null)
-            throw new NullPointerException("The ParentProperty is null.");
-        getCalcWriteLock();
-        try {
-            this.hasAdjustment = PRO_ADJ_PAR;
-            this.parentProperty = p;
-            if (isCalc)
-                totalVal = parentProperty.adjust(totalVal);
-        } finally {
-            unlockCalcWriteLock();
+            unlock();
         }
     }
 
     public final void removeAdjustment() {
-        getCalcWriteLock();
+        lock();
         try {
             this.hasAdjustment = PRO_ADJ_NONE;
         } finally {
-            unlockCalcWriteLock();
+            unlock();
         }
     }
 
@@ -254,7 +217,7 @@ public class BoolProperty extends AbstractProperty<Boolean> {
     }
 
     private void calcTotalValue() {
-        getCalcWriteLock();
+        lock();
         try {
             if (isFixed)
                 totalVal = fixedEffect.affect(false);
@@ -285,7 +248,7 @@ public class BoolProperty extends AbstractProperty<Boolean> {
             }
             isCalc = true;
         } finally {
-            unlockCalcWriteLock();
+            unlock();
         }
     }
 
@@ -336,7 +299,7 @@ public class BoolProperty extends AbstractProperty<Boolean> {
             = new HashMap<>(CoreEngine.getDefaultQuantily(), .2f);
     protected LinkedPointer currentEffectPointer = LinkedPointer.first();
     private boolean isFixed = false;
-    protected AbstractFixedEffect<Boolean> fixedEffect;
+    protected ModifiedEffect<Boolean> fixedEffect;
     protected transient volatile boolean isCalc = false;
     private final transient ReentrantReadWriteLock calcLocker
             = new ReentrantReadWriteLock();
@@ -351,13 +314,13 @@ public class BoolProperty extends AbstractProperty<Boolean> {
 
         @Override
         public void run() {
-            AbstractBuffEffect<Boolean> effect
-                    = (AbstractBuffEffect<Boolean>) effects.get(pointer);
+            BuffEffect<Boolean> effect
+                    = (BuffEffect<Boolean>) effects.get(pointer);
             int ce1mscc = CoreEngine.get1msSuspendTimeChangeCount();
             int time = CoreEngine.calcSuspendTime(effect.getMaxDuration());
-            if (effect.getStartingTime() > 0) {
+            if (effect.getBeginningTime() > 0) {
                 isInStartingTime = true;
-                startingTimeAlready = effect.getStartingTime();
+                startingTimeAlready = effect.getBeginningTime();
             }
             if (effect.isInterval()) {
                 int it = CoreEngine
@@ -391,15 +354,15 @@ public class BoolProperty extends AbstractProperty<Boolean> {
                         }
                         already = 0;
                         alreadyTime += effect.getIntervalDuration();
-                        if (alreadyTime + effect.getStartingTime()
+                        if (alreadyTime + effect.getBeginningTime()
                                 >= effect.getMaxDuration()) {
                             removeEffect(pointer);
                             return;
                         }
-                        getCalcWriteLock();
-                        ((AbstractIntervalBuffEffect<Boolean>) effect)
+                        lock();
+                        ((IntervalBuffEffect<Boolean>) effect)
                                 .getIntervalEffector().intervalChange();
-                        unlockCalcWriteLock();
+                        unlock();
                     }
                 }
             } else {
@@ -459,8 +422,8 @@ public class BoolProperty extends AbstractProperty<Boolean> {
 
         @Override
         public void run() {
-            AbstractLongTimeEffect<Boolean> effect
-                    = (AbstractLongTimeEffect<Boolean>) effects.get(pointer);
+            LongTimeEffect<Boolean> effect
+                    = (LongTimeEffect<Boolean>) effects.get(pointer);
             int ce1mscc = CoreEngine.get1msSuspendTimeChangeCount();
             int it = CoreEngine
                     .calcSuspendTime(effect.getIntervalDuration());
@@ -494,7 +457,7 @@ public class BoolProperty extends AbstractProperty<Boolean> {
                         continue;
                     }
                     if (already == effect.getIntervalDuration())
-                        ((AbstractIntervalLongTimeEffect<Boolean>) effect)
+                        ((IntervalLongTimeEffect<Boolean>) effect)
                                 .getIntervalEffector().intervalChange();
                 }
             }

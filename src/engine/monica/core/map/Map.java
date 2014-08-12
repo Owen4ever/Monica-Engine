@@ -22,17 +22,17 @@ import engine.monica.core.graphics.GraphicObject;
 import engine.monica.util.Vector;
 import java.util.List;
 
-public interface Map extends ConfigInterface {
+public interface Map<V extends Vector<V>> extends ConfigInterface {
 
     World getWorld();
 
-    Area getArea(Vector v);
+    Area getArea(V v);
 
-    void setArea(Vector v, Area a);
+    void setArea(V v, Area a);
 
-    void createIrregularArea(Vector v, Area a);
+    void createIrregularArea(V v, Area a);
 
-    Area[] getNearbyAreas(Vector v);
+    Area[] getNearbyAreas(V v);
 
     Area[] getNearbyAreas(Area a);
 

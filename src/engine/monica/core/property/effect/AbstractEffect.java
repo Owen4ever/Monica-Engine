@@ -16,38 +16,30 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
-package engine.monica.core.property;
+package engine.monica.core.property.effect;
 
-import engine.monica.util.StringID;
+import engine.monica.core.property.PropertyID;
 
 public abstract class AbstractEffect<T> implements Cloneable {
 
-    protected AbstractEffect(StringID id, EffectType type, PropertyID affectTo,
-            EffectorInterface<T> effector) {
-        setID(id);
-        setEffectType(type);
+    protected AbstractEffect(String id, EffectType type, PropertyID affectTo,
+            Effector<T> effector) {
+        if (id == null)
+            throw new EffectInitializeException("The effect id is null.");
+        this.id = id;
+        if (type == null)
+            throw new EffectInitializeException("The effect type is null.");
+        this.effectType = type;
         setAffectTo(affectTo);
         setEffector(effector);
     }
 
-    public final StringID getID() {
+    public final String getID() {
         return id;
-    }
-
-    public final void setID(StringID id) {
-        if (id == null)
-            throw new NullPointerException("The effect id is null.");
-        this.id = id;
     }
 
     public final EffectType getEffectType() {
         return effectType;
-    }
-
-    public final void setEffectType(EffectType type) {
-        if (type == null)
-            throw new NullPointerException("The effect type is null.");
-        this.effectType = type;
     }
 
     public final PropertyID affectTo() {
@@ -60,11 +52,11 @@ public abstract class AbstractEffect<T> implements Cloneable {
         this.affectTo = affectTo;
     }
 
-    public final EffectorInterface<T> getEffector() {
+    public final Effector<T> getEffector() {
         return effector;
     }
 
-    public final void setEffector(EffectorInterface<T> effector) {
+    public final void setEffector(Effector<T> effector) {
         if (effector == null)
             throw new NullPointerException("The effector is null.");
         this.effector = effector;
@@ -80,8 +72,8 @@ public abstract class AbstractEffect<T> implements Cloneable {
                 + affectTo.getType()
                 + ", Affect to = " + affectTo.getID() + " ]";
     }
-    protected StringID id;
-    protected EffectType effectType;
-    protected PropertyID affectTo;
-    protected EffectorInterface<T> effector;
+    private final String id;
+    private final EffectType effectType;
+    private PropertyID affectTo;
+    private Effector<T> effector;
 }

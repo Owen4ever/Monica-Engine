@@ -16,25 +16,30 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
-package engine.monica.core.property;
+package engine.monica.core.property.effect;
 
-import engine.monica.util.StringID;
+import engine.monica.core.property.PropertyID;
 
-public abstract class AbstractBuffEffect<T> extends AbstractEffect<T> {
+public class BuffEffect<T> extends AbstractEffect<T> {
 
-    protected AbstractBuffEffect(StringID id, EffectType type,
-            PropertyID affectTo, EffectorInterface<T> effector,
-            int startingTime, int intervalDuration, int duration,
-            boolean isInterval) {
+    public BuffEffect(String id, PropertyID affectTo, Effector<T> effector,
+            int beginningTime, int duration) {
+        this(id, EffectType.TYPE_BUFF, affectTo, effector,
+                beginningTime, duration, duration, false);
+    }
+
+    protected BuffEffect(String id, EffectType type, PropertyID affectTo,
+            Effector<T> effector, int beginningTime, int intervalDuration,
+            int duration, boolean isInterval) {
         super(id, type, affectTo, effector);
         if (duration < 100)
             throw new EffectInitializeException("The duration of the effect"
                     + "is less than 100 milliseconds (0.001 seconds).");
-        if (startingTime < 0 || startingTime > duration)
+        if (beginningTime < 0 || beginningTime > duration)
             throw new EffectInitializeException("The starting time of the effect"
                     + "is less than 0 or is greater than max duration.");
         this.duration = duration;
-        this.startingTime = startingTime;
+        this.beginningTime = beginningTime;
         this.isInterval = isInterval;
         if (this.isInterval) {
             if (intervalDuration <= 0)
@@ -45,8 +50,8 @@ public abstract class AbstractBuffEffect<T> extends AbstractEffect<T> {
             this.intervalDuration = 0;
     }
 
-    public final int getStartingTime() {
-        return startingTime;
+    public final int getBeginningTime() {
+        return beginningTime;
     }
 
     public final boolean isInterval() {
@@ -60,8 +65,14 @@ public abstract class AbstractBuffEffect<T> extends AbstractEffect<T> {
     public final int getMaxDuration() {
         return duration;
     }
-    protected final int startingTime;
-    protected final int intervalDuration;
-    protected final int duration;
-    protected final boolean isInterval;
+
+    @Override
+    public BuffEffect<T> clone() {
+        return new BuffEffect<>(getID(), getEffectType(), affectTo(), getEffector(),
+                beginningTime, intervalDuration, duration, isInterval);
+    }
+    private final int beginningTime;
+    private final int intervalDuration;
+    private final int duration;
+    private final boolean isInterval;
 }

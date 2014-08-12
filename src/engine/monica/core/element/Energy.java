@@ -18,20 +18,18 @@
 
 package engine.monica.core.element;
 
-import engine.monica.util.StringID;
-
 public final class Energy {
 
     private static final long serialVersionUID = 46274354375486750L;
 
-    public Energy(StringID id, String name) {
+    public Energy(String id, String name) {
         if (id == null)
             throw new NullPointerException("The id is null.");
         this.id = id;
         setName(name);
     }
 
-    public final StringID getID() {
+    public final String getID() {
         return id;
     }
 
@@ -70,6 +68,6 @@ public final class Energy {
     public String toString() {
         return getClass().getName() + " [ Name = " + name + " ]";
     }
-    private final StringID id;
+    private final String id;
     private String name;
 }

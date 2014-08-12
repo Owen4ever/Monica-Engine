@@ -16,17 +16,10 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
-package engine.monica.core.property;
+package engine.monica.core.property.effect;
 
-public class EffectInitializeException extends RuntimeException {
+@FunctionalInterface
+public interface Effector<T> {
 
-    private static final long serialVersionUID = -16433789987L;
-
-    public EffectInitializeException() {
-        super();
-    }
-
-    public EffectInitializeException(String msg) {
-        super(msg);
-    }
+    T affect(T t);
 }

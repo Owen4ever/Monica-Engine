@@ -16,27 +16,26 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
-package engine.monica.core.property.bool;
+package engine.monica.core.property.effect;
 
-import engine.monica.core.property.AbstractIntervalLongTimeEffect;
-import engine.monica.core.property.EffectType;
-import engine.monica.core.property.IntervalEffectorInterface;
 import engine.monica.core.property.PropertyID;
-import engine.monica.util.StringID;
 
-public class BoolIntervalLongTimeEffect
-        extends AbstractIntervalLongTimeEffect<Double> {
+public class IntervalLongTimeEffect<T> extends LongTimeEffect<T> {
 
-    public BoolIntervalLongTimeEffect(StringID id, PropertyID affectTo,
-            IntervalEffectorInterface<Double> effector,
+    public IntervalLongTimeEffect(String id, PropertyID affectTo,
+            IntervalEffector<T> effector,
             int startingTime, int intervalDuration) {
-        super(id, EffectType.TYPE_BOOL_LONGTIME_INTERVAL, affectTo,
-                effector, startingTime, intervalDuration);
+        super(id, EffectType.TYPE_LONGTIME_INTERVAL, affectTo, effector,
+                startingTime, intervalDuration, true);
+    }
+
+    public final IntervalEffector<T> getIntervalEffector() {
+        return (IntervalEffector<T>) getEffector();
     }
 
     @Override
-    public BoolIntervalLongTimeEffect clone() {
-        return new BoolIntervalLongTimeEffect(id, affectTo,
-                getIntervalEffector(), startingTime, intervalDuration);
+    public IntervalLongTimeEffect<T> clone() {
+        return new IntervalLongTimeEffect<>(getID(), affectTo(), getIntervalEffector(),
+                getBeginningTime(), getIntervalDuration());
     }
 }

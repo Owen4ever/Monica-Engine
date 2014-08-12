@@ -18,15 +18,13 @@
 
 package engine.monica.core.object;
 
-import engine.monica.util.StringID;
-
 public final class ItemKind {
 
-    public ItemKind(StringID id, String name) {
+    public ItemKind(String id, String name) {
         this(id, name, PARENT);
     }
 
-    public ItemKind(StringID id, String name, ItemKind parent) {
+    public ItemKind(String id, String name, ItemKind parent) {
         if (id == null)
             throw new NullPointerException("the id is null.");
         if (name == null || name.isEmpty())
@@ -44,7 +42,7 @@ public final class ItemKind {
         parent = null;
     }
 
-    public StringID getID() {
+    public String getID() {
         return id;
     }
 
@@ -82,7 +80,7 @@ public final class ItemKind {
                 + ", Name = " + name
                 + ", Parent = " + (hasParent ? parent.name : "null");
     }
-    private final StringID id;
+    private final String id;
     private final String name;
     private final boolean hasParent;
     private final ItemKind parent;

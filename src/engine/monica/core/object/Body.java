@@ -20,12 +20,11 @@ package engine.monica.core.object;
 
 import engine.monica.core.graphics.GraphicObject;
 import engine.monica.core.property.PropertyList;
-import engine.monica.util.StringID;
 import engine.monica.util.Vector;
 
 public final class Body<V extends Vector<V>> implements NamesGetter {
 
-    public Body(StringID id, Names name, String describe,
+    public Body(String id, Names name, String describe,
             PropertyList defaultProperties, Talent[] talents,
             GraphicObject<V>[] bodyObjects) {
         if (id == null)
@@ -43,7 +42,7 @@ public final class Body<V extends Vector<V>> implements NamesGetter {
         this.bodyObjects = bodyObjects;
     }
 
-    public StringID getID() {
+    public String getID() {
         return id;
     }
 
@@ -90,7 +89,7 @@ public final class Body<V extends Vector<V>> implements NamesGetter {
                 + ", Name = " + name.getDisplayName()
                 + ", Describe = " + describe + " ]";
     }
-    private final StringID id;
+    private final String id;
     private final Names name;
     private final String describe;
     private final PropertyList defaultProperties = new PropertyList();

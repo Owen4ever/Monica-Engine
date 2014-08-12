@@ -18,9 +18,10 @@
 
 package engine.monica.core.property;
 
+import engine.monica.core.property.effect.AbstractEffect;
 import engine.monica.core.engine.CoreEngine;
 import engine.monica.util.LinkedPointer;
-import engine.monica.util.StringID;
+
 import java.util.concurrent.ConcurrentHashMap;
 
 public final class PropertyList {
@@ -62,7 +63,7 @@ public final class PropertyList {
         return properties.get(id).addEffect(e);
     }
 
-    public void removeEffect(PropertyID id, StringID effectId) {
+    public void removeEffect(PropertyID id, String effectId) {
         properties.get(id).removeEffect(effectId);
     }
 

@@ -20,18 +20,17 @@ package engine.monica.util.condition;
 
 import engine.monica.core.engine.CoreEngine;
 import engine.monica.util.AlreadyExistsInContainerException;
-import engine.monica.util.StringID;
-import java.util.HashMap;
+import java.util.HashSet;
 
 public final class ProviderType {
 
-    public ProviderType(StringID id) {
+    public ProviderType(String id) {
         if (id == null)
             throw new NullPointerException("The id is null.");
         this.id = id;
     }
 
-    public StringID getID() {
+    public String getID() {
         return id;
     }
 
@@ -51,26 +50,27 @@ public final class ProviderType {
 
     @Override
     public String toString() {
-        return getClass().getName() + id;
+        return getClass().getName() + "(" + id + ")";
     }
-    private final StringID id;
+    private final String id;
 
-    public static StringID newStringID(String sid) {
+    public static String newID(String sid) {
         if (sid == null || sid.isEmpty())
             throw new NullPointerException("The sid is null.");
-        if (sids.containsKey(sid))
+        if (sids.contains(sid))
             throw new AlreadyExistsInContainerException("The sid has already"
                     + " put into the map.");
-        StringID id = new StringID(sid);
-        sids.put(sid, id);
-        return id;
+        sids.add(sid);
+        return sid;
     }
 
-    public static StringID getStringID(String sid) {
+    public static String getString(String sid) {
         if (sid == null || sid.isEmpty())
             throw new NullPointerException("The sid is null.");
-        return sids.get(sid);
+        if (sids.contains(sid))
+            return sid;
+        return null;
     }
-    private static final HashMap<String, StringID> sids
-            = new HashMap<>(CoreEngine.getDefaultQuantily(), 0.4f);
+    private static final HashSet<String> sids
+            = new HashSet<>(CoreEngine.getDefaultQuantily(), 0.4f);
 }

@@ -19,7 +19,6 @@
 package engine.monica.core.map;
 
 import engine.monica.core.element.ElementEngine;
-import engine.monica.util.StringID;
 import java.math.BigInteger;
 import java.util.Set;
 
@@ -32,22 +31,22 @@ public final class World implements ConfigInterface {
     }
 
     @Override
-    public <T> void set(StringID key, T value) {
+    public <T> void set(String key, T value) {
         config.set(key, value);
     }
 
     @Override
-    public <T> T get(StringID key) {
+    public <T> T get(String key) {
         return config.get(key);
     }
 
     @Override
-    public boolean containKey(StringID id) {
+    public boolean containKey(String id) {
         return config.containKey(id);
     }
 
     @Override
-    public boolean remove(StringID key) {
+    public boolean remove(String key) {
         return config.remove(key);
     }
 
@@ -57,7 +56,7 @@ public final class World implements ConfigInterface {
     }
 
     @Override
-    public Set<StringID> keySet() {
+    public Set<String> keySet() {
         return config.keySet();
     }
     private final ConfigInterface config;

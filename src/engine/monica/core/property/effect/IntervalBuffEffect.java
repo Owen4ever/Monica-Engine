@@ -16,28 +16,26 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
-package engine.monica.core.property.number;
+package engine.monica.core.property.effect;
 
-import engine.monica.core.property.AbstractIntervalBuffEffect;
-import engine.monica.core.property.EffectType;
-import engine.monica.core.property.IntervalEffectorInterface;
 import engine.monica.core.property.PropertyID;
-import engine.monica.util.StringID;
 
-public class NumberIntervalBuffEffect
-        extends AbstractIntervalBuffEffect<Double> {
+public class IntervalBuffEffect<T> extends BuffEffect<T> {
 
-    protected NumberIntervalBuffEffect(StringID id, PropertyID affectTo,
-            IntervalEffectorInterface<Double> effector,
+    public IntervalBuffEffect(String id, PropertyID affectTo,
+            IntervalEffector<T> effector,
             int startingTime, int intervalDuration, int duration) {
-        super(id, EffectType.TYPE_NUM_BUFF_INTERVAL, affectTo, effector,
-                startingTime, intervalDuration, duration);
+        super(id, EffectType.TYPE_BUFF_INTERVAL, affectTo, effector,
+                startingTime, intervalDuration, duration, true);
+    }
+
+    public final IntervalEffector<T> getIntervalEffector() {
+        return (IntervalEffector<T>) getEffector();
     }
 
     @Override
-    public NumberIntervalBuffEffect clone() {
-        return new NumberIntervalBuffEffect(id, affectTo,
-                getIntervalEffector(), startingTime,
-                intervalDuration, duration);
+    public IntervalBuffEffect<T> clone() {
+        return new IntervalBuffEffect<>(getID(), affectTo(), getIntervalEffector(),
+                getBeginningTime(), getIntervalDuration(), getMaxDuration());
     }
 }

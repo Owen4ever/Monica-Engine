@@ -16,28 +16,38 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
-package engine.monica.core.property;
+package engine.monica.core.property.effect;
 
-import engine.monica.util.StringID;
+import engine.monica.core.property.PropertyID;
 
-public abstract class AbstractLongTimeEffect<T> extends AbstractEffect<T> {
+public class LongTimeEffect<T> extends AbstractEffect<T> {
 
-    protected AbstractLongTimeEffect(StringID id, EffectType type,
-            PropertyID affectTo, EffectorInterface<T> effector,
-            int startingTime, int intervalDuration, boolean isInterval) {
+    public LongTimeEffect(String id, PropertyID affectTo,
+            Effector<T> effector, int beginningTime) {
+        this(id, EffectType.TYPE_LONGTIME, affectTo,
+                effector, beginningTime, 0, false);
+    }
+
+    protected LongTimeEffect(String id, EffectType type,
+            PropertyID affectTo, Effector<T> effector,
+            int beginning, int intervalDuration, boolean isInterval) {
         super(id, type, affectTo, effector);
-        if (startingTime < 0)
+        if (beginning < 0)
             throw new EffectInitializeException("The starting time of the effect"
                     + " is less than 0.");
         this.isInterval = isInterval;
-        this.startingTime = startingTime;
+        this.beginningTime = beginning;
         if (this.isInterval) {
-            if (intervalDuration <= 0)
+            if (intervalDuration < 100)
                 throw new EffectInitializeException("The duration of the effect"
-                        + " is less than 1 milliseconds (0.001 seconds).");
+                        + " is less than 100 milliseconds (0.1 seconds).");
             this.intervalDuration = intervalDuration;
         } else
             this.intervalDuration = 0;
+    }
+
+    public final int getBeginningTime() {
+        return beginningTime;
     }
 
     public final boolean isInterval() {
@@ -47,7 +57,7 @@ public abstract class AbstractLongTimeEffect<T> extends AbstractEffect<T> {
     public final int getIntervalDuration() {
         return intervalDuration;
     }
-    protected final int startingTime;
-    protected final boolean isInterval;
-    protected final int intervalDuration;
+    private final int beginningTime;
+    private final boolean isInterval;
+    private final int intervalDuration;
 }

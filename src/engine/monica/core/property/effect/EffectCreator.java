@@ -16,38 +16,7 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
-package engine.monica.util;
+package engine.monica.core.property.effect;
 
-public class Type<T> {
-
-    public Type(T t) {
-        type = t;
-    }
-
-    public final T set(T t) {
-        T tt = type;
-        type = t;
-        return tt;
-    }
-
-    public final T get() {
-        return type;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (obj == null || obj.getClass() != getClass())
-            return false;
-        @SuppressWarnings("unchecked")
-        Type<T> t = (Type<T>) obj;
-        if (type == null)
-            return t.type == null;
-        return type.equals(t.type);
-    }
-
-    @Override
-    public int hashCode() {
-        return (type == null ? -1024 : type.hashCode());
-    }
-    private T type;
+public interface EffectCreator<T> {
 }

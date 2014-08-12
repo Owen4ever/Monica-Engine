@@ -16,28 +16,25 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
-package engine.monica.core.property.number;
+package engine.monica.core.property.effect;
 
-import engine.monica.core.property.AbstractEffect;
-import engine.monica.core.property.EffectType;
-import engine.monica.core.property.EffectorInterface;
 import engine.monica.core.property.PropertyID;
-import engine.monica.util.StringID;
+import engine.monica.util.Wrapper;
 
-public class NumberSimpleEffect extends AbstractEffect<Double> {
+public class ModifiedEffect<T> extends AbstractEffect<T> {
 
-    protected NumberSimpleEffect(StringID id, PropertyID affectTo,
-            EffectorInterface<Double> effector) {
-        super(id, EffectType.TYPE_NUM_SIMPLE, affectTo, effector);
+    public ModifiedEffect(String id, PropertyID affectTo, T val) {
+        super(id, EffectType.TYPE_MODIFIED, affectTo, v -> null);
+        this.val = new Wrapper<>(val);
+        setEffector(v -> this.val.pack);
     }
 
-    @Override
-    public NumberSimpleEffect clone() {
-        return new NumberSimpleEffect(id, affectTo, effector);
+    public T getValue() {
+        return val.pack;
     }
 
-    public static NumberSimpleEffect newSimpleEffect(StringID id,
-            PropertyID affectTo, EffectorInterface<Double> effector) {
-        return new NumberSimpleEffect(id, affectTo, effector);
+    public void setValue(T t) {
+        val.pack = t;
     }
+    private final Wrapper<T> val;
 }

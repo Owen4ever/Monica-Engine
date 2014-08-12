@@ -18,18 +18,24 @@
 
 package engine.monica.core.element;
 
-import engine.monica.util.Convertor;
+import static engine.monica.core.element.ElementRelation.CAN;
+import static engine.monica.core.element.ElementRelation.CANNOT;
+import static engine.monica.core.element.ElementRelation.COMBINED_CAN;
+import static engine.monica.core.element.ElementRelation.CONDITION;
+import static engine.monica.core.element.ElementRelation.SYSTEM_CAN;
+import static engine.monica.core.element.SystemRelation.BASE_CAN;
 import engine.monica.core.engine.CoreEngine;
-import static engine.monica.core.engine.EngineConstants.ELEMENT_CONCENTRATION_CALC_DEFAULT;
 import static engine.monica.core.engine.EngineConstants.ELEMENT_CALC_DEFAULT;
+import static engine.monica.core.engine.EngineConstants.ELEMENT_CONCENTRATION_CALC_DEFAULT;
 import engine.monica.core.map.Area;
 import engine.monica.core.map.Map;
+import engine.monica.util.Convertor;
 import engine.monica.util.FinalPair;
+import static engine.monica.util.Lock.*;
 import engine.monica.util.NonOrderedFinalPair;
 import engine.monica.util.SimpleArrayList;
-import engine.monica.util.condition.Condition;
-import engine.monica.util.StringID;
 import engine.monica.util.Wrapper;
+import engine.monica.util.condition.Condition;
 import engine.monica.util.condition.Provider;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -47,7 +53,7 @@ public final class ElementEngine {
         RET(defaultEngineLock, () -> {
             if (!elements.containsKey(element.getID())) {
                 elements.values().parallelStream().forEach(e -> {
-                    NonOrderedFinalPair<StringID, StringID> key
+                    NonOrderedFinalPair<String, String> key
                             = new NonOrderedFinalPair<>(e.getID(), element.getID());
                     switch (getSystemRelation(e.getSystemID(),
                             element.getSystemID())) {
@@ -64,23 +70,23 @@ public final class ElementEngine {
                 });
                 elements.put(element.getID(), element);
                 elementConcentrationCalcs.put(element.getID(), ELEMENT_CONCENTRATION_CALC_DEFAULT);
-                NonOrderedFinalPair<StringID, StringID> self = new NonOrderedFinalPair<>(element.getID(), element.getID());
+                NonOrderedFinalPair<String, String> self = new NonOrderedFinalPair<>(element.getID(), element.getID());
                 elementRelations.put(self, ElementRelation.CAN);
                 elementCalcs.put(self, ELEMENT_CALC_DEFAULT);
             }
         });
     }
 
-    public AbstractElement addBasedElement(StringID systemId,
-            StringID id, String name, int turnToEnergy) {
+    public AbstractElement addBasedElement(String systemId,
+            String id, String name, int turnToEnergy) {
         AbstractElement e = new BaseElement(systemId, id, name, turnToEnergy);
         addElement(e);
         return e;
     }
 
     @SafeVarargs
-    public final AbstractElement addCombinedElement(StringID systemId,
-            StringID id, String name,
+    public final AbstractElement addCombinedElement(String systemId,
+            String id, String name,
             FinalPair<AbstractElement, Integer>... elementAndCount) {
         AbstractElement e = new CombinedElement(systemId, id,
                 name, elementAndCount);
@@ -88,15 +94,15 @@ public final class ElementEngine {
         return e;
     }
 
-    public AbstractElement getElement(StringID id) {
+    public AbstractElement getElement(String id) {
         if (id == null)
-            throw new NullPointerException("The StringID is null.");
+            throw new NullPointerException("The String is null.");
         return elements.get(id);
     }
 
-    public boolean removeElement(StringID id) {
+    public boolean removeElement(String id) {
         if (id == null)
-            throw new NullPointerException("The StringID is null.");
+            throw new NullPointerException("The String is null.");
         return RET(defaultEngineLock, () -> elements.remove(id) != null);
     }
 
@@ -104,7 +110,7 @@ public final class ElementEngine {
         return new SimpleArrayList<>(elements.values(), AbstractElement.class);
     }
 
-    public ElementRelation getElementRelation(StringID e1, StringID e2) {
+    public ElementRelation getElementRelation(String e1, String e2) {
         if (e1 == null || e2 == null)
             throw new NullPointerException("The sid is null.");
         return elementRelations.getOrDefault(new NonOrderedFinalPair<>(e1, e2),
@@ -129,7 +135,7 @@ public final class ElementEngine {
         });
     }
 
-    public ElementCalculator getElementCalculator(StringID e1, StringID e2) {
+    public ElementCalculator getElementCalculator(String e1, String e2) {
         if (e1 == null || e2 == null)
             throw new NullPointerException("The element is null.");
         return elementCalcs.get(new NonOrderedFinalPair<>(e1, e2));
@@ -151,7 +157,7 @@ public final class ElementEngine {
         });
     }
 
-    public ElementConcentrationCalculator getElementConcentrationCalculator(StringID e) {
+    public ElementConcentrationCalculator getElementConcentrationCalculator(String e) {
         if (e == null)
             throw new NullPointerException("The sid is null.");
         return elementConcentrationCalcs.get(e);
@@ -173,7 +179,7 @@ public final class ElementEngine {
         });
     }
 
-    public Condition getElementCondition(StringID e1, StringID e2) {
+    public Condition getElementCondition(String e1, String e2) {
         if (e1 == null || e2 == null)
             throw new NullPointerException("The sid is null.");
         return elementConditions.get(new NonOrderedFinalPair<>(e1, e2));
@@ -195,7 +201,7 @@ public final class ElementEngine {
         });
     }
 
-    public ElementConflict getElementConflict(StringID e1, StringID e2) {
+    public ElementConflict getElementConflict(String e1, String e2) {
         if (e1 == null || e2 == null)
             throw new NullPointerException("The sid is null.");
         return elementConflicts.getOrDefault(new NonOrderedFinalPair<>(e1, e2),
@@ -215,7 +221,7 @@ public final class ElementEngine {
         if (c == null)
             throw new NullPointerException("The conflict is null.");
         RET(defaultEngineLock, () -> {
-            NonOrderedFinalPair<StringID, StringID> p = new NonOrderedFinalPair<>(e1.getID(), e2.getID());
+            NonOrderedFinalPair<String, String> p = new NonOrderedFinalPair<>(e1.getID(), e2.getID());
             elementConflicts.put(p, c);
             elementConflictProcessers.put(p, (p1, p2, m, a)
                     -> new FinalPair<>(new FinalPair<>(p1.first, p1.last * 2),
@@ -223,7 +229,7 @@ public final class ElementEngine {
         });
     }
 
-    public Condition getElementConflictCondition(StringID e1, StringID e2) {
+    public Condition getElementConflictCondition(String e1, String e2) {
         if (e1 == null || e2 == null)
             throw new NullPointerException("The sid is null.");
         return elementConditions.get(new NonOrderedFinalPair<>(e1, e2));
@@ -245,7 +251,7 @@ public final class ElementEngine {
         });
     }
 
-    public ConflictProcesser getElementConflictProcesser(StringID e1, StringID e2) {
+    public ConflictProcesser getElementConflictProcesser(String e1, String e2) {
         if (e1 == null || e2 == null)
             throw new NullPointerException("The sid is null.");
         return elementConflictProcessers.get(new NonOrderedFinalPair<>(e1, e2));
@@ -266,15 +272,15 @@ public final class ElementEngine {
             elementConflictProcessers.put(new NonOrderedFinalPair<>(e1.getID(), e2.getID()), p);
         });
     }
-    private final HashMap<StringID, AbstractElement> elements
+    private final HashMap<String, AbstractElement> elements
             = new HashMap<>(CoreEngine.getDefaultQuantily() * CoreEngine.getDefaultQuantily(), 0.2f);
-    private final HashMap<NonOrderedFinalPair<StringID, StringID>, ElementRelation> elementRelations = new HashMap<>();
-    private final HashMap<StringID, ElementConcentrationCalculator> elementConcentrationCalcs = new HashMap<>();
-    private final HashMap<NonOrderedFinalPair<StringID, StringID>, ElementCalculator> elementCalcs = new HashMap<>();
-    private final HashMap<NonOrderedFinalPair<StringID, StringID>, Condition> elementConditions = new HashMap<>();
-    private final HashMap<NonOrderedFinalPair<StringID, StringID>, ElementConflict> elementConflicts = new HashMap<>();
-    private final HashMap<NonOrderedFinalPair<StringID, StringID>, Condition> elementConflictConditions = new HashMap<>();
-    private final HashMap<NonOrderedFinalPair<StringID, StringID>, ConflictProcesser> elementConflictProcessers = new HashMap<>();
+    private final HashMap<NonOrderedFinalPair<String, String>, ElementRelation> elementRelations = new HashMap<>();
+    private final HashMap<String, ElementConcentrationCalculator> elementConcentrationCalcs = new HashMap<>();
+    private final HashMap<NonOrderedFinalPair<String, String>, ElementCalculator> elementCalcs = new HashMap<>();
+    private final HashMap<NonOrderedFinalPair<String, String>, Condition> elementConditions = new HashMap<>();
+    private final HashMap<NonOrderedFinalPair<String, String>, ElementConflict> elementConflicts = new HashMap<>();
+    private final HashMap<NonOrderedFinalPair<String, String>, Condition> elementConflictConditions = new HashMap<>();
+    private final HashMap<NonOrderedFinalPair<String, String>, ConflictProcesser> elementConflictProcessers = new HashMap<>();
 
     public void addElementSystem(ElementSystem system) {
         if (system == null)
@@ -283,7 +289,7 @@ public final class ElementEngine {
             if (!systems.containsKey(system.getID())) {
                 systems.put(system.getID(), system);
                 systems.values().parallelStream().forEach(s -> {
-                    NonOrderedFinalPair<StringID, StringID> p = new NonOrderedFinalPair<>(s.getID(), system.getID());
+                    NonOrderedFinalPair<String, String> p = new NonOrderedFinalPair<>(s.getID(), system.getID());
                     if (s.hasBasedElementSystem() && system.hasBasedElementSystem()) {
                         switch (getSystemRelation(s.getBasedElementSystem(), system.getBasedElementSystem())) {
                             case CAN:
@@ -303,27 +309,27 @@ public final class ElementEngine {
         });
     }
 
-    public ElementSystem addElementSystem(StringID id, String name, Energy energy,
+    public ElementSystem addElementSystem(String id, String name, Energy energy,
             ElementList elements) {
         return addElementSystem(id, name, energy, elements, null, null);
     }
 
-    public ElementSystem addElementSystem(StringID id, String name, Energy energy,
+    public ElementSystem addElementSystem(String id, String name, Energy energy,
             ElementList elements, ElementSystem basedOn, Convertor<Integer> c) {
         ElementSystem s = new ElementSystem(id, name, energy, elements, basedOn, c);
         addElementSystem(s);
         return s;
     }
 
-    public ElementSystem getSystem(StringID id) {
+    public ElementSystem getSystem(String id) {
         if (id == null)
-            throw new NullPointerException("The StringID is null.");
+            throw new NullPointerException("The String is null.");
         return systems.get(id);
     }
 
-    public boolean removeElementSystem(StringID id) {
+    public boolean removeElementSystem(String id) {
         if (id == null)
-            throw new NullPointerException("The StringID is null.");
+            throw new NullPointerException("The String is null.");
         return RET(defaultEngineLock, () -> systems.remove(id) != null);
     }
 
@@ -331,7 +337,7 @@ public final class ElementEngine {
         return new SimpleArrayList<>(systems.values(), ElementSystem.class);
     }
 
-    public SystemRelation getSystemRelation(StringID e1, StringID e2) {
+    public SystemRelation getSystemRelation(String e1, String e2) {
         if (e1 == null || e2 == null)
             throw new NullPointerException("The sid is null.");
         return systemRelations.getOrDefault(new NonOrderedFinalPair<>(e1, e2),
@@ -371,7 +377,7 @@ public final class ElementEngine {
         });
     }
 
-    public Condition getSystemCondition(StringID e1, StringID e2) {
+    public Condition getSystemCondition(String e1, String e2) {
         if (e1 == null || e2 == null)
             throw new NullPointerException("The sid is null.");
         return systemConditions.get(new NonOrderedFinalPair<>(e1, e2));
@@ -392,9 +398,9 @@ public final class ElementEngine {
             systemConditions.put(new NonOrderedFinalPair<>(e1.getID(), e2.getID()), l);
         });
     }
-    private final HashMap<StringID, ElementSystem> systems = new HashMap<>(CoreEngine.getDefaultQuantily(), 0.2f);
-    private final HashMap<NonOrderedFinalPair<StringID, StringID>, SystemRelation> systemRelations = new HashMap<>();
-    private final HashMap<NonOrderedFinalPair<StringID, StringID>, Condition> systemConditions = new HashMap<>();
+    private final HashMap<String, ElementSystem> systems = new HashMap<>(CoreEngine.getDefaultQuantily(), 0.2f);
+    private final HashMap<NonOrderedFinalPair<String, String>, SystemRelation> systemRelations = new HashMap<>();
+    private final HashMap<NonOrderedFinalPair<String, String>, Condition> systemConditions = new HashMap<>();
 
     @SuppressWarnings("unchecked")
     public ElementCountSet calc(ElementCountSet set1, ElementCountSet set2,
@@ -667,7 +673,7 @@ public final class ElementEngine {
     }
 
     private static boolean systemConditionPassed(ElementEngine e,
-            StringID s1, StringID s2) {
+            String s1, String s2) {
         return conditionPassed(e.getSystemCondition(s1, s2));
     }
 
@@ -678,46 +684,6 @@ public final class ElementEngine {
         });
         return c.match(list.toArray(new Provider[list.size()]));
     }
-
-    private static void getWriteLock(ReentrantReadWriteLock lock) {
-        do {
-            if (!lock.isWriteLocked() && lock.writeLock().tryLock())
-                if (lock.getWriteHoldCount() != 1)
-                    lock.writeLock().unlock();
-                else
-                    break;
-        } while (true);
-    }
     private final transient ReentrantReadWriteLock defaultEngineLock
             = new ReentrantReadWriteLock();
-
-    @FunctionalInterface
-    private static interface VoidReturn {
-
-        void func();
-    }
-
-    @FunctionalInterface
-    private static interface TReturn<T> {
-
-        T func();
-    }
-
-    private static <T> T RET(ReentrantReadWriteLock lock, TReturn<T> t) {
-        getWriteLock(lock);
-        try {
-            return t.func();
-        } finally {
-            lock.writeLock().unlock();
-        }
-    }
-
-    private static void RET(ReentrantReadWriteLock lock, VoidReturn r) {
-        getWriteLock(lock);
-        try {
-            r.func();
-        } finally {
-            lock.writeLock().unlock();
-        }
-    }
 }

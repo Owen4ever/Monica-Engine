@@ -16,26 +16,15 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
-package engine.monica.core.property;
+package engine.monica.util;
 
-public enum EffectType {
+public class RegesteredIDException extends RuntimeException {
 
-    // Number Effect
-    TYPE_NUM_FIXED,
-    TYPE_NUM_SIMPLE,
-    TYPE_NUM_BUFF,
-    TYPE_NUM_BUFF_INTERVAL,
-    TYPE_NUM_DEBUFF,
-    TYPE_NUM_DEBUFF_INTERVAL,
-    TYPE_NUM_LONGTIME,
-    TYPE_NUM_LONGTIME_INTERVAL,
-    // Boolean Effect
-    TYPE_BOOL_FIXED,
-    TYPE_BOOL_SIMPLE,
-    TYPE_BOOL_BUFF,
-    TYPE_BOOL_BUFF_INTERVAL,
-    TYPE_BOOL_DEBUFF,
-    TYPE_BOOL_DEBUFF_INTERVAL,
-    TYPE_BOOL_LONGTIME,
-    TYPE_BOOL_LONGTIME_INTERVAL
+    public RegesteredIDException() {
+        super();
+    }
+
+    public RegesteredIDException(String msg) {
+        super(msg);
+    }
 }

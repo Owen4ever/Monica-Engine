@@ -20,19 +20,18 @@ package engine.monica.core.object;
 
 import engine.monica.core.graphics.GraphicObject;
 import engine.monica.core.property.PropertyList;
-import engine.monica.util.StringID;
 import engine.monica.util.Vector;
 import java.util.Arrays;
 
 public final class Race<V extends Vector<V>> implements NamesGetter {
 
-    public Race(StringID id, Names name, RoleSex[] enableSex,
+    public Race(String id, Names name, RoleSex[] enableSex,
             PropertyList defaultProperties, Talent[] talents,
             GraphicObject<V>[] objs) {
         this(id, name, enableSex, defaultProperties, talents, null, objs);
     }
 
-    public Race(StringID id, Names name, RoleSex[] enableSex,
+    public Race(String id, Names name, RoleSex[] enableSex,
             PropertyList defaultProperties, Talent[] talents,
             Body defaultBody, GraphicObject<V>[] objs) {
         if (id == null)
@@ -61,7 +60,7 @@ public final class Race<V extends Vector<V>> implements NamesGetter {
         raceObjects = objs;
     }
 
-    public StringID getID() {
+    public String getID() {
         return id;
     }
 
@@ -119,7 +118,7 @@ public final class Race<V extends Vector<V>> implements NamesGetter {
                 + (hasDefaultBody ? body.getNames().getDisplayName() : "null")
                 + " ]";
     }
-    private final StringID id;
+    private final String id;
     private final Names names;
     private final RoleSex[] enableSex;
     private final PropertyList defaultProperties;
