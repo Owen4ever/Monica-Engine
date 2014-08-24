@@ -19,7 +19,9 @@
 package engine.monica.core.map;
 
 import engine.monica.core.element.AbstractElement;
-import java.util.concurrent.ConcurrentHashMap;
+import static engine.monica.util.Lock.*;
+import java.util.HashMap;
+import java.util.Set;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public final class ElementConcentration {
@@ -33,17 +35,13 @@ public final class ElementConcentration {
         if (concentration < 0d)
             throw new ConcentrationValueException("The concentration"
                     + " is less than 0.");
-        while (true) {
-            if (!lock.isWriteLocked() && lock.writeLock().tryLock())
-                if (lock.getWriteHoldCount() != 1)
-                    lock.writeLock().unlock();
-                else
-                    break;
-        }
-        vals.put(e, new ConcentrationValue(concentration));
-        count++;
-        total = -1d;
-        lock.writeLock().unlock();
+        getWriteLock(lock);
+        RET(lock, () -> {
+            vals.put(e, new ConcentrationValue(concentration));
+            count++;
+            total = -1d;
+            average = -1d;
+        });
     }
 
     public void setConcentration(AbstractElement e, double concentration) {
@@ -52,21 +50,22 @@ public final class ElementConcentration {
         if (concentration < 0d)
             throw new ConcentrationValueException("The concentration"
                     + " is less than 0.");
-        while (true) {
-            if (!lock.isWriteLocked() && lock.writeLock().tryLock())
-                if (lock.getWriteHoldCount() != 1)
-                    lock.writeLock().unlock();
-                else
-                    break;
-        }
-        vals.get(e).setVal(concentration);
-        count++;
-        total = -1d;
-        lock.writeLock().unlock();
+        getWriteLock(lock);
+        RET(lock, () -> {
+            vals.get(e).setVal(concentration);
+            count++;
+            total = -1d;
+            average = -1d;
+        });
     }
 
     public double getConcentration(AbstractElement e) {
-        return vals.get(e).val;
+        ConcentrationValue c = vals.get(e);
+        return c != null ? c.val : 0d;
+    }
+
+    public Set<AbstractElement> getElements() {
+        return vals.keySet();
     }
 
     public int getElementCount() {
@@ -79,10 +78,35 @@ public final class ElementConcentration {
                     .stream().mapToDouble(ConcentrationValue::getVal).sum();
         return total;
     }
+
+    public double getAverage() {
+        if (average < 0d)
+            average = getTotal() / vals.size();
+        return average;
+    }
+
+    public static void average(ElementConcentration c1, ElementConcentration c2,
+            ElementConcentrationAverager a) {
+        average(c1, c2, a, false);
+    }
+
+    public static void average(ElementConcentration c1, ElementConcentration c2,
+            ElementConcentrationAverager a, boolean needLock) {
+        if (needLock) {
+            getWriteLock(c1.lock);
+            getWriteLock(c2.lock);
+            RET(c1.lock, () -> {
+                RET(c2.lock, () -> {
+                    a.average(c1, c2);
+                });
+            });
+        } else
+            a.average(c1, c2);
+    }
     private int count = 0;
-    private final ConcurrentHashMap<AbstractElement, ConcentrationValue> vals
-            = new ConcurrentHashMap<>();
-    private transient double total = -1d;
+    private final HashMap<AbstractElement, ConcentrationValue> vals
+            = new HashMap<>();
+    private transient double total = -1d, average = -1d;
     private transient final ReentrantReadWriteLock lock
             = new ReentrantReadWriteLock();
 

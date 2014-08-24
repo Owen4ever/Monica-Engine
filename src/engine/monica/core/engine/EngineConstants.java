@@ -25,6 +25,7 @@ import engine.monica.core.element.ElementList;
 import engine.monica.core.element.ElementProviderType;
 import engine.monica.core.graphics.GraphicObject;
 import engine.monica.core.input.InputConstants;
+import engine.monica.core.map.ElementConcentrationAverager;
 import engine.monica.util.FinalPair;
 
 /**
@@ -40,8 +41,8 @@ public interface EngineConstants extends
     ElementConcentrationCalculator ELEMENT_CONCENTRATION_CALC_DEFAULT
             = (p, map, area) -> {
                 double per
-                    = area.getElementConcentration().getConcentration(p.first)
-                        / area.getElementConcentration().getTotal();
+                = area.getElementConcentration().getConcentration(p.first)
+                / area.getElementConcentration().getTotal();
                 if (per >= .8)
                     return new FinalPair<>(p.first, p.last << 1);
                 else if (per >= .68)
@@ -61,5 +62,22 @@ public interface EngineConstants extends
                     return new FinalPair[]{new FinalPair<>(p2.first, i), new FinalPair<>(p1.first, -p1.last)};
                 else
                     return null;
+            };
+
+    ElementConcentrationAverager ELEMENT_CONCENTRATION_AVERAGER_DEFAULT
+            = (c1, c2) -> {
+                c1.getElements().parallelStream().forEach(e1 -> {
+                    double dc1 = c1.getConcentration(e1);
+                    double dc2 = c2.getConcentration(e1);
+                    if (dc2 == 0d)
+                        c2.setConcentration(e1, dc1 / 10);
+                    else
+                        c2.setConcentration(e1, (dc1 + dc2) / 2);
+                });
+                c2.getElements().parallelStream().forEach(e2 -> {
+                    double dc1 = c1.getConcentration(e2);
+                    if (dc1 == 0d)
+                        c2.setConcentration(e2, c2.getConcentration(e2) / 10);
+                });
             };
 }

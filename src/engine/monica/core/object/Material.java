@@ -18,10 +18,13 @@
 
 package engine.monica.core.object;
 
-public interface Material extends Item {
+import engine.monica.util.Vector;
+
+public interface Material<V extends Vector<V>> extends Item<V> {
 
     @Override
-    default Material[] getMaterials() {
+    @SuppressWarnings("unchecked")
+    default Material<V>[] getMaterials() {
         return new Material[]{this};
     }
 }

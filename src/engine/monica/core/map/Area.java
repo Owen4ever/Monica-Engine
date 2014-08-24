@@ -18,7 +18,13 @@
 
 package engine.monica.core.map;
 
-public interface Area {
+import engine.monica.util.Vector;
+
+public interface Area<V extends Vector<V>> {
 
     ElementConcentration getElementConcentration();
+
+    void set(String id, Intangible<V> o);
+
+    Intangible<V> get(String id);
 }

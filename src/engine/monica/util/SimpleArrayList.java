@@ -28,6 +28,8 @@ import java.util.Spliterator;
 import java.util.Spliterators;
 
 /**
+ * Most of codes are copied from {@code java.util.Array#ArrayList}.
+ *
  * @see java.util.Arrays#asList(java.lang.Object...)
  */
 public final class SimpleArrayList<E> extends AbstractList<E>

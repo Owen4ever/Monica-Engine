@@ -36,13 +36,9 @@ public interface Map<V extends Vector<V>> extends ConfigInterface {
 
     Area[] getNearbyAreas(Area a);
 
-    ObserverInterface getObserver();
+    List<GraphicObject> getNodes();
 
-    void setObserver(ObserverInterface o);
+    void addNode(GraphicObject obj);
 
-    List<GraphicObject> getObjects();
-
-    void addObject(GraphicObject obj);
-
-    boolean removeObject(GraphicObject obj);
+    boolean removeNode(GraphicObject obj);
 }

@@ -135,6 +135,19 @@ public final class ElementEngine {
         });
     }
 
+    public void setElementRelationToAll(AbstractElement e, ElementRelation r) {
+        if (e == null)
+            throw new NullPointerException("The element is null.");
+        if (r == null)
+            throw new NullPointerException("The element relation is null.");
+        RET(defaultEngineLock, () -> {
+            getElements().parallelStream().forEach(ae -> {
+                if (!ae.getID().equals(e.getID()))
+                    setElementRelation(e, ae, r);
+            });
+        });
+    }
+
     public ElementCalculator getElementCalculator(String e1, String e2) {
         if (e1 == null || e2 == null)
             throw new NullPointerException("The element is null.");
@@ -201,6 +214,20 @@ public final class ElementEngine {
         });
     }
 
+    public void setElementConditionToAll(AbstractElement e, Condition c) {
+        if (e == null)
+            throw new NullPointerException("The element is null.");
+        if (c == null)
+            throw new NullPointerException("The condition is null.");
+        RET(defaultEngineLock, () -> {
+            elementConditions.keySet().forEach(p -> {
+                if (p.first.equals(p.last)
+                        && (p.first.equals(e.getID()) || p.last.equals(e.getID())))
+                    elementConditions.put(p, c);
+            });
+        });
+    }
+
     public ElementConflict getElementConflict(String e1, String e2) {
         if (e1 == null || e2 == null)
             throw new NullPointerException("The sid is null.");
@@ -216,7 +243,7 @@ public final class ElementEngine {
     }
 
     public void setElementConflict(AbstractElement e1, AbstractElement e2, ElementConflict c) {
-        if (e1 == null)
+        if (e1 == null || e2 == null)
             throw new NullPointerException("The element is null.");
         if (c == null)
             throw new NullPointerException("The conflict is null.");
@@ -226,6 +253,19 @@ public final class ElementEngine {
             elementConflictProcessers.put(p, (p1, p2, m, a)
                     -> new FinalPair<>(new FinalPair<>(p1.first, p1.last * 2),
                             new FinalPair<>(p2.first, p2.last * 2)));
+        });
+    }
+
+    public void setElementConflictToAll(AbstractElement e, ElementConflict c) {
+        if (e == null)
+            throw new NullPointerException("The element is null.");
+        if (c == null)
+            throw new NullPointerException("The conflict is null.");
+        RET(defaultEngineLock, () -> {
+            getElements().parallelStream().forEach(ae -> {
+                if (!ae.getID().equals(e.getID()))
+                    setElementConflict(e, ae, c);
+            });
         });
     }
 
@@ -248,6 +288,20 @@ public final class ElementEngine {
             throw new NullPointerException("The condition is null.");
         RET(defaultEngineLock, () -> {
             elementConflictConditions.put(new NonOrderedFinalPair<>(e1.getID(), e2.getID()), c);
+        });
+    }
+
+    public void setElementConflictConditionToAll(AbstractElement e, Condition c) {
+        if (e == null)
+            throw new NullPointerException("The element is null.");
+        if (c == null)
+            throw new NullPointerException("The condition is null.");
+        RET(defaultEngineLock, () -> {
+            elementConflictConditions.keySet().forEach(p -> {
+                if (p.first.equals(p.last)
+                        && (p.first.equals(e.getID()) || p.last.equals(e.getID())))
+                    elementConflictConditions.put(p, c);
+            });
         });
     }
 
@@ -356,8 +410,7 @@ public final class ElementEngine {
         if (e1 == null || e2 == null)
             throw new NullPointerException("The ElementSystem is null.");
         if (r == null)
-            throw new NullPointerException("The ElementSystem relation is"
-                    + " null.");
+            throw new NullPointerException("The ElementSystem relation is null.");
         if (r == SystemRelation.CANNOT)
             getElements().parallelStream().forEach(fe1 -> {
                 getElements().parallelStream().forEach(fe2 -> {
@@ -374,6 +427,19 @@ public final class ElementEngine {
             });
         RET(defaultEngineLock, () -> {
             systemRelations.put(new NonOrderedFinalPair<>(e1.getID(), e2.getID()), r);
+        });
+    }
+
+    public void setSystemRelationToAll(ElementSystem e, SystemRelation r) {
+        if (e == null)
+            throw new NullPointerException("The ElementSystem is null.");
+        if (r == null)
+            throw new NullPointerException("The ElementSystem relation is null.");
+        RET(defaultEngineLock, () -> {
+            getSystems().parallelStream().forEach(s -> {
+                if (!s.getID().equals(e.getID()))
+                    setSystemRelation(e, s, r);
+            });
         });
     }
 
@@ -396,6 +462,20 @@ public final class ElementEngine {
             throw new NullPointerException("The condition is null.");
         RET(defaultEngineLock, () -> {
             systemConditions.put(new NonOrderedFinalPair<>(e1.getID(), e2.getID()), l);
+        });
+    }
+
+    public void setSystemConditionToAll(ElementSystem e, Condition l) {
+        if (e == null)
+            throw new NullPointerException("The ElementSystem is null.");
+        if (l == null)
+            throw new NullPointerException("The condition is null.");
+        RET(defaultEngineLock, () -> {
+            systemConditions.keySet().forEach(p -> {
+                if (p.first.equals(p.last)
+                        && (p.first.equals(e.getID()) || p.last.equals(e.getID())))
+                    systemConditions.put(p, l);
+            });
         });
     }
     private final HashMap<String, ElementSystem> systems = new HashMap<>(CoreEngine.getDefaultQuantily(), 0.2f);

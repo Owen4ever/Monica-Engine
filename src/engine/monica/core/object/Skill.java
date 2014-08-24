@@ -24,6 +24,8 @@ import engine.monica.util.Vector;
 public interface Skill<V extends Vector<V>> extends NamesGetter {
 
     String getID();
+    
+    String getAbilityID();
 
     GraphicObject<V>[] getReleaseObjects();
 

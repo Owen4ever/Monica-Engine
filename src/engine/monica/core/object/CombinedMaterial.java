@@ -18,8 +18,14 @@
 
 package engine.monica.core.object;
 
-public interface CombinedMaterial extends Material {
+import engine.monica.util.Vector;
+
+public interface CombinedMaterial<V extends Vector<V>> extends Material<V> {
 
     @Override
-    Material[] getMaterials();
+    default Material<V>[] getMaterials() {
+        return getCombinedMaterials();
+    }
+
+    Material<V>[] getCombinedMaterials();
 }
