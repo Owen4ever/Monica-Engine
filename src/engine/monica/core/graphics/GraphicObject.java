@@ -24,12 +24,10 @@ import engine.monica.util.Vector;
 
 public interface GraphicObject<V extends Vector<V>> {
 
-    String getName();
-
     /**
      * Get the map which the {@code  GraphicObject} is located.
      */
-    Map getLocatedMap();
+    Map<V> getLocatedMap();
 
     VisibleLevel getVisibleLevel();
 
@@ -72,4 +70,8 @@ public interface GraphicObject<V extends Vector<V>> {
     <T> T getAttribute(String key);
 
     <T> void setAttribute(String key, T val);
+
+    boolean canColide(GraphicObject o);
+
+    void colide(GraphicObject o);
 }

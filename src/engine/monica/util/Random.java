@@ -6,9 +6,11 @@
 
 package engine.monica.util;
 
-public interface Random<T> {
+public interface Random<T, S> {
 
-    void setSeed(int seed);
+    S getSeed();
+
+    void setSeed(S seed);
 
     T next();
 }

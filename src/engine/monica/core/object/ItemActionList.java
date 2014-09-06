@@ -21,6 +21,7 @@ package engine.monica.core.object;
 import engine.monica.core.map.Area;
 import engine.monica.core.map.Map;
 import engine.monica.util.FinalPair;
+import engine.monica.util.result.BoolMsgResult;
 import engine.monica.util.Vector;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -48,7 +49,7 @@ public final class ItemActionList<V extends Vector<V>> {
     }
 
     @SuppressWarnings("unchecked")
-    public FinalPair<FinalPair<Boolean, String>, TangibleObject<V>[]> action(String name,
+    public FinalPair<BoolMsgResult, TangibleObject<V>[]> action(String name,
             Role owner, Role user, TangibleObject<V> target,
             Item beUsingItem, Map map, Area area) {
         if (name == null || name.isEmpty())
@@ -59,7 +60,7 @@ public final class ItemActionList<V extends Vector<V>> {
     private final ArrayList<String> names = new ArrayList<>(4);
     private final HashMap<String, ItemAction<V>> actions = new HashMap<>(4, 0.1f);
 
-    private static final FinalPair<FinalPair<Boolean, String>, TangibleObject[]> DEFAULT_RESULT
-            = new FinalPair<>(new FinalPair<>(false, "Do not has this action."), new TangibleObject[]{});
+    private static final FinalPair<BoolMsgResult, TangibleObject[]> DEFAULT_RESULT
+            = new FinalPair<>(new BoolMsgResult(false, "Do not has this action."), new TangibleObject[]{});
     private static final ItemAction DEFAULT = (o, u, uo, buo, m, a) -> DEFAULT_RESULT;
 }

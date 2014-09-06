@@ -41,4 +41,23 @@ public interface Map<V extends Vector<V>> extends ConfigInterface {
     void addNode(GraphicObject obj);
 
     boolean removeNode(GraphicObject obj);
+
+    /**
+     * Test two GraphicObjects can colide each other.
+     *
+     * @param obj1 A GraphicObject which has collided obj2.
+     * @param obj2 A GraphicObject which has been collided by obj1.
+     */
+    default boolean canColide(GraphicObject obj1, GraphicObject obj2) {
+        return obj1.canColide(obj2);
+    }
+
+    default boolean colide(GraphicObject obj1, GraphicObject obj2) {
+        if (canColide(obj1, obj2)) {
+            obj1.colide(obj2);
+            obj2.colide(obj1);
+            return true;
+        }
+        return false;
+    }
 }

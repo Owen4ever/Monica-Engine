@@ -18,11 +18,11 @@
 
 package engine.monica.core.map;
 
+import com.sun.webkit.plugin.PluginManager;
 import engine.monica.core.element.ElementEngine;
 import java.math.BigInteger;
-import java.util.Set;
 
-public final class World implements ConfigInterface {
+public final class World {
 
     public World(ConfigInterface c) {
         if (c == null)
@@ -30,36 +30,15 @@ public final class World implements ConfigInterface {
         config = c;
     }
 
-    @Override
-    public <T> void set(String key, T value) {
-        config.set(key, value);
-    }
-
-    @Override
-    public <T> T get(String key) {
-        return config.get(key);
-    }
-
-    @Override
-    public boolean containKey(String id) {
-        return config.containKey(id);
-    }
-
-    @Override
-    public boolean remove(String key) {
-        return config.remove(key);
-    }
-
-    @Override
-    public void clearConfig() {
-        config.clearConfig();
-    }
-
-    @Override
-    public Set<String> keySet() {
-        return config.keySet();
+    public ConfigInterface getConfigures() {
+        return config;
     }
     private final ConfigInterface config;
+
+    public PluginManager getPluginManager() {
+        return plugins;
+    }
+    private final PluginManager plugins = new PluginManager();
 
     public boolean isStart() {
         return isStart;

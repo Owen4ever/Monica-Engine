@@ -21,6 +21,7 @@ package engine.monica.core.object;
 import engine.monica.core.map.Area;
 import engine.monica.core.map.Map;
 import engine.monica.util.FinalPair;
+import engine.monica.util.result.BoolMsgResult;
 import engine.monica.util.Vector;
 
 public interface Item<V extends Vector<V>> extends TangibleObject<V> {
@@ -33,7 +34,7 @@ public interface Item<V extends Vector<V>> extends TangibleObject<V> {
 
     Role getOwner();
 
-    default FinalPair<FinalPair<Boolean, String>, TangibleObject<V>[]>
+    default FinalPair<BoolMsgResult, TangibleObject<V>[]>
             action(String name, Role user, TangibleObject<V> target,
                     Map map, Area area) {
         return getItemActions().action(name, getOwner(), user, target, this, map, area);
