@@ -35,14 +35,21 @@ public final class VisibleLevel {
     public void setLevel(int level) {
         this.level = level;
     }
+
+    public int getAlpha() {
+        if (isVisible())
+            return level;
+        else
+            return 0;
+    }
     private int level;
 
-    public static final int INT_INVISIBLE_MAX = -25500;
-    public static final int INT_INVISIBLE_ORDINARY = -4000;
+    public static final int INT_INVISIBLE_MAX = -255;
+    public static final int INT_INVISIBLE_ORDINARY = -40;
     public static final int INT_INVISIBLE_MIN = 0;
     public static final int INT_VISIBLE_MIN = 1;
-    public static final int INT_VISIBLE_ORDINARY = 6000;
-    public static final int INT_VISIBLE_MAX = 25500;
+    public static final int INT_VISIBLE_ORDINARY = 60;
+    public static final int INT_VISIBLE_MAX = 255;
 
     public static final VisibleLevel LV_INVISIBLE_MAX = new VisibleLevel(INT_INVISIBLE_MAX);
     public static final VisibleLevel LV_INVISIBLE_ORDINARY = new VisibleLevel(INT_INVISIBLE_ORDINARY);

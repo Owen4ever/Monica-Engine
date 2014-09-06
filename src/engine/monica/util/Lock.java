@@ -19,26 +19,33 @@
 package engine.monica.util;
 
 import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.concurrent.locks.StampedLock;
 
 public final class Lock {
 
     public static void getWriteLock(ReentrantReadWriteLock lock) {
+        if (!lock.isWriteLocked() && lock.writeLock().tryLock()
+                && lock.getWriteHoldCount() != 1)
+            lock.writeLock().unlock();
         do {
-            if (!lock.isWriteLocked() && lock.writeLock().tryLock())
-                if (lock.getWriteHoldCount() != 1)
-                    lock.writeLock().unlock();
-                else
-                    break;
+            if (!lock.isWriteLocked() && lock.writeLock().tryLock()
+                    && lock.getWriteHoldCount() != 1)
+                lock.writeLock().unlock();
+            else
+                break;
         } while (true);
     }
 
     public static void getReadLock(ReentrantReadWriteLock lock) {
+        if (lock.getReadLockCount() == 0 && lock.readLock().tryLock()
+                && lock.getReadHoldCount() != 1)
+            lock.readLock().unlock();
         do {
-            if (lock.getReadLockCount() == 0 && lock.readLock().tryLock())
-                if (lock.getReadHoldCount() != 1)
-                    lock.readLock().unlock();
-                else
-                    break;
+            if (lock.getReadLockCount() == 0 && lock.readLock().tryLock()
+                    && lock.getReadHoldCount() != 1)
+                lock.readLock().unlock();
+            else
+                break;
         } while (true);
     }
 

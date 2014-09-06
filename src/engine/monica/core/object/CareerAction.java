@@ -21,6 +21,7 @@ package engine.monica.core.object;
 import engine.monica.core.map.Area;
 import engine.monica.core.map.Map;
 import engine.monica.util.FinalPair;
+import engine.monica.util.result.BoolMsgResult;
 import engine.monica.util.Vector;
 
 @FunctionalInterface
@@ -36,6 +37,6 @@ public interface CareerAction<V extends Vector<V>> {
      * @return Boolean: Is succeed? String: Visible message. TangibleObject[]:
      * The objects the action created.
      */
-    FinalPair<FinalPair<Boolean, String>, TangibleObject<V>[]>
+    FinalPair<BoolMsgResult, TangibleObject<V>[]>
             action(Role user, TangibleObject<V> target, Map map, Area area);
 }
