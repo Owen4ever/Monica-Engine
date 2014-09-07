@@ -24,6 +24,11 @@ public final class BoolMsgResult {
         this.success = success;
         this.message = msg;
     }
+
+    @Override
+    public String toString() {
+        return "(" + success + ", " + message + ")";
+    }
     public final boolean success;
     public final String message;
 }

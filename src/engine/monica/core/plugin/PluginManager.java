@@ -22,12 +22,15 @@ import engine.monica.core.map.World;
 import engine.monica.util.result.BoolMsgResult;
 import engine.monica.util.result.IntMsgResult;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Set;
 import java.util.StringJoiner;
+import java.util.concurrent.ConcurrentHashMap;
 
 public final class PluginManager {
 
     public PluginManager(World world) {
+        if (world == null)
+            throw new NullPointerException("The world is null.");
         this.world = world;
     }
 
@@ -57,8 +60,27 @@ public final class PluginManager {
         BoolMsgResult ret = plugin.load(this);
         if (ret == null)
             return new IntMsgResult(RET_ERR_LOAD_FAILED, "Failed while loading " + name + ".");
-        return new IntMsgResult(ret.success ? RET_SUCCEED : RET_ERR_LOAD_FAILED,
-                ret.message == null || ret.message.isEmpty() ? "Succeed in loading " + name + "." : ret.message);
+        if (ret.success) {
+            plugins.put(plugin.getPluginName(), plugin);
+            return new IntMsgResult(RET_SUCCEED,
+                    ret.message == null || ret.message.isEmpty() ? "Succeed in loading " + name + "." : ret.message);
+        } else
+            return new IntMsgResult(RET_ERR_LOAD_FAILED,
+                    ret.message == null || ret.message.isEmpty() ? "Failed while loading " + name + "." : ret.message);
+    }
+
+    public IntMsgResult removePlugin(String name) {
+        return removePlugin(name, false);
+    }
+
+    public IntMsgResult removePlugin(String name, boolean force) {
+        if (name == null || name.isEmpty())
+            return new IntMsgResult(RET_ERR_NULL, "The Plugin name is null.");
+        Plugin p = plugins.get(name);
+        if (p != null)
+            return removePlugin(p, force);
+        else
+            return new IntMsgResult(RET_ERR_REMOVE_REMOVED, name + " did not load or has already removed.");
     }
 
     public IntMsgResult removePlugin(Plugin plugin) {
@@ -93,8 +115,12 @@ public final class PluginManager {
         BoolMsgResult ret = plugin.remove(this);
         if (ret == null)
             return new IntMsgResult(RET_ERR_REMOVE_FAILED, "Failed while removing " + name + ".");
-        return new IntMsgResult(ret.success ? RET_SUCCEED : RET_ERR_REMOVE_FAILED,
-                ret.message == null || ret.message.isEmpty() ? "Succeed in removing " + name + "." : ret.message);
+        if (ret.success && plugins.remove(plugin.getPluginName(), plugin)) {
+            return new IntMsgResult(RET_SUCCEED,
+                    ret.message == null || ret.message.isEmpty() ? "Succeed in removing " + name + "." : ret.message);
+        } else
+            return new IntMsgResult(RET_ERR_REMOVE_FAILED,
+                    ret.message == null || ret.message.isEmpty() ? "Failed while removing " + name + "." : ret.message);
     }
 
     public BoolMsgResult canLoad(Plugin plugin) {
@@ -150,17 +176,23 @@ public final class PluginManager {
                 names.add(p.getPluginName());
         });
         plugins.clear();
-        if (!names.isEmpty()) {
+        if (names.size() > 1) {
             StringJoiner strJoiner = new StringJoiner(", ");
             names.forEach(n -> {
                 strJoiner.add(n);
             });
             return new BoolMsgResult(false, "Failed to remove follow Plugins: (" + strJoiner + ").");
-        } else
-            return new BoolMsgResult(true, "");
+        } else if (names.size() == 1)
+            return new BoolMsgResult(false, "Failed to remove follow Plugin: (" + names.iterator().next() + ").");
+        else
+            return new BoolMsgResult(true, "Success in removing all plugins.");
+    }
+
+    public Set<String> getLoadedPluginNames() {
+        return plugins.keySet();
     }
     private final World world;
-    private final HashMap<String, Plugin> plugins = new HashMap<>();
+    private final ConcurrentHashMap<String, Plugin> plugins = new ConcurrentHashMap<>();
 
     public static final int RET_SUCCEED = 0;
     public static final int RET_ERR_NULL = 1;

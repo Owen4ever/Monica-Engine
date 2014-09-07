@@ -22,11 +22,13 @@ import engine.monica.util.result.BoolMsgResult;
 
 public interface Plugin {
 
+    String getShortName();
+
     String getPluginName();
 
     String[] needSupportPlugins();
 
-    BoolMsgResult load(PluginManager m);
+    BoolMsgResult load(PluginManager mgr);
 
-    BoolMsgResult remove(PluginManager m);
+    BoolMsgResult remove(PluginManager mgr);
 }

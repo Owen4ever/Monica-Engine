@@ -24,6 +24,11 @@ public class IntMsgResult {
         this.success = success;
         this.message = msg;
     }
+
+    @Override
+    public String toString() {
+        return "(" + success + ", " + message + ")";
+    }
     public final int success;
     public final String message;
 }
