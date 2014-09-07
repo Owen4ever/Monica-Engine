@@ -18,7 +18,7 @@
 
 package engine.monica.core.map;
 
-public final class VisibleLevel {
+public final class VisibleLevel implements Cloneable {
 
     public VisibleLevel(int level) {
         this.level = level;
@@ -42,19 +42,20 @@ public final class VisibleLevel {
         else
             return 0;
     }
+
+    @Override
+    public VisibleLevel clone() {
+        return new VisibleLevel(level);
+    }
     private int level;
 
     public static final int INT_INVISIBLE_MAX = -255;
-    public static final int INT_INVISIBLE_ORDINARY = -40;
     public static final int INT_INVISIBLE_MIN = 0;
     public static final int INT_VISIBLE_MIN = 1;
-    public static final int INT_VISIBLE_ORDINARY = 60;
     public static final int INT_VISIBLE_MAX = 255;
 
     public static final VisibleLevel LV_INVISIBLE_MAX = new VisibleLevel(INT_INVISIBLE_MAX);
-    public static final VisibleLevel LV_INVISIBLE_ORDINARY = new VisibleLevel(INT_INVISIBLE_ORDINARY);
     public static final VisibleLevel LV_INVISIBLE_MIN = new VisibleLevel(INT_INVISIBLE_MIN);
     public static final VisibleLevel LV_VISIBLE_MIN = new VisibleLevel(INT_VISIBLE_MIN);
-    public static final VisibleLevel LV_VISIBLE_ORDINARY = new VisibleLevel(INT_VISIBLE_ORDINARY);
     public static final VisibleLevel LV_VISIBLE_MAX = new VisibleLevel(INT_VISIBLE_MAX);
 }

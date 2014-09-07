@@ -18,7 +18,7 @@
 
 package engine.monica.util;
 
-public interface Vector<V extends Vector> {
+public interface Vector<V extends Vector<V>> {
 
     V add(V v);
 

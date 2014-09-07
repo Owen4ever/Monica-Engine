@@ -45,9 +45,9 @@ public interface GraphicObject<V extends Vector<V>> {
 
     GraphicObject<V>[] getChilds();
 
-    void addChild(GraphicObject obj);
+    void addChild(GraphicObject<V> obj);
 
-    boolean removeChild(GraphicObject obj);
+    boolean removeChild(GraphicObject<V> obj);
 
     default V getAbsoluteLocation() {
         GraphicObject<V> parent = getParent();
@@ -71,7 +71,7 @@ public interface GraphicObject<V extends Vector<V>> {
 
     <T> void setAttribute(String key, T val);
 
-    boolean canColide(GraphicObject o);
+    boolean canColide(GraphicObject<V> o);
 
-    void colide(GraphicObject o);
+    void colide(GraphicObject<V> o);
 }

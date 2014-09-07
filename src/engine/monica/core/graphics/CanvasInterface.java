@@ -18,17 +18,5 @@
 
 package engine.monica.core.graphics;
 
-public interface CanvasInterface {
-
-    int getX();
-
-    int getY();
-
-    void setLocation(int x, int y);
-
-    int getWidth();
-
-    int getHeight();
-
-    void setSize(int w, int h);
+public interface CanvasInterface extends ComponentInterface {
 }

@@ -18,27 +18,43 @@
 
 package engine.monica.core.map;
 
-import com.sun.webkit.plugin.PluginManager;
 import engine.monica.core.element.ElementEngine;
+import engine.monica.core.plugin.PluginManager;
 import java.math.BigInteger;
 
 public final class World {
 
     public World(ConfigInterface c) {
         if (c == null)
-            throw new NullPointerException("The world config is null.");
-        config = c;
+            throw new NullPointerException("The World Configure is null.");
+        configs = c;
+        pluginMgr = new PluginManager(this);
     }
 
     public ConfigInterface getConfigures() {
-        return config;
+        return configs;
     }
-    private final ConfigInterface config;
+    private final ConfigInterface configs;
+
+    public static final String CFG_ALLROLES_KEY = "CFG-Role-All";
 
     public PluginManager getPluginManager() {
-        return plugins;
+        return pluginMgr;
     }
-    private final PluginManager plugins = new PluginManager();
+    private final PluginManager pluginMgr;
+
+    public ElementEngine getElementEngine() {
+        return elementEngine;
+    }
+
+    public void setElementEngine(ElementEngine e) {
+        if (isStart())
+            throw new WorldException("The world has already started.");
+        if (e == null)
+            throw new NullPointerException("The ElementEngine is null.");
+        elementEngine = e;
+    }
+    private ElementEngine elementEngine = new ElementEngine();
 
     public boolean isStart() {
         return isStart;
@@ -48,7 +64,7 @@ public final class World {
         if (isStart)
             throw new WorldException("The world has already started.");
         if (date == null)
-            throw new WorldException("Cannot start the game until WorldDate sets up.");
+            throw new WorldException("Cannot start the world until WorldDate sets up.");
         date.ready();
         isStart = true;
         isContinuing = true;
@@ -61,7 +77,7 @@ public final class World {
 
     public void stop() {
         if (!isStart)
-            throw new WorldException("The game engine has not started yet.");
+            throw new WorldException("The world has not started yet.");
         isStart = false;
         isContinuing = false;
         date.stop();
@@ -69,9 +85,9 @@ public final class World {
 
     public void setContinue() {
         if (!isStart())
-            throw new WorldException("The game engine has not started yet.");
+            throw new WorldException("The world has not started yet.");
         if (isContinuing)
-            throw new WorldException("The game engine has already started.");
+            throw new WorldException("The world has already started.");
         date.ready();
         isContinuing = true;
         date.start();
@@ -79,9 +95,9 @@ public final class World {
 
     public void setPause() {
         if (!isStart())
-            throw new WorldException("The game engine has not started yet.");
+            throw new WorldException("The world has not started yet.");
         if (!isContinuing)
-            throw new WorldException("The game engine has already"
+            throw new WorldException("The world has already"
                     + " set to continue.");
         isContinuing = false;
         date.stop();
@@ -169,17 +185,4 @@ public final class World {
         return date.getCurrentDateTime().toInteger(date);
     }
     private volatile WorldDate date;
-
-    public ElementEngine getElementEngine() {
-        return elementEngine;
-    }
-
-    public void setElementEngine(ElementEngine e) {
-        if (isStart())
-            throw new WorldException("The world has already started.");
-        if (e == null)
-            throw new NullPointerException("The ElementEngine is null.");
-        elementEngine = e;
-    }
-    private ElementEngine elementEngine = new ElementEngine();
 }

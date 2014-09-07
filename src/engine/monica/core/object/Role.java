@@ -27,7 +27,7 @@ public interface Role<V extends Vector<V>> extends NamesGetter, TangibleObject<V
         return getNames().getDisplayName();
     }
 
-    RoleSex getSex();
+    RoleGender getSex();
 
     Career[] getCareers();
 

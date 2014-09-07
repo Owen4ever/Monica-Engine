@@ -26,33 +26,33 @@ public interface Map<V extends Vector<V>> extends ConfigInterface {
 
     World getWorld();
 
-    Area getArea(V v);
+    Area<V> getArea(V v);
 
-    void setArea(V v, Area a);
+    void setArea(V v, Area<V> a);
 
-    void createIrregularArea(V v, Area a);
+    void createIrregularArea(V v, Area<V> a);
 
-    Area[] getNearbyAreas(V v);
+    Area<V>[] getNearbyAreas(V v);
 
-    Area[] getNearbyAreas(Area a);
+    Area<V>[] getNearbyAreas(Area<V> a);
 
-    List<GraphicObject> getNodes();
+    List<GraphicObject<V>> getNodes();
 
-    void addNode(GraphicObject obj);
+    void addNode(GraphicObject<V> obj);
 
-    boolean removeNode(GraphicObject obj);
+    boolean removeNode(GraphicObject<V> obj);
 
     /**
-     * Test two GraphicObjects can colide each other.
+     * Test two GraphicObjects if they have colided each other.
      *
      * @param obj1 A GraphicObject which has collided obj2.
      * @param obj2 A GraphicObject which has been collided by obj1.
      */
-    default boolean canColide(GraphicObject obj1, GraphicObject obj2) {
+    default boolean canColide(GraphicObject<V> obj1, GraphicObject<V> obj2) {
         return obj1.canColide(obj2);
     }
 
-    default void colide(GraphicObject obj1, GraphicObject obj2) {
+    default void colide(GraphicObject<V> obj1, GraphicObject<V> obj2) {
         obj1.colide(obj2);
         obj2.colide(obj1);
     }

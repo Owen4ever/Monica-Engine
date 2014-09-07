@@ -16,14 +16,17 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
-package engine.monica.util.result;
+package engine.monica.core.plugin;
 
-public final class BoolMsgResult {
+import engine.monica.util.result.BoolMsgResult;
 
-    public BoolMsgResult(boolean success, String msg) {
-        this.success = success;
-        this.message = msg;
-    }
-    public final boolean success;
-    public final String message;
+public interface Plugin {
+
+    String getPluginName();
+
+    String[] needSupportPlugins();
+
+    BoolMsgResult load(PluginManager m);
+
+    BoolMsgResult remove(PluginManager m);
 }

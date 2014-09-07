@@ -18,12 +18,12 @@
 
 package engine.monica.util.result;
 
-public final class BoolMsgResult {
+public class IntMsgResult {
 
-    public BoolMsgResult(boolean success, String msg) {
+    public IntMsgResult(int success, String msg) {
         this.success = success;
         this.message = msg;
     }
-    public final boolean success;
+    public final int success;
     public final String message;
 }

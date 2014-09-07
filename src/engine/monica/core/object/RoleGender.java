@@ -18,15 +18,15 @@
 
 package engine.monica.core.object;
 
-public final class RoleSex {
+public final class RoleGender {
 
-    public RoleSex(String sex, int id) {
-        this.sex = sex;
+    public RoleGender(String gender, int id) {
+        this.gender = gender;
         this.id = id;
     }
 
-    public String getSex() {
-        return sex;
+    public String getGender() {
+        return gender;
     }
 
     @Override
@@ -35,7 +35,7 @@ public final class RoleSex {
             return true;
         if (obj == null || obj.getClass() != getClass())
             return false;
-        RoleSex s = (RoleSex) obj;
+        RoleGender s = (RoleGender) obj;
         return id == s.id;
     }
 
@@ -46,11 +46,11 @@ public final class RoleSex {
 
     @Override
     public String toString() {
-        return sex + "(" + id + ")";
+        return gender + "(" + id + ")";
     }
-    private final String sex;
+    private final String gender;
     private final int id;
 
-    public static final RoleSex MALE = new RoleSex("Male", 0);
-    public static final RoleSex FEMALE = new RoleSex("Female", 1);
+    public static final RoleGender MALE = new RoleGender("Male", 0);
+    public static final RoleGender FEMALE = new RoleGender("Female", 1);
 }

@@ -22,9 +22,24 @@ import java.util.Set;
 
 public interface ConfigInterface {
 
+    /**
+     * Set the value to the key and the value cannot be {@code null}.
+     */
     <T> void set(String key, T value);
 
+    /**
+     * Return {@code null} if configures do not contain the key, otherwise,
+     * return the value of the key.
+     */
     <T> T get(String key);
+
+    /**
+     * Return {@code null} if configures do not contain the key, otherwise,
+     * return the value of the key.
+     */
+    default <T> T get(String key, Class<T> clazz) {
+        return (T) get(key);
+    }
 
     boolean remove(String key);
 
@@ -35,6 +50,6 @@ public interface ConfigInterface {
     Set<String> keySet();
 
     default void clearConfig() {
-        keySet().stream().forEach(id -> remove(id));
+        keySet().stream().forEach(key -> remove(key));
     }
 }

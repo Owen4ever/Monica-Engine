@@ -24,9 +24,13 @@ public interface ComponentInterface {
 
     int getY();
 
+    void setLocation(int x, int y);
+
     int getWidth();
 
     int getHeight();
+
+    void setSize(int w, int h);
 
     void paintComponent(GraphicInterface g);
 }
