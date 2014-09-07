@@ -63,7 +63,7 @@ public final class PluginManager {
         if (ret.success) {
             plugins.put(plugin.getPluginName(), plugin);
             return new IntMsgResult(RET_SUCCEED,
-                    ret.message == null || ret.message.isEmpty() ? "Succeed in loading " + name + "." : ret.message);
+                    ret.message == null || ret.message.isEmpty() ? "Succeeded in loading " + name + "." : ret.message);
         } else
             return new IntMsgResult(RET_ERR_LOAD_FAILED,
                     ret.message == null || ret.message.isEmpty() ? "Failed while loading " + name + "." : ret.message);
@@ -117,7 +117,7 @@ public final class PluginManager {
             return new IntMsgResult(RET_ERR_REMOVE_FAILED, "Failed while removing " + name + ".");
         if (ret.success && plugins.remove(plugin.getPluginName(), plugin)) {
             return new IntMsgResult(RET_SUCCEED,
-                    ret.message == null || ret.message.isEmpty() ? "Succeed in removing " + name + "." : ret.message);
+                    ret.message == null || ret.message.isEmpty() ? "Succeeded in removing " + name + "." : ret.message);
         } else
             return new IntMsgResult(RET_ERR_REMOVE_FAILED,
                     ret.message == null || ret.message.isEmpty() ? "Failed while removing " + name + "." : ret.message);
@@ -185,7 +185,7 @@ public final class PluginManager {
         } else if (names.size() == 1)
             return new BoolMsgResult(false, "Failed to remove follow Plugin: (" + names.iterator().next() + ").");
         else
-            return new BoolMsgResult(true, "Success in removing all plugins.");
+            return new BoolMsgResult(true, "Succeeded in removing all plugins.");
     }
 
     public Set<String> getLoadedPluginNames() {
