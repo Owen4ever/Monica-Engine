@@ -21,7 +21,7 @@ package engine.monica.core.map;
 import static engine.monica.util.OMath.minTimes;
 import java.math.BigInteger;
 
-public class DateTime {
+public final class DateTime {
 
     public DateTime(int year, int mon, int day,
             int hour, int min, int sec, int msec) {
@@ -32,7 +32,18 @@ public class DateTime {
         this.minute = min;
         this.second = sec;
         this.millisecond = msec;
-        hash = calcHash(this);
+        int h = this.year << 4 + this.month;
+        h <<= 4;
+        h += this.day;
+        h <<= 4;
+        h += this.hour;
+        h <<= 4;
+        h += this.minute;
+        h <<= 4;
+        h += this.second;
+        h <<= 4;
+        h += this.millisecond;
+        this.hash = h;
     }
 
     public BigInteger toInteger(WorldDate d) {
@@ -75,20 +86,6 @@ public class DateTime {
     public final int year, month, day, hour, minute, second, millisecond;
     private final int hash;
 
-    private static int calcHash(DateTime t) {
-        int hash = t.year << 4 + t.month;
-        hash <<= 4;
-        hash += t.day;
-        hash <<= 4;
-        hash += t.hour;
-        hash <<= 4;
-        hash += t.minute;
-        hash <<= 4;
-        hash += t.second;
-        hash <<= 4;
-        return hash + t.millisecond;
-    }
-
     public static DateTime getDateTime(WorldDate d, BigInteger i) {
         int pmon = minTimes(d.loopMon);
         int pday = minTimes(d.loopDay);
@@ -125,7 +122,7 @@ public class DateTime {
 
     private static int getNum(int f, String m, int r, BigInteger i) {
         return i.and(new BigInteger(createStringWithSepcialChar('0', f) + m
-                                + createStringWithSepcialChar('0', r), 2))
+                + createStringWithSepcialChar('0', r), 2))
                 .and(new BigInteger(createStringWithSepcialChar('1', f) + m
                                 + createStringWithSepcialChar('1', r), 2))
                 .shiftRight(r).intValue();

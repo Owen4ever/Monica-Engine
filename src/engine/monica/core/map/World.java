@@ -39,6 +39,8 @@ public final class World {
     public static final String CFG_ALLROLES_KEY = "CFG-Role-All";
 
     public PluginManager getPluginManager() {
+        if (isStart())
+            throw new WorldException("The world has already started.");
         return pluginMgr;
     }
     private final PluginManager pluginMgr;
@@ -97,8 +99,7 @@ public final class World {
         if (!isStart())
             throw new WorldException("The world has not started yet.");
         if (!isContinuing)
-            throw new WorldException("The world has already"
-                    + " set to continue.");
+            throw new WorldException("The world has already set to continue.");
         isContinuing = false;
         date.stop();
     }
