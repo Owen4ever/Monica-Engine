@@ -26,20 +26,20 @@ import java.util.Arrays;
 public class Race<V extends Vector<V>> implements NamesGetter {
 
     public Race(String id, Names name, RoleGender[] enableGender,
-            PropertyList defaultProperties, Talent[] talents,
+            PropertyList defaultProperties, Talent<V>[] talents,
             GraphicObject<V>[] objs) {
         this(id, name, enableGender, defaultProperties, talents, null, objs);
     }
 
     public Race(String id, Names name, RoleGender[] enableGender,
-            PropertyList defaultProperties, Talent[] talents,
-            Body defaultBody, GraphicObject<V>[] objs) {
+            PropertyList defaultProperties, Talent<V>[] talents,
+            Body<V> defaultBody, GraphicObject<V>[] objs) {
         this(id, name, enableGender, defaultProperties, talents, defaultBody, objs, null);
     }
 
     protected Race(String id, Names name, RoleGender[] enableGender,
-            PropertyList defaultProperties, Talent[] talents,
-            Body defaultBody, GraphicObject<V>[] objs, Race<V>[] races) {
+            PropertyList defaultProperties, Talent<V>[] talents,
+            Body<V> defaultBody, GraphicObject<V>[] objs, Race<V>[] races) {
         if (id == null)
             throw new NullPointerException("The id is null.");
         if (name == null)
@@ -53,7 +53,7 @@ public class Race<V extends Vector<V>> implements NamesGetter {
             throw new NullPointerException("The array of default properties is null.");
         if (talents == null || talents.length == 0)
             throw new NullPointerException("The talent is null.");
-        for (Talent t : talents)
+        for (Talent<V> t : talents)
             if (t == null)
                 throw new NullPointerException("The talent is null.");
         this.id = id;
@@ -87,7 +87,7 @@ public class Race<V extends Vector<V>> implements NamesGetter {
         return defaultProperties;
     }
 
-    public final Talent[] getTalents() {
+    public final Talent<V>[] getTalents() {
         return talents;
     }
 
@@ -95,7 +95,7 @@ public class Race<V extends Vector<V>> implements NamesGetter {
         return hasDefaultBody;
     }
 
-    public final Body getDefaultBody() {
+    public final Body<V> getDefaultBody() {
         return body;
     }
 
@@ -107,7 +107,7 @@ public class Race<V extends Vector<V>> implements NamesGetter {
         return races.length;
     }
 
-    public final Race[] getRaces() {
+    public final Race<V>[] getRaces() {
         return races;
     }
 
@@ -140,9 +140,9 @@ public class Race<V extends Vector<V>> implements NamesGetter {
     private final Names names;
     private final RoleGender[] enableGender;
     private final PropertyList defaultProperties;
-    private final Talent[] talents;
+    private final Talent<V>[] talents;
     private final boolean hasDefaultBody;
-    private final Body body;
+    private final Body<V> body;
     private final GraphicObject<V>[] raceObjects;
-    private final Race[] races;
+    private final Race<V>[] races;
 }

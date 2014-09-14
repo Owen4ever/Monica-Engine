@@ -30,9 +30,9 @@ public interface Item<V extends Vector<V>> extends TangibleObject<V> {
 
     ItemActionList<V> getItemActions();
 
-    Material[] getMaterials();
+    Material<V>[] getMaterials();
 
-    Role getOwner();
+    Role<V> getOwner();
 
     default FinalPair<BoolMsgResult, TangibleObject<V>[]>
             action(String name, Role user, TangibleObject<V> target,

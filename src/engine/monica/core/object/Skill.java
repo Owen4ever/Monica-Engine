@@ -24,12 +24,16 @@ import engine.monica.util.Vector;
 public interface Skill<V extends Vector<V>> extends NamesGetter {
 
     String getID();
-    
+
     String getAbilityID();
 
     GraphicObject<V>[] getReleaseObjects();
 
     ReleaseType getReleaseType();
+
+    default <T> T get(String key, Class<T> c) {
+        return (T) get(key);
+    }
 
     <T> T get(String key);
 
@@ -37,6 +41,6 @@ public interface Skill<V extends Vector<V>> extends NamesGetter {
 
     public enum ReleaseType {
 
-        ACTIVE, PASSIVE
+        ACTIVE, PASSIVE, BOTH
     }
 }

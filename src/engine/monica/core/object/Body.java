@@ -24,17 +24,17 @@ import engine.monica.util.Vector;
 
 public final class Body<V extends Vector<V>> implements NamesGetter {
 
-    public Body(String id, Names name, String describe,
+    public Body(String id, Names names, String describe,
             PropertyList defaultProperties, Talent[] talents,
             GraphicObject<V>[] bodyObjects) {
         if (id == null)
             throw new NullPointerException("The id is null.");
-        if (name == null)
-            throw new NullPointerException("The name is null.");
+        if (names == null)
+            throw new NullPointerException("The names is null.");
         if (describe == null)
             throw new NullPointerException("The describe is null.");
         this.id = id;
-        this.name = name;
+        this.name = names;
         this.describe = describe;
         if (defaultProperties != null)
             this.defaultProperties.addAll(defaultProperties);
