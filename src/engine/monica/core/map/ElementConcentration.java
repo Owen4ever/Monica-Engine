@@ -35,8 +35,7 @@ public final class ElementConcentration {
         if (concentration < 0d)
             throw new ConcentrationValueException("The concentration"
                     + " is less than 0.");
-        getWriteLock(lock);
-        RET(lock, () -> {
+        RETW(lock, () -> {
             vals.put(e, new ConcentrationValue(concentration));
             count++;
             total = -1d;
@@ -50,8 +49,7 @@ public final class ElementConcentration {
         if (concentration < 0d)
             throw new ConcentrationValueException("The concentration"
                     + " is less than 0.");
-        getWriteLock(lock);
-        RET(lock, () -> {
+        RETW(lock, () -> {
             vals.get(e).setVal(concentration);
             count++;
             total = -1d;
@@ -95,8 +93,8 @@ public final class ElementConcentration {
         if (needLock) {
             getWriteLock(c1.lock);
             getWriteLock(c2.lock);
-            RET(c1.lock, () -> {
-                RET(c2.lock, () -> {
+            RETW(c1.lock, () -> {
+                RETW(c2.lock, () -> {
                     a.average(c1, c2);
                 });
             });

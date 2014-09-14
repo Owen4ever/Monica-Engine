@@ -64,11 +64,10 @@ public class EngineThread extends Thread {
         }
     }
 
-    public static void sleepAndNeedWakeUp(long delay)
-            throws InterruptedException {
-        CoreEngine.getThreadRouser().addNeedWakeUpThread(Thread.currentThread());
+    public static void sleepAndNeedWakeUp(long delay, ThreadRouser r) throws InterruptedException {
+        r.addNeedWakeUpThread(Thread.currentThread());
         sleep(delay);
-        CoreEngine.getThreadRouser().removeWakeUpThread(Thread.currentThread());
+        r.removeWakeUpThread(Thread.currentThread());
     }
 
     private static int threadCount = 0;

@@ -72,5 +72,5 @@ public final class ProviderType {
         return null;
     }
     private static final HashSet<String> sids
-            = new HashSet<>(CoreEngine.getDefaultQuantily(), 0.4f);
+            = new HashSet<>(CoreEngine.getDefaultQuantity(), 0.4f);
 }

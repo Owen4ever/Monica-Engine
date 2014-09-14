@@ -45,6 +45,7 @@ public final class Names {
 
     public void setDisplayName(String name) {
         checkName(name);
+        addNickName(name);
         this.displayName = name;
     }
 

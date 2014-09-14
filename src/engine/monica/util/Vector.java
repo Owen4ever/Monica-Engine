@@ -24,9 +24,7 @@ public interface Vector<V extends Vector<V>> {
 
     V substract(V v);
 
-    double length(V v);
+    double lengthPow2(V v);
 
-    default double lengthSqrt(V v) {
-        return Math.sqrt(length(v));
-    }
+    double length(V v);
 }

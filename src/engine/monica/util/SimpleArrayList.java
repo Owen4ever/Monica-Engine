@@ -28,7 +28,7 @@ import java.util.Spliterator;
 import java.util.Spliterators;
 
 /**
- * Most of codes are copied from {@code java.util.Array#ArrayList}.
+ * Most codes are copied from {@code java.util.Array#ArrayList}.
  *
  * @see java.util.Arrays#asList(java.lang.Object...)
  */
@@ -105,6 +105,6 @@ public final class SimpleArrayList<E> extends AbstractList<E>
 
     @Override
     public Spliterator<E> spliterator() {
-        return Spliterators.spliterator(array, Spliterator.ORDERED);
+        return Spliterators.spliterator(array, Spliterator.CONCURRENT);
     }
 }

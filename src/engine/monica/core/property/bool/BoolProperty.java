@@ -21,6 +21,8 @@ package engine.monica.core.property.bool;
 import engine.monica.core.engine.CoreEngine;
 import engine.monica.core.engine.EngineThread;
 import engine.monica.core.engine.EngineThreadGroup;
+import engine.monica.core.engine.ThreadRouser;
+import engine.monica.core.engine.ThreadRunner;
 import engine.monica.core.property.effect.BuffEffect;
 import engine.monica.core.property.effect.AbstractEffect;
 import engine.monica.core.property.effect.ModifiedEffect;
@@ -81,10 +83,7 @@ public class BoolProperty extends AbstractProperty<Boolean> {
         effects.put(currentEffectPointer, e);
         BuffRunnable r = new BuffRunnable(currentEffectPointer);
         bltThreads.put(currentEffectPointer, r);
-        if (CoreEngine.isContinuing())
-            new EngineThread(TG_PROPERTY_NUM, r).start();
-        else
-            CoreEngine.runThreadNextStart(r);
+        runner.runIfStart(new EngineThread(TG_PROPERTY_NUM, r));
         return currentEffectPointer;
     }
 
@@ -94,15 +93,12 @@ public class BoolProperty extends AbstractProperty<Boolean> {
         LTRunnable r = new LTRunnable(currentEffectPointer);
         if (e.isInterval()) {
             bltThreads.put(currentEffectPointer, r);
-            if (CoreEngine.isContinuing())
-                new EngineThread(TG_PROPERTY_NUM, r).start();
-            else
-                CoreEngine.runThreadNextStart(r);
+            runner.runIfStart(new EngineThread(TG_PROPERTY_NUM, r));
         }
         return currentEffectPointer;
     }
-    protected static final EngineThreadGroup TG_PROPERTY_NUM
-            = new EngineThreadGroup("BoolProperty Thread Group");
+    protected transient final ThreadRunner runner = CoreEngine.newThreadRunner();
+    protected static final EngineThreadGroup TG_PROPERTY_NUM = new EngineThreadGroup("BoolProperty Thread Group");
 
     private void setFixedEffect(ModifiedEffect<Boolean> e) {
         fixedEffect = e;
@@ -119,8 +115,7 @@ public class BoolProperty extends AbstractProperty<Boolean> {
         if (e == null)
             throw new NullPointerException("The effect is null.");
         if (!e.affectTo().equals(type))
-            throw new NullPointerException("The effect cannot "
-                    + "affect this property.");
+            throw new NullPointerException("The effect cannot affect this property.");
         lock();
         try {
             switch (e.getEffectType()) {
@@ -232,15 +227,13 @@ public class BoolProperty extends AbstractProperty<Boolean> {
                         break;
                     case 0:
                         effects.forEach((p, e) -> {
-                            tval.pack = adjustment
-                                    .adjust(e.affect(tval.pack));
+                            tval.pack = adjustment.adjust(e.affect(tval.pack));
                         });
                         break;
                     case 1:
                         effects.forEach((p, e) -> {
                             parentProperty.getTotalValue();
-                            tval.pack = parentProperty
-                                    .adjust(e.affect(tval.pack));
+                            tval.pack = parentProperty.adjust(e.affect(tval.pack));
                         });
                         break;
                 }
@@ -279,7 +272,7 @@ public class BoolProperty extends AbstractProperty<Boolean> {
             default:
                 strAdjustment = ", No Adjustment ]";
         }
-        String strTypeID = type.getID().toString();
+        String strTypeID = type.getID();
         return new StringBuilder(160 + strTypeID.length())
                 .append(getClass().getName())
                 .append("[ ID = ").append(strTypeID)
@@ -290,13 +283,13 @@ public class BoolProperty extends AbstractProperty<Boolean> {
                 .append(strAdjustment).toString();
     }
     private final ConcurrentHashMap<LinkedPointer, AbstractEffect<Boolean>> effects
-            = new ConcurrentHashMap<>(CoreEngine.getDefaultQuantily(), .5f);
+            = new ConcurrentHashMap<>(CoreEngine.getDefaultQuantity(), .5f);
     private transient final HashMap<LinkedPointer, AbstractEffect<Boolean>> tempEffects
-            = new HashMap<>(CoreEngine.getDefaultQuantily(), .5f);
+            = new HashMap<>(CoreEngine.getDefaultQuantity(), .5f);
     private final HashMap<LinkedPointer, Runnable> bltThreads
-            = new HashMap<>(CoreEngine.getDefaultQuantily(), .2f);
+            = new HashMap<>(CoreEngine.getDefaultQuantity(), .2f);
     private transient final HashMap<LinkedPointer, Runnable> tempBltThreads
-            = new HashMap<>(CoreEngine.getDefaultQuantily(), .2f);
+            = new HashMap<>(CoreEngine.getDefaultQuantity(), .2f);
     protected LinkedPointer currentEffectPointer = LinkedPointer.first();
     private boolean isFixed = false;
     protected ModifiedEffect<Boolean> fixedEffect;
@@ -305,8 +298,7 @@ public class BoolProperty extends AbstractProperty<Boolean> {
             = new ReentrantReadWriteLock();
     protected transient boolean totalVal;
 
-    private final class BuffRunnable
-            implements Comparable<BuffRunnable>, Runnable {
+    private final class BuffRunnable implements Comparable<BuffRunnable>, Runnable {
 
         public BuffRunnable(LinkedPointer pointer) {
             this.pointer = pointer;
@@ -314,8 +306,7 @@ public class BoolProperty extends AbstractProperty<Boolean> {
 
         @Override
         public void run() {
-            BuffEffect<Boolean> effect
-                    = (BuffEffect<Boolean>) effects.get(pointer);
+            BuffEffect<Boolean> effect = (BuffEffect<Boolean>) effects.get(pointer);
             int ce1mscc = CoreEngine.get1msSuspendTimeChangeCount();
             int time = CoreEngine.calcSuspendTime(effect.getMaxDuration());
             if (effect.getBeginningTime() > 0) {
@@ -323,19 +314,15 @@ public class BoolProperty extends AbstractProperty<Boolean> {
                 startingTimeAlready = effect.getBeginningTime();
             }
             if (effect.isInterval()) {
-                int it = CoreEngine
-                        .calcSuspendTime(effect.getIntervalDuration());
+                int it = CoreEngine.calcSuspendTime(effect.getIntervalDuration());
                 while (CoreEngine.isStart()) {
                     if (CoreEngine.is1msSuspendTimeChanged(ce1mscc))
-                        it = CoreEngine
-                                .calcSuspendTime(effect.getIntervalDuration());
+                        it = CoreEngine.calcSuspendTime(effect.getIntervalDuration());
                     while (CoreEngine.isContinuing()) {
                         if (isInStartingTime) {
                             long startingTime = System.currentTimeMillis();
                             try {
-                                EngineThread
-                                        .sleepAndNeedWakeUp(CoreEngine
-                                                .calcSuspendTime(startingTimeAlready));
+                                EngineThread.sleepAndNeedWakeUp(CoreEngine.calcSuspendTime(startingTimeAlready), rouser);
                             } catch (InterruptedException ex) {
                                 long endTime = System.currentTimeMillis();
                                 startingTimeAlready = CoreEngine.calcQuondamTime((int) (endTime - startingTime));
@@ -345,8 +332,7 @@ public class BoolProperty extends AbstractProperty<Boolean> {
                         }
                         long startingTime = System.currentTimeMillis();
                         try {
-                            EngineThread.sleepAndNeedWakeUp(it
-                                    - CoreEngine.calcSuspendTime(already));
+                            EngineThread.sleepAndNeedWakeUp(it - CoreEngine.calcSuspendTime(already), rouser);
                         } catch (InterruptedException ex) {
                             long endTime = System.currentTimeMillis();
                             already += CoreEngine.calcQuondamTime((int) (endTime - startingTime));
@@ -354,29 +340,24 @@ public class BoolProperty extends AbstractProperty<Boolean> {
                         }
                         already = 0;
                         alreadyTime += effect.getIntervalDuration();
-                        if (alreadyTime + effect.getBeginningTime()
-                                >= effect.getMaxDuration()) {
+                        if (alreadyTime + effect.getBeginningTime() >= effect.getMaxDuration()) {
                             removeEffect(pointer);
                             return;
                         }
                         lock();
-                        ((IntervalBuffEffect<Boolean>) effect)
-                                .getIntervalEffector().intervalChange();
+                        ((IntervalBuffEffect<Boolean>) effect).getIntervalEffector().intervalChange();
                         unlock();
                     }
                 }
             } else {
                 while (CoreEngine.isStart()) {
                     if (CoreEngine.is1msSuspendTimeChanged(ce1mscc))
-                        time = CoreEngine
-                                .calcSuspendTime(effect.getMaxDuration());
+                        time = CoreEngine.calcSuspendTime(effect.getMaxDuration());
                     while (CoreEngine.isContinuing()) {
                         if (isInStartingTime) {
                             long startingTime = System.currentTimeMillis();
                             try {
-                                EngineThread
-                                        .sleepAndNeedWakeUp(CoreEngine
-                                                .calcSuspendTime(startingTimeAlready));
+                                EngineThread.sleepAndNeedWakeUp(CoreEngine.calcSuspendTime(startingTimeAlready), rouser);
                             } catch (InterruptedException ex) {
                                 long endTime = System.currentTimeMillis();
                                 startingTimeAlready -= CoreEngine.calcQuondamTime((int) (endTime - startingTime));
@@ -386,8 +367,7 @@ public class BoolProperty extends AbstractProperty<Boolean> {
                         }
                         long startingTime = System.currentTimeMillis();
                         try {
-                            EngineThread.sleepAndNeedWakeUp(time
-                                    - CoreEngine.calcSuspendTime(already));
+                            EngineThread.sleepAndNeedWakeUp(time - CoreEngine.calcSuspendTime(already), rouser);
                         } catch (InterruptedException ex) {
                             long endTime = System.currentTimeMillis();
                             already += CoreEngine.calcQuondamTime((int) (endTime - startingTime));
@@ -402,8 +382,7 @@ public class BoolProperty extends AbstractProperty<Boolean> {
         @Override
         public int compareTo(BuffRunnable r) {
             if (r == null)
-                throw new NullPointerException("Compare with"
-                        + " a null BoolBuffRunnable.");
+                throw new NullPointerException("Compare with a null BoolBuffRunnable.");
             return Integer.compare(pointer.pointer(), r.pointer.pointer());
         }
         protected LinkedPointer pointer;
@@ -413,8 +392,7 @@ public class BoolProperty extends AbstractProperty<Boolean> {
         private int already = 0;
     }
 
-    private final class LTRunnable
-            implements Comparable<LTRunnable>, Runnable {
+    private final class LTRunnable implements Comparable<LTRunnable>, Runnable {
 
         public LTRunnable(LinkedPointer pointer) {
             this.pointer = pointer;
@@ -422,22 +400,17 @@ public class BoolProperty extends AbstractProperty<Boolean> {
 
         @Override
         public void run() {
-            LongTimeEffect<Boolean> effect
-                    = (LongTimeEffect<Boolean>) effects.get(pointer);
+            LongTimeEffect<Boolean> effect = (LongTimeEffect<Boolean>) effects.get(pointer);
             int ce1mscc = CoreEngine.get1msSuspendTimeChangeCount();
-            int it = CoreEngine
-                    .calcSuspendTime(effect.getIntervalDuration());
+            int it = CoreEngine.calcSuspendTime(effect.getIntervalDuration());
             while (CoreEngine.isStart()) {
                 if (CoreEngine.is1msSuspendTimeChanged(ce1mscc))
-                    it = CoreEngine
-                            .calcSuspendTime(effect.getIntervalDuration());
+                    it = CoreEngine.calcSuspendTime(effect.getIntervalDuration());
                 while (CoreEngine.isContinuing()) {
                     if (isInStartingTime) {
                         long startingTime = System.currentTimeMillis();
                         try {
-                            EngineThread
-                                    .sleepAndNeedWakeUp(CoreEngine
-                                            .calcSuspendTime(startingTimeAlready));
+                            EngineThread.sleepAndNeedWakeUp(CoreEngine.calcSuspendTime(startingTimeAlready), rouser);
                         } catch (InterruptedException ex) {
                             long endTime = System.currentTimeMillis();
                             startingTimeAlready = CoreEngine
@@ -449,16 +422,14 @@ public class BoolProperty extends AbstractProperty<Boolean> {
                     }
                     long startingTime = System.currentTimeMillis();
                     try {
-                        EngineThread.sleepAndNeedWakeUp(it - already);
+                        EngineThread.sleepAndNeedWakeUp(it - already, rouser);
                     } catch (InterruptedException ex) {
                         long endTime = System.currentTimeMillis();
-                        already = (int) (endTime - startingTime)
-                                / CoreEngine.get1msSuspendTime();
+                        already = (int) (endTime - startingTime) / CoreEngine.get1msSuspendTime();
                         continue;
                     }
                     if (already == effect.getIntervalDuration())
-                        ((IntervalLongTimeEffect<Boolean>) effect)
-                                .getIntervalEffector().intervalChange();
+                        ((IntervalLongTimeEffect<Boolean>) effect).getIntervalEffector().intervalChange();
                 }
             }
         }
@@ -466,8 +437,7 @@ public class BoolProperty extends AbstractProperty<Boolean> {
         @Override
         public int compareTo(LTRunnable r) {
             if (r == null)
-                throw new NullPointerException("Compare with"
-                        + " a null BoolLongTimeRunnable.");
+                throw new NullPointerException("Compare with a null BoolLongTimeRunnable.");
             return Integer.compare(pointer.pointer(), r.pointer.pointer());
         }
         private boolean isInStartingTime;
@@ -475,4 +445,5 @@ public class BoolProperty extends AbstractProperty<Boolean> {
         protected LinkedPointer pointer;
         private int already = 0;
     }
+    protected transient final ThreadRouser rouser = CoreEngine.newThreadRouser();
 }

@@ -75,5 +75,5 @@ public final class PropertyList {
         return properties.size();
     }
     private final ConcurrentHashMap<PropertyID, AbstractProperty> properties
-            = new ConcurrentHashMap<>(CoreEngine.getDefaultQuantily(), 0.2f);
+            = new ConcurrentHashMap<>(CoreEngine.getDefaultQuantity(), 0.2f);
 }

@@ -50,7 +50,7 @@ public final class ElementEngine {
     public void addElement(AbstractElement element) {
         if (element == null)
             throw new NullPointerException("The ElementSystem is null.");
-        RET(defaultEngineLock, () -> {
+        RETW(defaultEngineLock, () -> {
             if (!elements.containsKey(element.getID())) {
                 elements.values().parallelStream().forEach(e -> {
                     NonOrderedFinalPair<String, String> key
@@ -103,7 +103,7 @@ public final class ElementEngine {
     public boolean removeElement(String id) {
         if (id == null)
             throw new NullPointerException("The String is null.");
-        return RET(defaultEngineLock, () -> elements.remove(id) != null);
+        return RETW(defaultEngineLock, () -> elements.remove(id) != null);
     }
 
     public SimpleArrayList<AbstractElement> getElements() {
@@ -130,7 +130,7 @@ public final class ElementEngine {
             throw new NullPointerException("The element is null.");
         if (r == null)
             throw new NullPointerException("The element relation is null.");
-        RET(defaultEngineLock, () -> {
+        RETW(defaultEngineLock, () -> {
             elementRelations.put(new NonOrderedFinalPair<>(e1.getID(), e2.getID()), r);
         });
     }
@@ -140,7 +140,7 @@ public final class ElementEngine {
             throw new NullPointerException("The element is null.");
         if (r == null)
             throw new NullPointerException("The element relation is null.");
-        RET(defaultEngineLock, () -> {
+        RETW(defaultEngineLock, () -> {
             getElements().parallelStream().forEach(ae -> {
                 if (!ae.getID().equals(e.getID()))
                     setElementRelation(e, ae, r);
@@ -165,7 +165,7 @@ public final class ElementEngine {
             throw new NullPointerException("The element is null.");
         if (c == null)
             throw new NullPointerException("The condition is null.");
-        RET(defaultEngineLock, () -> {
+        RETW(defaultEngineLock, () -> {
             elementCalcs.put(new NonOrderedFinalPair<>(e1.getID(), e2.getID()), c);
         });
     }
@@ -187,7 +187,7 @@ public final class ElementEngine {
             throw new NullPointerException("The element is null.");
         if (c == null)
             throw new NullPointerException("The condition is null.");
-        RET(defaultEngineLock, () -> {
+        RETW(defaultEngineLock, () -> {
             elementConcentrationCalcs.put(e.getID(), c);
         });
     }
@@ -209,7 +209,7 @@ public final class ElementEngine {
             throw new NullPointerException("The element is null.");
         if (c == null)
             throw new NullPointerException("The condition is null.");
-        RET(defaultEngineLock, () -> {
+        RETW(defaultEngineLock, () -> {
             elementConditions.put(new NonOrderedFinalPair<>(e1.getID(), e2.getID()), c);
         });
     }
@@ -219,7 +219,7 @@ public final class ElementEngine {
             throw new NullPointerException("The element is null.");
         if (c == null)
             throw new NullPointerException("The condition is null.");
-        RET(defaultEngineLock, () -> {
+        RETW(defaultEngineLock, () -> {
             elementConditions.keySet().forEach(p -> {
                 if (p.first.equals(p.last)
                         && (p.first.equals(e.getID()) || p.last.equals(e.getID())))
@@ -247,7 +247,7 @@ public final class ElementEngine {
             throw new NullPointerException("The element is null.");
         if (c == null)
             throw new NullPointerException("The conflict is null.");
-        RET(defaultEngineLock, () -> {
+        RETW(defaultEngineLock, () -> {
             NonOrderedFinalPair<String, String> p = new NonOrderedFinalPair<>(e1.getID(), e2.getID());
             elementConflicts.put(p, c);
             elementConflictProcessers.put(p, (p1, p2, m, a)
@@ -261,7 +261,7 @@ public final class ElementEngine {
             throw new NullPointerException("The element is null.");
         if (c == null)
             throw new NullPointerException("The conflict is null.");
-        RET(defaultEngineLock, () -> {
+        RETW(defaultEngineLock, () -> {
             getElements().parallelStream().forEach(ae -> {
                 if (!ae.getID().equals(e.getID()))
                     setElementConflict(e, ae, c);
@@ -286,7 +286,7 @@ public final class ElementEngine {
             throw new NullPointerException("The element is null.");
         if (c == null)
             throw new NullPointerException("The condition is null.");
-        RET(defaultEngineLock, () -> {
+        RETW(defaultEngineLock, () -> {
             elementConflictConditions.put(new NonOrderedFinalPair<>(e1.getID(), e2.getID()), c);
         });
     }
@@ -296,7 +296,7 @@ public final class ElementEngine {
             throw new NullPointerException("The element is null.");
         if (c == null)
             throw new NullPointerException("The condition is null.");
-        RET(defaultEngineLock, () -> {
+        RETW(defaultEngineLock, () -> {
             elementConflictConditions.keySet().forEach(p -> {
                 if (p.first.equals(p.last)
                         && (p.first.equals(e.getID()) || p.last.equals(e.getID())))
@@ -322,12 +322,12 @@ public final class ElementEngine {
             throw new NullPointerException("The element is null.");
         if (p == null)
             throw new NullPointerException("The condition is null.");
-        RET(defaultEngineLock, () -> {
+        RETW(defaultEngineLock, () -> {
             elementConflictProcessers.put(new NonOrderedFinalPair<>(e1.getID(), e2.getID()), p);
         });
     }
     private final HashMap<String, AbstractElement> elements
-            = new HashMap<>(CoreEngine.getDefaultQuantily() * CoreEngine.getDefaultQuantily(), 0.2f);
+            = new HashMap<>(CoreEngine.getDefaultQuantity() * CoreEngine.getDefaultQuantity(), 0.2f);
     private final HashMap<NonOrderedFinalPair<String, String>, ElementRelation> elementRelations = new HashMap<>();
     private final HashMap<String, ElementConcentrationCalculator> elementConcentrationCalcs = new HashMap<>();
     private final HashMap<NonOrderedFinalPair<String, String>, ElementCalculator> elementCalcs = new HashMap<>();
@@ -339,7 +339,7 @@ public final class ElementEngine {
     public void addElementSystem(ElementSystem system) {
         if (system == null)
             throw new NullPointerException("The ElementSystem is null.");
-        RET(defaultEngineLock, () -> {
+        RETW(defaultEngineLock, () -> {
             if (!systems.containsKey(system.getID())) {
                 systems.put(system.getID(), system);
                 systems.values().parallelStream().forEach(s -> {
@@ -384,7 +384,7 @@ public final class ElementEngine {
     public boolean removeElementSystem(String id) {
         if (id == null)
             throw new NullPointerException("The String is null.");
-        return RET(defaultEngineLock, () -> systems.remove(id) != null);
+        return RETW(defaultEngineLock, () -> systems.remove(id) != null);
     }
 
     public SimpleArrayList<ElementSystem> getSystems() {
@@ -425,7 +425,7 @@ public final class ElementEngine {
                         setElementRelation(fe1, fe2, ElementRelation.SYSTEM_CAN);
                 });
             });
-        RET(defaultEngineLock, () -> {
+        RETW(defaultEngineLock, () -> {
             systemRelations.put(new NonOrderedFinalPair<>(e1.getID(), e2.getID()), r);
         });
     }
@@ -435,7 +435,7 @@ public final class ElementEngine {
             throw new NullPointerException("The ElementSystem is null.");
         if (r == null)
             throw new NullPointerException("The ElementSystem relation is null.");
-        RET(defaultEngineLock, () -> {
+        RETW(defaultEngineLock, () -> {
             getSystems().parallelStream().forEach(s -> {
                 if (!s.getID().equals(e.getID()))
                     setSystemRelation(e, s, r);
@@ -460,7 +460,7 @@ public final class ElementEngine {
             throw new NullPointerException("The ElementSystem is null.");
         if (l == null)
             throw new NullPointerException("The condition is null.");
-        RET(defaultEngineLock, () -> {
+        RETW(defaultEngineLock, () -> {
             systemConditions.put(new NonOrderedFinalPair<>(e1.getID(), e2.getID()), l);
         });
     }
@@ -470,7 +470,7 @@ public final class ElementEngine {
             throw new NullPointerException("The ElementSystem is null.");
         if (l == null)
             throw new NullPointerException("The condition is null.");
-        RET(defaultEngineLock, () -> {
+        RETW(defaultEngineLock, () -> {
             systemConditions.keySet().forEach(p -> {
                 if (p.first.equals(p.last)
                         && (p.first.equals(e.getID()) || p.last.equals(e.getID())))
@@ -478,7 +478,7 @@ public final class ElementEngine {
             });
         });
     }
-    private final HashMap<String, ElementSystem> systems = new HashMap<>(CoreEngine.getDefaultQuantily(), 0.2f);
+    private final HashMap<String, ElementSystem> systems = new HashMap<>(CoreEngine.getDefaultQuantity(), 0.2f);
     private final HashMap<NonOrderedFinalPair<String, String>, SystemRelation> systemRelations = new HashMap<>();
     private final HashMap<NonOrderedFinalPair<String, String>, Condition> systemConditions = new HashMap<>();
 

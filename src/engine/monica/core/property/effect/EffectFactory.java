@@ -21,7 +21,7 @@ package engine.monica.core.property.effect;
 import engine.monica.core.engine.CoreEngine;
 import engine.monica.core.property.PropertyID;
 import engine.monica.util.AlreadyExistsInContainerException;
-import static engine.monica.util.Lock.RET;
+import static engine.monica.util.Lock.RETW;
 import static engine.monica.util.Lock.getWriteLock;
 import engine.monica.util.RegesteredIDException;
 import java.util.HashMap;
@@ -111,15 +111,15 @@ public final class EffectFactory {
 
     public void checkID(String id) {
         getWriteLock(lock);
-        RET(lock, () -> {
+        RETW(lock, () -> {
             if (ids.contains(id))
                 throw new RegesteredIDException("Regestered ID: " + id + ".");
             ids.add(id);
         });
     }
     private final HashMap<Class<?>, EffectCreator<?>> creators
-            = new HashMap<>(CoreEngine.getDefaultQuantily(), .4f);
+            = new HashMap<>(CoreEngine.getDefaultQuantity(), .4f);
     private final HashSet<String> ids
-            = new HashSet<>(CoreEngine.getDefaultQuantily(), .4f);
+            = new HashSet<>(CoreEngine.getDefaultQuantity(), .4f);
     private final transient ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
 }

@@ -38,6 +38,6 @@ public final class WorldFactory {
         return worlds.get(new LinkedPointer(index));
     }
     private final HashMap<LinkedPointer, World> worlds
-            = new HashMap<>(CoreEngine.getDefaultQuantily(), 0.1f);
+            = new HashMap<>(CoreEngine.getDefaultQuantity(), 0.1f);
     private LinkedPointer pointer = LinkedPointer.first();
 }

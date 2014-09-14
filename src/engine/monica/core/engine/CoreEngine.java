@@ -23,7 +23,6 @@ import engine.monica.core.map.WorldFactory;
 import engine.monica.util.AlreadyExistsInContainerException;
 import engine.monica.util.OMath;
 import engine.monica.util.SimpleArrayList;
-import engine.monica.util.ThreadRouser;
 import engine.monica.util.Wrapper;
 import engine.monica.util.condition.ProcesserInterface;
 import engine.monica.util.condition.Provider;
@@ -36,43 +35,33 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public final class CoreEngine {
 
-    public static ThreadRouser getThreadRouser() {
-        return engineThreadRouser;
-    }
-    private static final ThreadRouser engineThreadRouser = new ThreadRouser();
-
-    public static void runThreadIfStart(Thread t) {
-        if (isContinuing())
-            t.start();
-        else
-            runThreadNextStart(t);
+    public static ThreadRouser newThreadRouser() {
+        return threadRouserSpliter.newRouser();
     }
 
-    public static void runThreadIfStart(Runnable r) {
-        if (isContinuing())
-            new EngineThread(TG_TR, r).start();
-        else
-            runThreadNextStart(r);
+    public static boolean deleteThreadRouser(ThreadRouser r) {
+        return threadRouserSpliter.deleteRouser(r);
     }
 
-    public static void runThreadNextStart(Runnable r) {
-        if (r == null)
-            throw new NullPointerException("The runnable which will run"
-                    + " when the game engine starts is null.");
-        engineThreadRunner.add(new EngineThread(TG_TR, r));
+    public static void rouseAll() {
+        threadRouserSpliter.rousers.forEach(r -> r.wakeUpAllThreads());
+    }
+    private static final ThreadRouserSpliter threadRouserSpliter = new ThreadRouserSpliter();
+
+    public static ThreadRunner newThreadRunner() {
+        return threadRunnerSpliter.newRunner();
     }
 
-    private static void runAll() {
-        if (!engineThreadRunner.isEmpty()) {
-            engineThreadRunner.parallelStream().forEach(r -> {
-                new EngineThread(TG_TR, r).start();
-            });
-            engineThreadRunner.clear();
-        }
+    public static boolean deleteThreadRunner(ThreadRunner r) {
+        return threadRunnerSpliter.deleteRunner(r);
     }
-    private static final HashSet<Runnable> engineThreadRunner = new HashSet<>();
-    private static final EngineThreadGroup TG_TR
-            = new EngineThreadGroup("Thread Runner");
+
+    public static void runAll() {
+        threadRunnerSpliter.runners.parallelStream().forEach(r -> {
+            r.runAll();
+        });
+    }
+    private static final ThreadRunnerSpliter threadRunnerSpliter = new ThreadRunnerSpliter();
 
     public static boolean isStart() {
         return currentWorld.isStart();
@@ -82,8 +71,7 @@ public final class CoreEngine {
         if (currentWorld == null)
             throw new EngineException("Cannot start the game until World sets up.");
         if (isStart())
-            throw new EngineException("The game engine "
-                    + "has already started.");
+            throw new EngineException("The game engine has already started.");
         if (engineSCLock.tryLock() && omsSuspendTimeLocker.tryLock())
             try {
                 currentWorld.start();
@@ -129,8 +117,7 @@ public final class CoreEngine {
         if (!isStart())
             throw new EngineException("The game engine has not started yet.");
         if (!isContinuing())
-            throw new EngineException("The game engine has already"
-                    + " set to continue.");
+            throw new EngineException("The game engine has already set to continue.");
         if (engineSCLock.tryLock() && omsSuspendTimeLocker.tryLock())
             try {
                 currentWorld.setPause();
@@ -139,14 +126,11 @@ public final class CoreEngine {
                 engineSCLock.unlock();
             }
     }
-    private static final transient ReentrantReadWriteLock.WriteLock engineSCLock
-            = new ReentrantReadWriteLock().writeLock();
+    private static final transient ReentrantReadWriteLock.WriteLock engineSCLock = new ReentrantReadWriteLock().writeLock();
 
     public static void set1msSuspendTime(int ms) {
         if (ms < 1)
-            throw new EngineException("set1msStopTime( "
-                    + Integer.toString(ms) + " ) < 1ms"
-            );
+            throw new EngineException("set1msStopTime( " + Integer.toString(ms) + " ) < 1ms");
         if (isStart())
             pause();
         omsSuspendTimeLocker.lock();
@@ -183,8 +167,7 @@ public final class CoreEngine {
     public static int get1msSuspendTime() {
         return suspendTimeCalc.omsSuspendTime;
     }
-    private static SuspendTimeCalculator suspendTimeCalc
-            = new SuspendTimeCalculator.SuspendTimeCalculator_1();
+    private static SuspendTimeCalculator suspendTimeCalc = new SuspendTimeCalculator.SuspendTimeCalculator_1();
 
     private static abstract class SuspendTimeCalculator {
 
@@ -238,8 +221,7 @@ public final class CoreEngine {
     public static int calcQuondamTime(int time) {
         return quondamTimeCalc.calc(time);
     }
-    private static QuondamTimeCalculator quondamTimeCalc
-            = new QuondamTimeCalculator.QuondamTimeCalculator_1();
+    private static QuondamTimeCalculator quondamTimeCalc = new QuondamTimeCalculator.QuondamTimeCalculator_1();
 
     private static abstract class QuondamTimeCalculator {
 
@@ -299,18 +281,15 @@ public final class CoreEngine {
     }
 
     private static transient volatile int omsSuspendTimeChangeCount = 0;
-    private static final transient ReentrantReadWriteLock.WriteLock omsSuspendTimeLocker
-            = new ReentrantReadWriteLock().writeLock();
+    private static final transient ReentrantReadWriteLock.WriteLock omsSuspendTimeLocker = new ReentrantReadWriteLock().writeLock();
 
-    public static int getDefaultQuantily() {
+    public static int getDefaultQuantity() {
         return defaultQuantily;
     }
 
     public static void setDefaultQuantily(int n) {
         if (n < 1)
-            throw new EngineException("The number which is used to"
-                    + "set up the default quantily of lists, sets and maps"
-                    + "is less than 1.");
+            throw new EngineException("The quantily is less than 1.");
         defaultQuantily = n;
     }
     private static int defaultQuantily = 16;
@@ -334,8 +313,7 @@ public final class CoreEngine {
         else
             return null;
     }
-    private static final HashSet<String> ids
-            = new HashSet<>(getDefaultQuantily(), 0.4f);
+    private static final HashSet<String> ids = new HashSet<>(getDefaultQuantity(), 0.4f);
 
     public static WorldFactory getWorldFactory() {
         return worldFactory;
@@ -353,35 +331,99 @@ public final class CoreEngine {
     }
 
     private static interface CurrentWorld {
+
         boolean isStart();
+
         boolean isContinuing();
+
         void start();
+
         void stop();
+
         void setContinue();
+
         void setPause();
+
         World getWorld();
 
         static final class EmptyWorld implements CurrentWorld {
-            @Override public boolean isStart() {return false;}
-            @Override public boolean isContinuing() {return false;}
-            @Override public void start() {throw new EngineException("The world has not set up.");}
-            @Override public void stop() {throw new EngineException("The world has not set up.");}
-            @Override public void setContinue() {throw new EngineException("The world has not set up.");}
-            @Override public void setPause() {throw new EngineException("The world has not set up.");}
-            @Override public World getWorld() {return null;}
+
+            @Override
+            public boolean isStart() {
+                return false;
+            }
+
+            @Override
+            public boolean isContinuing() {
+                return false;
+            }
+
+            @Override
+            public void start() {
+                throw new EngineException("The world has not set up.");
+            }
+
+            @Override
+            public void stop() {
+                throw new EngineException("The world has not set up.");
+            }
+
+            @Override
+            public void setContinue() {
+                throw new EngineException("The world has not set up.");
+            }
+
+            @Override
+            public void setPause() {
+                throw new EngineException("The world has not set up.");
+            }
+
+            @Override
+            public World getWorld() {
+                return null;
+            }
         }
 
         static final class WrapperWorld implements CurrentWorld {
+
             private WrapperWorld(World w) {
                 world = w;
             }
-            @Override public boolean isStart() {return world.isStart();}
-            @Override public boolean isContinuing() {return world.isContinuing();}
-            @Override public void start() {world.start();}
-            @Override public void stop() {world.stop();}
-            @Override public void setContinue() {world.setContinue();}
-            @Override public void setPause() {world.setPause();}
-            @Override public World getWorld() {return world;}
+
+            @Override
+            public boolean isStart() {
+                return world.isStart();
+            }
+
+            @Override
+            public boolean isContinuing() {
+                return world.isContinuing();
+            }
+
+            @Override
+            public void start() {
+                world.start();
+            }
+
+            @Override
+            public void stop() {
+                world.stop();
+            }
+
+            @Override
+            public void setContinue() {
+                world.setContinue();
+            }
+
+            @Override
+            public void setPause() {
+                world.setPause();
+            }
+
+            @Override
+            public World getWorld() {
+                return world;
+            }
             private final World world;
         }
     }
@@ -409,6 +451,5 @@ public final class CoreEngine {
             throw new UnkownProviderTypeException(type.toString());
         return list;
     }
-    private static final ArrayList<ProcesserInterface> ptypeProcessers
-            = new ArrayList<>(8);
+    private static final ArrayList<ProcesserInterface> ptypeProcessers = new ArrayList<>(getDefaultQuantity());
 }

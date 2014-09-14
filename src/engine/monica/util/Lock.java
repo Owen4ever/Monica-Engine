@@ -24,28 +24,22 @@ import java.util.concurrent.locks.StampedLock;
 public final class Lock {
 
     public static void getWriteLock(ReentrantReadWriteLock lock) {
-        if (!lock.isWriteLocked() && lock.writeLock().tryLock()
-                && lock.getWriteHoldCount() != 1)
-            lock.writeLock().unlock();
         do {
-            if (!lock.isWriteLocked() && lock.writeLock().tryLock()
-                    && lock.getWriteHoldCount() != 1)
-                lock.writeLock().unlock();
-            else
-                break;
+            if (!lock.isWriteLocked() && lock.writeLock().tryLock())
+                if (lock.getWriteHoldCount() != 1)
+                    lock.writeLock().unlock();
+                else
+                    break;
         } while (true);
     }
 
     public static void getReadLock(ReentrantReadWriteLock lock) {
-        if (lock.getReadLockCount() == 0 && lock.readLock().tryLock()
-                && lock.getReadHoldCount() != 1)
-            lock.readLock().unlock();
         do {
-            if (lock.getReadLockCount() == 0 && lock.readLock().tryLock()
-                    && lock.getReadHoldCount() != 1)
-                lock.readLock().unlock();
-            else
-                break;
+            if (lock.getReadLockCount() == 0 && lock.readLock().tryLock())
+                if (lock.getReadHoldCount() != 1)
+                    lock.readLock().unlock();
+                else
+                    break;
         } while (true);
     }
 
@@ -61,7 +55,7 @@ public final class Lock {
         T func();
     }
 
-    public static <T> T RET(ReentrantReadWriteLock lock, TReturn<T> t) {
+    public static <T> T RETW(ReentrantReadWriteLock lock, TReturn<T> t) {
         getWriteLock(lock);
         try {
             return t.func();
@@ -70,12 +64,30 @@ public final class Lock {
         }
     }
 
-    public static void RET(ReentrantReadWriteLock lock, VoidReturn r) {
+    public static void RETW(ReentrantReadWriteLock lock, VoidReturn r) {
         getWriteLock(lock);
         try {
             r.func();
         } finally {
             lock.writeLock().unlock();
+        }
+    }
+
+    public static <T> T RETW(StampedLock lock, TReturn<T> t) {
+        long stamped = lock.writeLock();
+        try {
+            return t.func();
+        } finally {
+            lock.unlockWrite(stamped);
+        }
+    }
+
+    public static void RETW(StampedLock lock, VoidReturn r) {
+        long stamped = lock.writeLock();
+        try {
+            r.func();
+        } finally {
+            lock.unlockWrite(stamped);
         }
     }
 }

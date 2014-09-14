@@ -16,9 +16,11 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
-package engine.monica.util;
+package engine.monica.core.engine;
 
-import java.util.LinkedList;
+import static engine.monica.util.Lock.*;
+import java.util.HashSet;
+import java.util.concurrent.locks.StampedLock;
 
 public final class ThreadRouser {
 
@@ -26,22 +28,22 @@ public final class ThreadRouser {
     }
 
     public void addNeedWakeUpThread(Thread t) {
-        if (t == null)
-            throw new NullPointerException("The thread which needs to wake up is null.");
-        needWakeUpThreads.add(t);
+        RETW(lock, () -> {
+            needWakeUpThreads.add(t);
+        });
     }
 
     public boolean removeWakeUpThread(Thread t) {
-        if (t == null)
-            throw new NullPointerException("THe thread which wants to remove from the list is null.");
-        return needWakeUpThreads.remove(t);
+        return RETW(lock, () -> needWakeUpThreads.remove(t));
     }
 
     public void wakeUpAllThreads() {
-        for (int i = 0; i < needWakeUpThreads.size(); ++i) {
-            Thread c = needWakeUpThreads.remove(i);
-            c.interrupt();
-        }
+        RETW(lock, () -> {
+            needWakeUpThreads.parallelStream().forEach(t -> {
+                t.interrupt();
+            });
+        });
     }
-    private static final LinkedList<Thread> needWakeUpThreads = new LinkedList<>();
+    private transient final StampedLock lock = new StampedLock();
+    private final HashSet<Thread> needWakeUpThreads = new HashSet<>(CoreEngine.getDefaultQuantity());
 }

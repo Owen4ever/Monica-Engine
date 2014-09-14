@@ -23,7 +23,7 @@ import engine.monica.core.property.PropertyList;
 import engine.monica.util.Vector;
 import java.util.Arrays;
 
-public final class Race<V extends Vector<V>> implements NamesGetter {
+public class Race<V extends Vector<V>> implements NamesGetter {
 
     public Race(String id, Names name, RoleGender[] enableGender,
             PropertyList defaultProperties, Talent[] talents,
@@ -34,6 +34,12 @@ public final class Race<V extends Vector<V>> implements NamesGetter {
     public Race(String id, Names name, RoleGender[] enableGender,
             PropertyList defaultProperties, Talent[] talents,
             Body defaultBody, GraphicObject<V>[] objs) {
+        this(id, name, enableGender, defaultProperties, talents, defaultBody, objs, null);
+    }
+
+    protected Race(String id, Names name, RoleGender[] enableGender,
+            PropertyList defaultProperties, Talent[] talents,
+            Body defaultBody, GraphicObject<V>[] objs, Race<V>[] races) {
         if (id == null)
             throw new NullPointerException("The id is null.");
         if (name == null)
@@ -58,39 +64,51 @@ public final class Race<V extends Vector<V>> implements NamesGetter {
         hasDefaultBody = defaultBody != null;
         body = defaultBody;
         raceObjects = objs;
+        if (races != null)
+            this.races = races;
+        else
+            this.races = new Race[]{this};
     }
 
-    public String getID() {
+    public final String getID() {
         return id;
     }
 
     @Override
-    public Names getNames() {
+    public final Names getNames() {
         return names;
     }
 
-    public RoleGender[] getEnableGender() {
+    public final RoleGender[] getEnableGender() {
         return enableGender;
     }
 
-    public PropertyList getDefaultProperties() {
+    public final PropertyList getDefaultProperties() {
         return defaultProperties;
     }
 
-    public Talent[] getTalents() {
+    public final Talent[] getTalents() {
         return talents;
     }
 
-    public boolean hasDefaultBody() {
+    public final boolean hasDefaultBody() {
         return hasDefaultBody;
     }
 
-    public Body getDefaultBody() {
+    public final Body getDefaultBody() {
         return body;
     }
 
-    public GraphicObject<V>[] getRaceObjects() {
+    public final GraphicObject<V>[] getRaceObjects() {
         return raceObjects;
+    }
+
+    public final int raceCount() {
+        return races.length;
+    }
+
+    public final Race[] getRaces() {
+        return races;
     }
 
     @Override
@@ -105,7 +123,7 @@ public final class Race<V extends Vector<V>> implements NamesGetter {
 
     @Override
     public int hashCode() {
-        return 138 + id.hashCode();
+        return id.hashCode();
     }
 
     @Override
@@ -126,4 +144,5 @@ public final class Race<V extends Vector<V>> implements NamesGetter {
     private final boolean hasDefaultBody;
     private final Body body;
     private final GraphicObject<V>[] raceObjects;
+    private final Race[] races;
 }
