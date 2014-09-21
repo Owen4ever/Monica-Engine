@@ -18,35 +18,11 @@
 
 package engine.monica.core.object;
 
-import engine.monica.core.property.PropertyList;
 import engine.monica.util.Vector;
 
-public class Bloodline<V extends Vector<V>> implements NamesGetter {
+public interface Bloodline<V extends Vector<V>> extends Equipable, NamesGetter {
 
-    public Bloodline(String id, Names names, PropertyList properties, Talent<V>[] talents) {
-        if (id == null)
-            throw new NullPointerException("The id is null.");
-        if (names == null)
-            throw new NullPointerException("The names is null.");
-        if (properties == null)
-            throw new NullPointerException("The properties are null.");
-        if (talents == null)
-            throw new NullPointerException("The talents are null.");
-        for (Talent<V> t : talents)
-            if (t == null)
-                throw new NullPointerException("The talent is null.");
-        this.id = id;
-        this.names = names;
-        this.properties = properties;
-        this.talents = talents;
-    }
+    BloodlineFactory getFactory();
 
-    @Override
-    public Names getNames() {
-        return names;
-    }
-    private final String id;
-    private final Names names;
-    private final PropertyList properties;
-    private final Talent<V>[] talents;
+    Talent<V>[] getTalents();
 }

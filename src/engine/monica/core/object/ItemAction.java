@@ -18,8 +18,8 @@
 
 package engine.monica.core.object;
 
-import engine.monica.core.map.Area;
-import engine.monica.core.map.Map;
+import engine.monica.core.world.Area;
+import engine.monica.core.world.Map;
 import engine.monica.util.FinalPair;
 import engine.monica.util.result.BoolMsgResult;
 import engine.monica.util.Vector;
@@ -40,6 +40,6 @@ public interface ItemAction<V extends Vector<V>> {
      * The objects the action created.
      */
     FinalPair<BoolMsgResult, TangibleObject<V>[]>
-            action(Role owner, Role user, TangibleObject<V> target,
-                    Item beUsingItem, Map map, Area area);
+            action(Role<V> owner, Role<V> user, TangibleObject<V> target,
+                    Item<V> beUsingItem, Map<V> map, Area<V> area);
 }

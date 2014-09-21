@@ -19,7 +19,7 @@
 package engine.monica.core.world;
 
 import engine.monica.core.engine.CoreEngine;
-import engine.monica.util.LinkedPointer;
+import java.util.Collection;
 import java.util.HashMap;
 
 public final class WorldFactory {
@@ -27,17 +27,19 @@ public final class WorldFactory {
     public WorldFactory() {
     }
 
-    public World createBy(ConfigInterface c) {
+    public World createBy(String name, ConfigInterface c) {
         World w = new World(c);
-        pointer = pointer.linkNew();
-        worlds.put(pointer, w);
+        worlds.put(name, w);
         return w;
     }
 
-    public World getWorld(int index) {
-        return worlds.get(new LinkedPointer(index));
+    public World getWorld(String name) {
+        return worlds.get(name);
     }
-    private final HashMap<LinkedPointer, World> worlds
+
+    public Collection<World> getWorlds() {
+        return worlds.values();
+    }
+    private final HashMap<String, World> worlds
             = new HashMap<>(CoreEngine.getDefaultQuantity(), 0.1f);
-    private LinkedPointer pointer = LinkedPointer.first();
 }

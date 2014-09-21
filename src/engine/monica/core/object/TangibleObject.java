@@ -19,13 +19,12 @@
 package engine.monica.core.object;
 
 import engine.monica.core.graphics.Model;
-import engine.monica.core.map.Map;
-import engine.monica.core.map.World;
+import engine.monica.core.world.Map;
+import engine.monica.core.world.World;
 import engine.monica.core.property.PropertyList;
 import engine.monica.util.Vector;
 
-public interface TangibleObject<V extends Vector<V>>
-        extends DisplayNameGetter, NamesGetter {
+public interface TangibleObject<V extends Vector<V>> extends DisplayNameGetter, NamesGetter {
 
     default Map getLocatedMap() {
         return getModel().getMainObject().getLocatedMap();
@@ -38,4 +37,8 @@ public interface TangibleObject<V extends Vector<V>>
     Model<V> getModel();
 
     PropertyList getProperties();
+
+    void notifyIn(TangibleObject<V> obj);
+
+    void notifyOut(TangibleObject<V> obj);
 }

@@ -18,8 +18,8 @@
 
 package engine.monica.core.graphics;
 
-import engine.monica.core.map.Map;
-import engine.monica.core.map.VisibleLevel;
+import engine.monica.core.world.Map;
+import engine.monica.core.world.VisibleLevel;
 import engine.monica.util.Vector;
 
 public interface GraphicObject<V extends Vector<V>> {

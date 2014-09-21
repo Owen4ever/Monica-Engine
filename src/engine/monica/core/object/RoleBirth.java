@@ -18,16 +18,10 @@
 
 package engine.monica.core.object;
 
-import engine.monica.core.map.DateTime;
+public final class RoleBirth {
 
-public class RoleBirth {
-
-    public RoleBirth(DateTime birth) {
+    public RoleBirth(long birth) {
         this.birth = birth;
     }
-
-    public RoleBirth(int year, int month, int day, int hour, int minute, int second, int millisecond) {
-        this(new DateTime(year, month, day, hour, minute, second, millisecond));
-    }
-    public final DateTime birth;
+    public final long birth;
 }

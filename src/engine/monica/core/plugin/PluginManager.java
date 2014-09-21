@@ -18,7 +18,7 @@
 
 package engine.monica.core.plugin;
 
-import engine.monica.core.map.World;
+import engine.monica.core.world.World;
 import engine.monica.util.result.BoolMsgResult;
 import engine.monica.util.result.IntMsgResult;
 import java.util.ArrayList;

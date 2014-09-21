@@ -18,8 +18,8 @@
 
 package engine.monica.core.engine;
 
-import engine.monica.core.map.World;
-import engine.monica.core.map.WorldFactory;
+import engine.monica.core.world.World;
+import engine.monica.core.world.WorldFactory;
 import engine.monica.util.AlreadyExistsInContainerException;
 import engine.monica.util.OMath;
 import engine.monica.util.SimpleArrayList;

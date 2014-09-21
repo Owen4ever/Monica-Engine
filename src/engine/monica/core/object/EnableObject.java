@@ -20,26 +20,29 @@ package engine.monica.core.object;
 
 import engine.monica.core.element.ElementSystem;
 
-public abstract class EnableObject implements EnableObjectInterface {
+public interface EnableObject extends EnableObjectInterface {
 
     @Override
-    public boolean enable(Body body) { return true; }
+    default boolean enable(Ability ability) { return true; }
 
     @Override
-    public boolean enable(Ability ability) { return true; }
+    default boolean enable(Career career) { return true; }
 
     @Override
-    public boolean enable(Career career) { return true; }
+    default boolean enable(ElementSystem system) { return true; }
 
     @Override
-    public boolean enable(ElementSystem system) { return true; }
+    default boolean enable(Item item) { return true; }
 
     @Override
-    public boolean enable(Item item) { return true; }
+    default boolean enable(Race race) { return true; }
 
     @Override
-    public boolean enable(Race race) { return true; }
+    default boolean enable(Role role) { return true; }
 
     @Override
-    public boolean enable(Role role) { return true; }
+    default boolean enable(Bloodline bloodline) { return true; }
+
+    @Override
+    default boolean enable(RoleGender gender) { return true; }
 }

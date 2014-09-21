@@ -16,20 +16,18 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
-package engine.monica.core.world;
+package engine.monica.core.property.simple;
 
-@FunctionalInterface
-public interface DateTime {
+import engine.monica.core.property.PropertyID;
 
-    long get(int type);
+public class SimpleObjectProperty<T> extends SimpleProperty<T> {
 
-    public static DateTime toDateTime(long time, DateTimeConvertor c) {
-        return c.convert(time);
+    public SimpleObjectProperty(PropertyID id, T defaultVal) {
+        super(id, defaultVal, null);
     }
 
-    @FunctionalInterface
-    public static interface DateTimeConvertor {
-
-        DateTime convert(long time);
+    @Override
+    public T getTotalValue() {
+        return defaultVal;
     }
 }

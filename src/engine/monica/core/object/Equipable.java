@@ -18,26 +18,15 @@
 
 package engine.monica.core.object;
 
-import engine.monica.core.property.PropertyList;
-import engine.monica.util.FinalPair;
 import engine.monica.util.Vector;
-import engine.monica.util.result.BoolMsgResult;
 
-public interface RoleFactory<V extends Vector<V>> {
+public interface Equipable<V extends Vector<V>> {
 
-    Role<V> randomRole();
+    Role<V> getOwner();
 
-    Role<V> randomRole(Names names);
+    Role<V> getHolder();
 
-    FinalPair<BoolMsgResult, Role<V>> bearChild(Role<V>... parents);
+    void equip();
 
-    Role<V> bearRole(Names names, RoleGender gender, RoleBirth birth, PropertyList properties);
-
-    int bearNeedParentCount();
-
-    boolean canBear(Role<V>... parents);
-
-    boolean canPlayerBear();
-
-    Role<V> bearPlayer(Names names, RoleGender gender, RoleBirth birth, PropertyList properties);
+    void unequip();
 }

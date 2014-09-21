@@ -29,7 +29,11 @@ public interface Role<V extends Vector<V>> extends NamesGetter, TangibleObject<V
 
     RoleGender getSex();
 
-    Career[] getCareers();
+    Race<V> getRace();
+
+    Bloodline<V> getBloodline();
+
+    Career<V>[] getCareers();
 
     Item<V>[] getItemsOnBody();
 

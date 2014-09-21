@@ -25,7 +25,7 @@ import engine.monica.core.element.ElementList;
 import engine.monica.core.element.ElementProviderType;
 import engine.monica.core.graphics.GraphicObject;
 import engine.monica.core.input.InputConstants;
-import engine.monica.core.map.ElementConcentrationAverager;
+import engine.monica.core.world.ElementConcentrationAverager;
 import engine.monica.util.FinalPair;
 
 /**

@@ -16,20 +16,13 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
-package engine.monica.core.world;
+package engine.monica.core.object;
 
-@FunctionalInterface
-public interface DateTime {
+public interface Factory {
 
-    long get(int type);
+    String getID();
 
-    public static DateTime toDateTime(long time, DateTimeConvertor c) {
-        return c.convert(time);
-    }
+    String getName();
 
-    @FunctionalInterface
-    public static interface DateTimeConvertor {
-
-        DateTime convert(long time);
-    }
+    String getDescription();
 }

@@ -18,8 +18,8 @@
 
 package engine.monica.core.element;
 
-import engine.monica.core.map.Area;
-import engine.monica.core.map.Map;
+import engine.monica.core.world.Area;
+import engine.monica.core.world.Map;
 import engine.monica.util.FinalPair;
 
 public interface ConflictProcesser {

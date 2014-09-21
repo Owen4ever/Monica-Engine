@@ -30,15 +30,15 @@ public interface Shortcut {
 
     interface ControlKey {
 
-        int NONE = 0b0000;
-        int CTRL_L = 0b0001;
-        int CTRL_R = 0b0010;
-        int SHIFT_L = 0b0011;
-        int SHIFT_R = 0b0100;
-        int ALT_L = 0b0101;
-        int ALT_R = 0b0110;
-        int WIN_L = 0b0111;
-        int WIN_R = 0b1000;
-        int META = 0b1001;
+        int NONE = 0;
+        int CTRL_L = 1;
+        int CTRL_R = 2;
+        int SHIFT_L = 4;
+        int SHIFT_R = 8;
+        int ALT_L = 16;
+        int ALT_R = 32;
+        int WIN_L = 64;
+        int WIN_R = 128;
+        int META = 256;
     }
 }

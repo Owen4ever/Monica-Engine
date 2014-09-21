@@ -34,6 +34,9 @@ public class EngineThread extends Thread {
 
     public EngineThread(EngineThreadGroup g, Runnable r, String name) {
         super(g, r, name);
+        synchronized (EngineThread.class) {
+            threadCount++;
+        }
     }
 
     @Override
@@ -50,27 +53,27 @@ public class EngineThread extends Thread {
     }
     private transient volatile boolean isInterrupted = false;
 
-    public static void sleepWithoutException(long delay) {
+    public static void sleepNoEx(long delay) {
         try {
             sleep(delay);
         } catch (InterruptedException ex) {
         }
     }
 
-    public static void sleepWithoutException(long delay, int nano) {
+    public static void sleepNoEx(long delay, int nano) {
         try {
             sleep(delay, nano);
         } catch (InterruptedException ex) {
         }
     }
 
-    public static void sleepAndNeedWakeUp(long delay, ThreadRouser r) throws InterruptedException {
+    public static boolean sleepAndNeedWakeUp(long delay, ThreadRouser r) throws InterruptedException {
         r.addNeedWakeUpThread(Thread.currentThread());
         sleep(delay);
-        r.removeWakeUpThread(Thread.currentThread());
+        return r.removeWakeUpThread(Thread.currentThread());
     }
 
-    private static int threadCount = 0;
+    private static volatile int threadCount = 0;
 
     private static synchronized int getCurrentThreadCount() {
         return threadCount++;

@@ -18,14 +18,5 @@
 
 package engine.monica.core.object;
 
-import engine.monica.core.graphics.GraphicObject;
-import engine.monica.core.property.PropertyList;
-import engine.monica.util.Vector;
-
-public final class MixedRace<V extends Vector<V>> extends Race<V> {
-
-    public MixedRace(String id, Race<V>[] races, Names names, RoleGender[] enabledGenders,
-            PropertyList properties, Talent[] talents, Body defaultBody, GraphicObject<V>[] objs) {
-        super(id, names, enabledGenders, properties, talents, defaultBody, objs, races);
-    }
+public interface AbilityFactory extends Factory {
 }

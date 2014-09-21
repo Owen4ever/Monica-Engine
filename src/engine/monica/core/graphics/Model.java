@@ -40,7 +40,7 @@ public interface Model<V extends Vector<V>> {
     /**
      * Return the object which named with the parameter {@code name}.
      */
-    GraphicObject getObject(String name);
+    GraphicObject<V> getObject(String name);
 
     /**
      * Return the current frame index.
@@ -56,6 +56,16 @@ public interface Model<V extends Vector<V>> {
      * Return the max count of the frames.
      */
     int getMaxFrame();
+
+    /**
+     * Set the speed of every single frame. The default value must be 1.
+     */
+    void setFrameSpeed(int speed);
+
+    /**
+     * Return the speed of every single frame.
+     */
+    int getFrameSpeed();
 
     /**
      * Draw the model on the {@code CanvasInterface} with the specified

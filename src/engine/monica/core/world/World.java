@@ -19,8 +19,14 @@
 package engine.monica.core.world;
 
 import engine.monica.core.element.ElementEngine;
+import engine.monica.core.engine.CoreEngine;
+import engine.monica.core.object.BloodlineFactory;
+import engine.monica.core.object.RaceFactory;
 import engine.monica.core.plugin.PluginManager;
-import java.math.BigInteger;
+import engine.monica.core.world.DateTime.DateTimeConvertor;
+import engine.monica.core.world.WorldDate.SleepTimeSupplier;
+import engine.monica.core.world.WorldDate.TimeCalc;
+import java.util.HashMap;
 
 public final class World {
 
@@ -36,7 +42,43 @@ public final class World {
     }
     private final ConfigInterface configs;
 
-    public static final String CFG_ALLROLES_KEY = "CFG-Role-All";
+    public void addRaceFactory(RaceFactory f) {
+        if (isStart())
+            throw new WorldException("The world has already started.");
+        if (f == null)
+            throw new NullPointerException("The RaceFactory is null.");
+        if (raceFactories.containsKey(f.getID()))
+            throw new WorldException("The RaceFactory has already contained.");
+        raceFactories.put(f.getID(), f);
+    }
+
+    public boolean removeRaceFactory(RaceFactory f) {
+        return raceFactories.remove(f.getID(), f);
+    }
+
+    public String[] getRaceFactoryNames() {
+        return raceFactories.values().parallelStream().map(RaceFactory::getName).toArray(String[]::new);
+    }
+    private final HashMap<String, RaceFactory> raceFactories = new HashMap<>(CoreEngine.getDefaultQuantity());
+
+    public void addBloodlineFactory(BloodlineFactory f) {
+        if (isStart())
+            throw new WorldException("The world has already started.");
+        if (f == null)
+            throw new NullPointerException("The RaceFactory is null.");
+        if (bloodlineFactories.containsKey(f.getID()))
+            throw new WorldException("The RaceFactory has already contained.");
+        bloodlineFactories.put(f.getID(), f);
+    }
+
+    public boolean removeBloodlineFactory(BloodlineFactory f) {
+        return bloodlineFactories.remove(f.getID(), f);
+    }
+
+    public String[] getBloodlineFactoryNames() {
+        return bloodlineFactories.values().parallelStream().map(BloodlineFactory::getName).toArray(String[]::new);
+    }
+    private final HashMap<String, BloodlineFactory> bloodlineFactories = new HashMap<>(CoreEngine.getDefaultQuantity());
 
     public PluginManager getPluginManager() {
         if (isStart())
@@ -67,14 +109,13 @@ public final class World {
             throw new WorldException("The world has already started.");
         if (date == null)
             throw new WorldException("Cannot start the world until WorldDate sets up.");
-        date.ready();
         isStart = true;
         isContinuing = true;
         date.start();
     }
 
     public boolean isContinuing() {
-        return isContinuing;
+        return isStart && isContinuing;
     }
 
     public void stop() {
@@ -90,7 +131,6 @@ public final class World {
             throw new WorldException("The world has not started yet.");
         if (isContinuing)
             throw new WorldException("The world has already started.");
-        date.ready();
         isContinuing = true;
         date.start();
     }
@@ -106,84 +146,53 @@ public final class World {
     private transient boolean isStart = false;
     private transient boolean isContinuing = false;
 
-    public void setWorldDate(DateTime dateTime) {
-        if (isStart())
+    public void setWorldDate(WorldDate worldDate) {
+        if (isContinuing())
             throw new WorldException("The world has already started.");
-        date = new WorldDate(dateTime);
+        if (worldDate == null)
+            throw new NullPointerException("The world date is null.");
+        date = worldDate;
     }
 
-    public int getCurrentYear() {
-        return date.getYear();
+    public void setCurrentTime(long time) {
+        date.setCurrentTime(time);
     }
 
-    public int getCurrentMonth() {
-        return date.getMonth();
+    public void setTimeCalculator(TimeCalc calc) {
+        if (isContinuing())
+            throw new WorldException("The world has already started.");
+        date.setTimeCalculator(calc);
     }
 
-    public int getCurrentDay() {
-        return date.getDay();
+    public void setSleepTimeSupplier(SleepTimeSupplier sleepTime) {
+        if (isContinuing())
+            throw new WorldException("The world has already started.");
+        date.setSleepTimeSupplier(sleepTime);
     }
 
-    public int getCurrentHour() {
-        return date.getHour();
-    }
-
-    public int getCurrentMinute() {
-        return date.getMinute();
-    }
-
-    public int getCurrentSecond() {
-        return date.getSecond();
-    }
-
-    public int getCurrentMilliSecond() {
-        return date.getMilliSecond();
+    public long getCurrentTime() {
+        return date.getCurrentTime();
     }
 
     public DateTime getCurrentDateTime() {
-        return date.getCurrentDateTime();
+        return getCurrentDateTime(convertor);
     }
 
-    public void setLoopMonth(int mon) {
-        if (isStart())
-            throw new WorldException("The world has already started.");
-        date.setLoopMonth(mon);
+    public DateTime getCurrentDateTime(DateTimeConvertor convertor) {
+        if (convertor == null)
+            throw new NullPointerException("The convertor is null.");
+        return convertor.convert(date.getCurrentTime());
+    }
+    private WorldDate date;
+
+    public void setDefaultDateTimeConvertor(DateTimeConvertor convertor) {
+        if (convertor == null)
+            throw new NullPointerException("The convertor is null.");
+        this.convertor = convertor;
     }
 
-    public void setLoopDay(int day) {
-        if (isStart())
-            throw new WorldException("The world has already started.");
-        date.setLoopDay(day);
+    public DateTimeConvertor getDefaultDateTimeConvertor() {
+        return convertor;
     }
-
-    public void setLoopHour(int hour) {
-        if (isStart())
-            throw new WorldException("The world has already started.");
-        date.setLoopHour(hour);
-    }
-
-    public void setLoopMinute(int min) {
-        if (isStart())
-            throw new WorldException("The world has already started.");
-        date.setLoopMinute(min);
-    }
-
-    public void setLoopSecond(int sec) {
-        if (isStart())
-            throw new WorldException("The world has already started.");
-        date.setLoopSecond(sec);
-    }
-
-    public void setLoopMilliSecond(int msec) {
-        if (isStart())
-            throw new WorldException("The world has already started.");
-        date.setLoopMilliSecond(msec);
-    }
-
-    public BigInteger dateTimeToInteger() {
-        if (!isStart())
-            throw new WorldException("The world has not started yet.");
-        return date.getCurrentDateTime().toInteger(date);
-    }
-    private volatile WorldDate date;
+    private DateTimeConvertor convertor;
 }

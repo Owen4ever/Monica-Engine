@@ -18,15 +18,9 @@
 
 package engine.monica.core.object;
 
-import engine.monica.core.element.ElementSystem;
+import engine.monica.util.Vector;
 
-public interface Ability extends EnableObjectInterface, NamesGetter {
-    
-    String getID();
+public interface Ability<V extends Vector<V>> extends EnableObjectInterface, Equipable, NamesGetter {
 
-    ElementSystem[] getEnabledElementSystems();
-
-    Race[] getEnabledRaces();
-
-    Career[] getEnabledCareers();
+    AbilityFactory getFactory();
 }

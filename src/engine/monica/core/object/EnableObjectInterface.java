@@ -19,20 +19,23 @@
 package engine.monica.core.object;
 
 import engine.monica.core.element.ElementSystem;
+import engine.monica.util.Vector;
 
-public interface EnableObjectInterface {
+public interface EnableObjectInterface<V extends Vector<V>> {
 
-    boolean enable(Body body);
+    boolean enable(Ability<V> ability);
 
-    boolean enable(Ability ability);
-
-    boolean enable(Career career);
+    boolean enable(Career<V> career);
 
     boolean enable(ElementSystem system);
 
-    boolean enable(Item item);
+    boolean enable(Bloodline<V> bloodline);
 
-    boolean enable(Race race);
+    boolean enable(Item<V> item);
 
-    boolean enable(Role role);
+    boolean enable(Race<V> race);
+
+    boolean enable(Role<V> role);
+
+    boolean enable(RoleGender gender);
 }

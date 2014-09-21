@@ -16,20 +16,7 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
-package engine.monica.core.world;
+package engine.monica.core.object;
 
-@FunctionalInterface
-public interface DateTime {
-
-    long get(int type);
-
-    public static DateTime toDateTime(long time, DateTimeConvertor c) {
-        return c.convert(time);
-    }
-
-    @FunctionalInterface
-    public static interface DateTimeConvertor {
-
-        DateTime convert(long time);
-    }
+public interface BloodlineFactory extends Factory {
 }

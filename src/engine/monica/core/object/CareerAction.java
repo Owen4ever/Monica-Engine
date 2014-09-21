@@ -18,8 +18,8 @@
 
 package engine.monica.core.object;
 
-import engine.monica.core.map.Area;
-import engine.monica.core.map.Map;
+import engine.monica.core.world.Area;
+import engine.monica.core.world.Map;
 import engine.monica.util.FinalPair;
 import engine.monica.util.result.BoolMsgResult;
 import engine.monica.util.Vector;

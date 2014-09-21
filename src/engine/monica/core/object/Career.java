@@ -18,35 +18,7 @@
 
 package engine.monica.core.object;
 
-import engine.monica.core.property.PropertyList;
+import engine.monica.util.Vector;
 
-public final class Career implements NamesGetter {
-
-    public Career(String id, Names names, PropertyList defaultProperties) {
-        if (id == null)
-            throw new NullPointerException("The id is null.");
-        if (names == null)
-            throw new NullPointerException("The name is null.");
-        if (defaultProperties == null)
-            throw new NullPointerException("The default properties are null.");
-        this.id = id;
-        this.names = names;
-        this.defaultProperties = defaultProperties;
-    }
-
-    public String getID() {
-        return id;
-    }
-
-    @Override
-    public Names getNames() {
-        return names;
-    }
-
-    public PropertyList getProperties() {
-        return defaultProperties;
-    }
-    private final String id;
-    private final Names names;
-    private final PropertyList defaultProperties;
+public interface Career<V extends Vector<V>> extends Equipable<V>, NamesGetter {
 }
